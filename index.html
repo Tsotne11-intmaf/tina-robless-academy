@@ -2409,6 +2409,7 @@ function cfgDefault(){
       {name:'ნინო მ.',email:'nino@example.com',courses:['master-1','french'],done:{'master-1':7,'french':0},joined:Date.now()-1000*60*60*24*12},
       {name:'მარიამ კ.',email:'mariam@example.com',courses:['bundle','master-1','master-2','french','extreme'],done:{'master-1':22,'master-2':3,'french':6,'extreme':0},joined:Date.now()-1000*60*60*24*40},
       {name:'ანა გ.',email:'ana@example.com',courses:['extreme'],done:{'extreme':2},joined:Date.now()-1000*60*60*24*3}],
+    timeline:[].slice.call(document.querySelectorAll('.timeline li')).map(function(li){var b=li.querySelector('b'),s=li.querySelector('span');return {t:b?b.textContent:li.textContent,s:s?s.textContent:''};}),
     t:{},gallery:[null,null,null,null,null,null],
     shop:{open:false,products:[]},
     sales:[
@@ -2463,6 +2464,13 @@ function applyConfig(){
   // about (home block + about page)
   var ap=document.querySelectorAll('.about .about-grid > div p');if(ap[0])ap[0].textContent=CFG.about.p1;if(ap[1])ap[1].textContent=CFG.about.p2;
   document.querySelectorAll('.creds').forEach(function(box){box.innerHTML=CFG.about.creds.map(function(c){return '<span'+(box.closest('main[data-page="about"]')?' style="border-color:var(--line);color:var(--ink)"':'')+'>'+esc(c)+'</span>';}).join('');});
+  /* Timeline is config-driven so entries can be added/removed from the admin bio tab.
+     data-edit paths point into the array, so inline editing on the site still works. */
+  document.querySelectorAll('.timeline').forEach(function(ul){
+    ul.innerHTML=(CFG.timeline||[]).map(function(m,i){
+      return '<li><b data-edit="timeline.'+i+'.t">'+esc(m.t||'')+'</b><span data-edit="timeline.'+i+'.s">'+esc(m.s||'')+'</span></li>';
+    }).join('');
+  });
   if(CFG.about.portrait)document.querySelectorAll('.portrait').forEach(function(el){el.style.backgroundImage='url('+CFG.about.portrait+')';});
   document.querySelectorAll('a[href*="instagram.com"]').forEach(function(a){a.href=CFG.about.instagram;});
   document.querySelectorAll('a[href*="tiktok.com"]').forEach(function(a){a.href=CFG.about.tiktok;});
@@ -2589,11 +2597,20 @@ var ADMIN={
      '<h2 class="adm-h">კურსების ფოტოები</h2><p class="lead">იცვლება „კურსები და ფასები“ განყოფილებაში, თითოეული კურსის რედაქტირებისას.</p>';
   },
   /* --- bio --- */
+  addTimeline:function(){CFG.timeline=CFG.timeline||[];CFG.timeline.push({t:'ახალი ეტაპი',s:''});this.tab_bio();},
   tab_bio:function(){var b=document.getElementById('adm-body'),H=CFG.hero,A=CFG.about;
     b.innerHTML='<h1>ბიო და ტექსტები</h1>'+this.saveBar()+
      '<div class="adm-form"><h2>მთავარი გვერდი</h2><div class="field"><label>სათაური</label><input value="'+esc(H.title)+'" oninput="CFG.hero.title=this.value"></div><div class="field"><label>ქვესათაური</label><textarea rows="3" oninput="CFG.hero.sub=this.value">'+esc(H.sub)+'</textarea></div><div class="field"><label>ღილაკის ტექსტი</label><input value="'+esc(H.btn)+'" oninput="CFG.hero.btn=this.value"></div></div>'+
      '<div class="adm-form"><h2>ჩემ შესახებ</h2><div class="field"><label>პირველი აბზაცი</label><textarea rows="4" oninput="CFG.about.p1=this.value">'+esc(A.p1)+'</textarea></div><div class="field"><label>მეორე აბზაცი</label><textarea rows="5" oninput="CFG.about.p2=this.value">'+esc(A.p2)+'</textarea></div><div class="field"><label>კვალიფიკაციები / ტეგები (თითო ხაზზე)</label><textarea rows="4" oninput="CFG.about.creds=this.value.split(\'\\n\').filter(Boolean)">'+esc(A.creds.join('\n'))+'</textarea></div>'+
      '<div class="adm-2"><div class="field"><label>Instagram</label><input value="'+esc(A.instagram)+'" oninput="CFG.about.instagram=this.value"></div><div class="field"><label>TikTok</label><input value="'+esc(A.tiktok)+'" oninput="CFG.about.tiktok=this.value"></div></div><div class="field"><label>Facebook</label><input value="'+esc(A.facebook)+'" oninput="CFG.about.facebook=this.value"></div></div>'+
+     '<div class="adm-form"><h2>ეტაპები — „ჩემ შესახებ“</h2>'+
+     '<p class="lead" style="font-size:.88rem">დაამატეთ, წაშალეთ ან გადაანაცვლეთ წერტილები. ცვლილება ძალაში შედის „შენახვის“ შემდეგ.</p>'+
+     (CFG.timeline||[]).map(function(m,i){return ''+
+       '<div class="field"><label>'+(i+1)+'. სათაური</label><input value="'+esc(m.t||'')+'" oninput="CFG.timeline['+i+'].t=this.value"></div>'+
+       '<div class="field"><label>აღწერა</label><input value="'+esc(m.s||'')+'" oninput="CFG.timeline['+i+'].s=this.value"></div>'+
+       '<div style="margin:-8px 0 20px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost" type="button" onclick="ADMIN.move(\'timeline\','+i+',-1)">↑</button><button class="btn btn-ghost" type="button" onclick="ADMIN.move(\'timeline\','+i+',1)">↓</button><button class="btn btn-ghost" type="button" onclick="ADMIN.del(\'timeline\','+i+')">✕ წაშლა</button></div>';
+     }).join('')+
+     '<button class="btn btn-plum" type="button" onclick="ADMIN.addTimeline()">+ ახალი წერტილი</button></div>'+
      '<p class="lead" style="font-size:.9rem">შენახვისას ტექსტი ავტომატურად ითარგმნება ინგლისურად, რუსულად და ბერძნულად. შესწორება — „შენახვა / ექსპორტი“ განყოფილებაში.</p>';
   },
   /* --- homework --- */
