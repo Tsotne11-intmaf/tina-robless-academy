@@ -1114,6 +1114,38 @@ footer .foot-bottom a{border-bottom:1px solid rgba(255,140,187,.4)}
 .bundle.is-package .btn-plum{background:#fff;color:var(--plum-deep)}
 .bundle.is-package .btn-plum:hover{background:var(--blush)}
 .chip[href="#catalog/package"]{border-color:#FF7FB6;color:var(--plum-deep)}
+
+/* ===== Uniform card sizes everywhere (text never changes the layout) ===== */
+.student{display:flex;flex-direction:column;height:100%}
+.student .work{flex:0 0 auto}
+.student-body{display:flex;flex-direction:column;flex:1}
+.student-body h3{font-size:1.15rem;line-height:1.25;height:1.25em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.student-body .where{height:1.4em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.student-body p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:2.9em;line-height:1.45}
+.student-body .course{margin-top:auto;padding-top:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.students-grid{align-items:stretch}
+/* catalog / grid course cards */
+.cards:not(.home-slider){align-items:stretch}
+.cards:not(.home-slider) .card{display:flex;flex-direction:column;height:100%}
+.cards:not(.home-slider) .card h3{line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em}
+.cards:not(.home-slider) .card p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:4.05em;line-height:1.35}
+.cards:not(.home-slider) .incl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1.4em}
+.card .card-body > .btn{margin-top:14px}
+/* certificate slots, quotes, gallery, comments */
+.cert-slot{display:flex;flex-direction:column;height:100%}
+.cert-slot h3{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cert-slots{align-items:stretch}
+.quotes{align-items:stretch}
+.quote{display:flex;flex-direction:column;height:100%}
+.quote cite{margin-top:auto}
+.why-item h3{min-height:2.4em;display:flex;align-items:flex-end}
+@media (max-width:640px){.why-item h3{min-height:0}}
+
+/* ===== Header: hides while scrolling down, returns when you stop or scroll up ===== */
+header{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s ease}
+header.hide{transform:translateY(-100%)}
+header.scrolled{box-shadow:0 14px 30px -18px rgba(184,15,95,.35)}
+@media (prefers-reduced-motion:reduce){header{transition:none}header.hide{transform:none}}
 </style>
 </head>
 <body>
@@ -2444,5 +2476,21 @@ var go;
 </script>
 
 
+<script>
+/* ===== Smart sticky header ===== */
+(function(){
+  var hd=document.querySelector('header'),last=0,timer=null;
+  function onScroll(){
+    var y=window.scrollY||0;
+    hd.classList.toggle('scrolled',y>10);
+    if(document.body.classList.contains('menu-open')){hd.classList.remove('hide');return;}
+    if(y>last+4&&y>120)hd.classList.add('hide');      // going down → hide
+    else if(y<last-4)hd.classList.remove('hide');     // going up → show
+    last=y;
+    clearTimeout(timer);timer=setTimeout(function(){hd.classList.remove('hide');},260); // stopped → show
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+})();
+</script>
 </body>
 </html>
