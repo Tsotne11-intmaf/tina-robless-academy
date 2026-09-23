@@ -1152,6 +1152,9 @@ header.scrolled{box-shadow:0 14px 30px -18px rgba(184,15,95,.35)}
    body gets matching top padding since fixed removes it from flow, and scroll-padding keeps
    in-page anchors from landing underneath it. */
 @media (max-width:640px){header{position:fixed;left:0;right:0;top:0}body{padding-top:65px}html{scroll-padding-top:70px}}
+/* Language switcher inside the mobile menu. The 380px block sets .lang{display:none}; this
+   selector is more specific so the in-menu copy stays reachable on narrow phones. */
+@media (max-width:1120px){.lang-li .lang{display:inline-flex}.lang-li{padding-top:14px!important}}
 /* Phones: keep the admin / student tab sidebar pinned under the 65px header while scrolling.
    Overrides .side{position:static} from the 640px block; higher specificity so source order is irrelevant. */
 @media (max-width:640px){.lms-grid{display:block}.lms-grid>.side{position:sticky;top:65px;z-index:15;background:#fff;max-height:52vh;overflow:auto;margin-bottom:22px}}
@@ -1301,6 +1304,10 @@ body.editing .cards.home-slider{scroll-snap-type:none}
       <li><a href="#shop" data-nav="shop">მაღაზია <span class="soon-tag">მალე</span></a></li>
       <li class="m-only"><a href="#login">ჩემი კაბინეტი</a></li>
       <li class="m-only"><a class="btn btn-plum" href="#catalog">კურსების ნახვა</a></li>
+      <!-- Language switcher inside the mobile menu: the header copy is display:none below 380px,
+           which left narrow phones with no way to change language at all. setLang() syncs
+           aria-pressed across every .lang instance, so both copies stay in step. -->
+      <li class="m-only lang-li"><div class="lang" aria-label="ენა"><button data-lang="en" aria-pressed="false" onclick="setLang('en')">EN</button><button data-lang="ka" aria-pressed="true" onclick="setLang('ka')">ქარ</button><button data-lang="ru" aria-pressed="false" onclick="setLang('ru')">RU</button><button data-lang="el" aria-pressed="false" onclick="setLang('el')">EL</button></div></li>
     </ul>
     <div class="nav-right">
       <div class="lang" aria-label="ენა"><button data-lang="en" aria-pressed="false" onclick="setLang('en')">EN</button><button data-lang="ka" aria-pressed="true" onclick="setLang('ka')">ქარ</button><button data-lang="ru" aria-pressed="false" onclick="setLang('ru')">RU</button><button data-lang="el" aria-pressed="false" onclick="setLang('el')">EL</button></div>
@@ -2156,24 +2163,40 @@ var LANG='ka';
 (function(){
   var keys=Object.keys(DICT).sort(function(a,b){return b.length-a.length;});
   var idx={ka:null,en:0,ru:1,el:2};
+  /* Substring fallback must respect word boundaries: short keys like "\u10D3\u10D0" (and) or
+     "\u10D4\u10DC\u10D0" (language) otherwise get replaced inside longer words \u2014 "\u10D3\u10D0\u10ED\u10D4\u10E0\u10D8\u10D7" became
+     "and \u10ED\u10D4\u10E0\u10D8\u10D7", "\u10E8\u10D4\u10DC\u10D0\u10EE\u10D5\u10D0" became "\u10E8Language\u10EE\u10D5\u10D0". A key only matches when it is not
+     flanked by Georgian letters. Regexes are cached because tr() runs per text node. */
+  var RXC={};
+  function rxFor(key){
+    var r=RXC[key];
+    if(!r){r=new RegExp('(^|[^\u10A0-\u10FF])'+key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![\u10A0-\u10FF])','g');RXC[key]=r;}
+    return r;
+  }
   function tr(s){
     if(LANG==='ka')return s;
     var i=idx[LANG],t=s.trim();
     if(DICT[t])return s.replace(t,DICT[t][i]);
     if(!/[\u10A0-\u10FF]/.test(s))return s;
     var out=s;
-    for(var k=0;k<keys.length;k++){var key=keys[k];if(out.indexOf(key)>-1)out=out.split(key).join(DICT[key][i]);}
+    for(var k=0;k<keys.length;k++){var key=keys[k];if(out.indexOf(key)>-1)out=out.replace(rxFor(key),'$1'+String(DICT[key][i]).replace(/\$/g,'$$$$'));}
     return out;
   }
   var ATTRS=['placeholder','aria-label','title'];
+  /* The admin panel is authored in Georgian and must never be translated — show() already
+     skips it, but setLang()/initLang() walk the whole body, which is how the admin UI ended
+     up half-English. Excluded here so every entry point is covered. */
+  var ADMIN_SEL='main[data-page="admin"],#adm-bar';
+  function isAdmin(el){return !!(el&&el.closest&&el.closest(ADMIN_SEL));}
   function walk(root){
     var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
       var p=n.parentNode;if(!p||p.nodeName==='SCRIPT'||p.nodeName==='STYLE')return NodeFilter.FILTER_REJECT;
+      if(isAdmin(p))return NodeFilter.FILTER_REJECT;
       return n.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_SKIP;}});
     var n,list=[];while(n=w.nextNode())list.push(n);
     for(var i=0;i<list.length;i++){n=list[i];if(n.__ka===undefined)n.__ka=n.nodeValue;var v=tr(n.__ka);if(v!==n.nodeValue)n.nodeValue=v;}
     var els=root.querySelectorAll('[placeholder],[aria-label],[title]');
-    for(i=0;i<els.length;i++){var el=els[i];for(var a=0;a<ATTRS.length;a++){var at=ATTRS[a];if(!el.hasAttribute(at))continue;var key='__ka_'+at;if(el[key]===undefined)el[key]=el.getAttribute(at);var nv=tr(el[key]);if(nv!==el.getAttribute(at))el.setAttribute(at,nv);}}
+    for(i=0;i<els.length;i++){var el=els[i];if(isAdmin(el))continue;for(var a=0;a<ATTRS.length;a++){var at=ATTRS[a];if(!el.hasAttribute(at))continue;var key='__ka_'+at;if(el[key]===undefined)el[key]=el.getAttribute(at);var nv=tr(el[key]);if(nv!==el.getAttribute(at))el.setAttribute(at,nv);}}
   }
   window.translateDom=function(root){walk(root||document.body);};
   window.setLang=function(l){
