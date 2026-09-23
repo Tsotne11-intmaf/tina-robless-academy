@@ -1148,9 +1148,13 @@ header.scrolled{box-shadow:0 14px 30px -18px rgba(184,15,95,.35)}
 @media (prefers-reduced-motion:reduce){header{transition:none}header.hide{transform:none}}
 /* Phones/small tablets: header stays pinned while scrolling instead of sliding away */
 @media (max-width:860px){header.hide{transform:none}}
-/* Phones: keep the admin / student tab sidebar pinned under the 64px header while scrolling.
+/* Phones: pin the header to the viewport outright. Header is 65px (64px .nav + 1px border);
+   body gets matching top padding since fixed removes it from flow, and scroll-padding keeps
+   in-page anchors from landing underneath it. */
+@media (max-width:640px){header{position:fixed;left:0;right:0;top:0}body{padding-top:65px}html{scroll-padding-top:70px}}
+/* Phones: keep the admin / student tab sidebar pinned under the 65px header while scrolling.
    Overrides .side{position:static} from the 640px block; higher specificity so source order is irrelevant. */
-@media (max-width:640px){.lms-grid{display:block}.lms-grid>.side{position:sticky;top:64px;z-index:15;background:#fff;max-height:52vh;overflow:auto;margin-bottom:22px}}
+@media (max-width:640px){.lms-grid{display:block}.lms-grid>.side{position:sticky;top:65px;z-index:15;background:#fff;max-height:52vh;overflow:auto;margin-bottom:22px}}
 
 /* admin: homework & students overview */
 .adm-addbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0 18px;font-size:.9rem;color:var(--ink-soft)}
