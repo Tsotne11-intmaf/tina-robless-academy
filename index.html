@@ -2412,6 +2412,8 @@ function cfgDefault(){
       {name:'მარიამ კ.',email:'mariam@example.com',courses:['bundle','master-1','master-2','french','extreme'],done:{'master-1':22,'master-2':3,'french':6,'extreme':0},joined:Date.now()-1000*60*60*24*40},
       {name:'ანა გ.',email:'ana@example.com',courses:['extreme'],done:{'extreme':2},joined:Date.now()-1000*60*60*24*3}],
     timeline:[].slice.call(document.querySelectorAll('.timeline li')).map(function(li){var b=li.querySelector('b'),s=li.querySelector('span');return {t:b?b.textContent:li.textContent,s:s?s.textContent:''};}),
+    certs:[].slice.call(document.querySelectorAll('.cert-slot .preview')).map(function(){return null;}),
+    awards:[].slice.call(document.querySelectorAll('.award .proof:not([data-img="poster"])')).map(function(){return null;}),
     t:{},gallery:[null,null,null,null,null,null],
     shop:{open:false,products:[]},
     sales:[
@@ -2493,6 +2495,18 @@ function applyConfig(){
   // free texts edited on the site itself
   Object.keys(CFG.t||{}).forEach(function(k){document.querySelectorAll('[data-edit="'+k+'"]').forEach(function(el){el.innerHTML=CFG.t[k];});});
   (CFG.gallery||[]).forEach(function(src,i){if(src)bg(document.querySelector('[data-img="gallery.'+i+'"]'),src);});
+  /* Certificate previews are static markup, so the data-img paths are assigned here rather
+     than repeated across nine <article> tags. decorate() then gives each one a 📷 button. */
+  document.querySelectorAll('.cert-slot .preview').forEach(function(el,i){
+    el.setAttribute('data-img','certs.'+i);
+    var src=(CFG.certs||[])[i];if(src)bg(el,src);
+  });
+  /* Award diploma slots, same idea. The champ poster is also a .proof but already carries
+     data-img="poster", so it is excluded — that keeps indexes stable on repeat calls. */
+  document.querySelectorAll('.award .proof:not([data-img="poster"])').forEach(function(el,i){
+    el.setAttribute('data-img','awards.'+i);
+    var src=(CFG.awards||[])[i];if(src)bg(el,src);
+  });
   renderShop();
   // students
   var sHTML=CFG.students.map(function(s,i){return '<article class="student"><div class="work '+(s.photo?'':['ph9','ph2','ph6','ph8'][i%4])+'"'+(s.photo?' style="background:url('+s.photo+') center/cover"':'')+'></div><div class="student-body"><h3 data-edit="students.'+i+'.name">'+esc(s.name)+'</h3><div class="where" data-edit="students.'+i+'.where">'+esc(s.where)+'</div><p data-edit="students.'+i+'.text">'+esc(s.text)+'</p><span class="course" data-edit="students.'+i+'.course">'+esc(s.course)+'</span></div></article>';}).join('');
