@@ -2495,7 +2495,7 @@ function applyConfig(){
   (CFG.gallery||[]).forEach(function(src,i){if(src)bg(document.querySelector('[data-img="gallery.'+i+'"]'),src);});
   renderShop();
   // students
-  var sHTML=CFG.students.map(function(s,i){return '<article class="student"><div class="work '+(s.photo?'':['ph9','ph2','ph6','ph8'][i%4])+'"'+(s.photo?' style="background:url('+s.photo+') center/cover"':'')+'></div><div class="student-body"><h3>'+esc(s.name)+'</h3><div class="where">'+esc(s.where)+'</div><p>'+esc(s.text)+'</p><span class="course">'+esc(s.course)+'</span></div></article>';}).join('');
+  var sHTML=CFG.students.map(function(s,i){return '<article class="student"><div class="work '+(s.photo?'':['ph9','ph2','ph6','ph8'][i%4])+'"'+(s.photo?' style="background:url('+s.photo+') center/cover"':'')+'></div><div class="student-body"><h3 data-edit="students.'+i+'.name">'+esc(s.name)+'</h3><div class="where" data-edit="students.'+i+'.where">'+esc(s.where)+'</div><p data-edit="students.'+i+'.text">'+esc(s.text)+'</p><span class="course" data-edit="students.'+i+'.course">'+esc(s.course)+'</span></div></article>';}).join('');
   document.querySelectorAll('.students-grid').forEach(function(g,i){g.innerHTML=i===0?CFG.students.slice(0,4).map(function(s,j){return sHTML.split('</article>')[j]+'</article>';}).join(''):sHTML;});
 }
 
