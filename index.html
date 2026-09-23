@@ -1202,6 +1202,43 @@ header.scrolled{box-shadow:0 14px 30px -18px rgba(184,15,95,.35)}
 .adm-photo input[type=file]{max-width:100%}
 .adm-student{padding:18px 20px}
 @media (max-width:700px){.adm-row.hw{grid-template-columns:1fr}.adm-row.hw .adm-btns{flex-direction:row}}
+
+/* admin v3: accordions, profile, activity */
+.adm-acc{background:#fff;border-radius:var(--r-card);margin-bottom:10px;box-shadow:0 20px 50px -30px rgba(184,15,95,.3);overflow:hidden}
+.adm-acc summary{list-style:none;cursor:pointer;padding:16px 20px}
+.adm-acc summary::-webkit-details-marker{display:none}
+.adm-acc-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.adm-acc-head b{font-size:1.15rem;font-weight:500;flex:1;min-width:120px}
+.adm-acc-head em{font-style:normal;color:var(--ink-soft);transition:transform .25s ease}
+.adm-acc[open] .adm-acc-head em{transform:rotate(180deg)}
+.adm-chips{display:flex;gap:6px;flex-wrap:wrap}
+.adm-chips i{font-style:normal;font-size:.8rem;background:var(--blush-soft);color:var(--plum-deep);border-radius:var(--r-pill);padding:4px 10px;white-space:nowrap}
+.adm-chips i.c-sent{background:#FFF1D6;color:#8A5A00;font-weight:600}
+.adm-chips i.c-soon{background:#FFE4E1;color:#B3170F;font-weight:600}
+.adm-acc-body{padding:0 20px 18px;border-top:1px solid var(--blush-soft)}
+.adm-acc.common summary{background:var(--blush-soft)}
+.adm-hwline{grid-template-columns:1fr auto auto auto}
+.adm-hwline b small{font-weight:400;color:var(--ink-soft);font-size:.78rem;margin-left:6px}
+.adm-hwline.sent{background:#FFF1D6}.adm-hwline.done{opacity:.7}
+.adm-hwline .adm-btns{gap:4px}.adm-hwline .adm-btns button{padding:4px 8px}
+.adm-grade{display:grid;grid-template-columns:120px 1fr;gap:14px;background:#fff;border:1px solid #FFE0A8;border-radius:12px;padding:12px;margin:-2px 0 10px}
+.adm-grade img{width:120px;height:120px;object-fit:cover;border-radius:10px}
+.adm-grade .field{margin:6px 0 10px}
+.adm-prof-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.adm-prof-head span{color:var(--ink-soft);font-size:.9rem}
+.muted{color:var(--ink-soft);font-size:.9rem}
+.adm-checks label small{color:var(--ink-soft)}
+.adm-chart{display:grid;grid-template-columns:repeat(14,1fr);gap:6px;align-items:end;height:140px;background:#fff;border-radius:var(--r-card);padding:14px 14px 26px;box-shadow:0 20px 50px -30px rgba(184,15,95,.3);margin-bottom:8px;position:relative}
+.adm-bar{position:relative;height:100%;display:flex;align-items:flex-end}
+.adm-bar i{display:block;width:100%;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#FF7FB6,var(--plum));min-height:2px;transition:height .6s cubic-bezier(.2,.7,.2,1)}
+.adm-chart.visits .adm-bar i{background:linear-gradient(180deg,#F2D68A,#C99A3E)}
+.adm-bar span{position:absolute;left:0;right:0;bottom:-20px;text-align:center;font-size:.68rem;color:var(--ink-soft)}
+.adm-row.sale{grid-template-columns:1fr auto}
+.adm-amt{font-weight:600;color:var(--plum-deep);white-space:nowrap}
+.hw-attach{display:inline-block;margin-bottom:14px}
+.hw-attach img{max-width:220px;border-radius:12px;display:block;box-shadow:0 14px 30px -16px rgba(184,15,95,.5)}
+.hw-attach.file{background:var(--blush-soft);border-radius:10px;padding:8px 12px;color:var(--plum-deep);font-size:.9rem}
+@media (max-width:700px){.adm-hwline{grid-template-columns:1fr}.adm-grade{grid-template-columns:1fr}.adm-chart{grid-template-columns:repeat(14,1fr);gap:3px;height:110px}.adm-bar span{font-size:.55rem}}
 </style>
 </head>
 <body>
@@ -2215,7 +2252,7 @@ var LMS={
   COURSES.map(function(c){return '<a href="#course/'+c.id+'"'+(active==c.id?' aria-current="page"':'')+'>'+c.title+'</a>';}).join('')+
   '<a href="#hw"'+(active=='hw'?' aria-current="page"':'')+'>დავალებები'+(this.hwPending()?'<i class="hw-count'+(this.hwUrgent()?' hot':'')+'">'+this.hwPending()+'</i>':'')+'</a>'+
   '<a href="#mycert">ჩემი სერტიფიკატები</a><a href="#login" onclick="LMS.logout()">გასვლა</a></nav>';},
- renderDash:function(){var s=this,total=0,doneN=0;COURSES.forEach(function(c){total+=s.flat(c).length;doneN+=s.done[c.id]||0;});
+ renderDash:function(){var s=this,total=0,doneN=0;var my=this.courses?COURSES.filter(function(c){return s.courses.indexOf(c.id)>-1;}):COURSES;if(!my.length)my=COURSES;COURSES.forEach(function(c){total+=s.flat(c).length;doneN+=s.done[c.id]||0;});
   document.getElementById('side-dash').innerHTML=this.side('dash');
   document.getElementById('dash').innerHTML='<h1 style="font-size:2.2rem;margin-bottom:8px"><span>გამარჯობა,</span> '+this.user.name+'</h1><p class="lead" style="margin-bottom:28px">გააგრძელეთ იქიდან, სადაც გაჩერდით. ყველა კურსი უვადოდ თქვენია.</p>'+
    (this.hwPending()?'<a class="hw-alert" href="#hw"><b>'+this.hwPending()+'</b> <span>დავალება ელოდება</span>'+(this.hwUrgent()?' · <span>'+this.hwUrgent()+' ვადა მალე იწურება</span>':'')+' →</a>':'')+
@@ -2245,21 +2282,22 @@ var LMS={
    (got.length?got.map(function(c){var f=s.flat(c),d=new Date();return '<div class="cert-doc" style="margin-bottom:28px"><div class="academy"><span>Tina Robless Nail Academy · თბილისი, საქართველო</span><span>No. TRA-'+d.getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000)+'</span></div><div class="title">დასრულების სერტიფიკატი</div><div class="sub">Certificate of Completion</div><div class="line">ეს ადასტურებს, რომ</div><div class="name">'+s.user.name+'</div><div class="line">წარმატებით დაასრულა</div><div class="course">'+c.title+'</div><div class="hours">'+f.length+' გაკვეთილი · '+c.hours+' საათი · საბოლოო ნამუშევარი შემოწმებული და დამტკიცებულია</div><div class="bottom"><div><div class="field">'+d.toLocaleDateString(LANG==='ka'?'ka-GE':LANG==='ru'?'ru-RU':LANG==='el'?'el-GR':'en-GB')+'</div></div><div><div class="seal">Tina Robless<br>Nail Academy<br>Tbilisi</div></div><div><span class="signature">Tina Robless</span><div class="field">თინა კუჭუხიზე (Tina Robless), დამფუძნებელი და პედაგოგი</div></div></div></div><p style="text-align:center"><a class="btn btn-ghost" href="#mycert" onclick="window.print()">PDF-ად ჩამოტვირთვა</a></p>';}).join(''):
    '<div class="cert-ready"><div>ჯერ არცერთი კურსი არ დაგისრულებიათ. სერტიფიკატი ბოლო გაკვეთილის შემდეგ აქ გამოჩნდება.</div><a class="btn btn-plum" href="#dashboard">კურსებზე დაბრუნება</a></div>');}
 };
-LMS.hwPending=function(){return HOMEWORK.filter(function(x){return x.status!=='done';}).length;};
-LMS.hwUrgent=function(){return HOMEWORK.filter(function(x){return x.status==='todo'&&x.due-Date.now()<1000*60*60*48;}).length;};
+LMS.hwPending=function(){return (this.user?this.myHw():[]).filter(function(x){return x.status!=='done';}).length;};
+LMS.hwUrgent=function(){return (this.user?this.myHw():[]).filter(function(x){return x.status==='todo'&&x.due-Date.now()<1000*60*60*48;}).length;};
 LMS.countdown=function(ms){
   if(ms<=0)return {t:({ka:'ვადა გავიდა',en:'deadline passed',ru:'срок истёк',el:'η προθεσμία πέρασε'}[LANG]||'ვადა გავიდა'),cls:'over'};
   var s=Math.floor(ms/1000),d=Math.floor(s/86400),hh=Math.floor(s%86400/3600),mm=Math.floor(s%3600/60),ss=s%60;
   var dl={ka:'დღე',en:'d',ru:'дн.',el:'ημ.'}[LANG]||'დღე';var t=(d>0?d+' '+dl+' ':'')+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0');
   return {t:t,cls:ms<1000*60*60*48?'soon':''};
 };
+LMS.myHw=function(){var u=this.user,cs=this.courses||['master-1','french'];return HOMEWORK.filter(function(x){return x.student?(u&&x.student.toLowerCase()===u.email.toLowerCase()):cs.indexOf(x.course)>-1;});};
 LMS.renderHomework=function(){
-  var s=this,cname=function(id){var c=COURSES.filter(function(x){return x.id==id;})[0];return c?c.title:id;};
-  var todo=HOMEWORK.filter(function(x){return x.status!=='done';}).sort(function(a,b){return a.due-b.due;}),done=HOMEWORK.filter(function(x){return x.status==='done';});
+  var s=this,cname=function(id){var c=CATALOG.filter(function(x){return x.id==id;})[0];return c?c.title:id;},mine=this.myHw();
+  var todo=mine.filter(function(x){return x.status!=='done';}).sort(function(a,b){return a.due-b.due;}),done=mine.filter(function(x){return x.status==='done';});
   function card(x){var cd=s.countdown(x.due-Date.now());
     return '<div class="hw '+(x.status==='done'?'hw-done':'')+'"><div class="hw-top"><div><div class="hw-course">'+cname(x.course)+' · <span>გაკვეთილი №</span>'+x.lesson+'</div><h3 class="hw-title"><span>'+x.title+'</span></h3></div>'+
      (x.status==='done'?'<span class="hw-badge ok">✓ <span>შესრულებულია</span></span>':x.status==='sent'?'<span class="hw-badge sent"><span>გაგზავნილია — მოწმდება</span></span>':'<span class="hw-badge due '+cd.cls+'" data-due="'+x.due+'"><span>დარჩა</span> <b>'+cd.t+'</b></span>')+'</div>'+
-     '<p>'+x.task+'</p>'+
+     '<p>'+x.task+'</p>'+(x.attach?(/^data:image/.test(x.attach)?'<a class="hw-attach" href="'+x.attach+'" target="_blank"><img src="'+x.attach+'" alt=""></a>':'<a class="hw-attach file" href="'+x.attach+'" download="'+(x.attachName||'file')+'">📎 '+(x.attachName||'ფაილი')+'</a>'):'')+
      (x.status==='done'?'<div class="hw-grade"><b>თინას შეფასება:</b> '+(x.grade||'')+'</div>':
       x.status==='sent'?'<div class="hw-grade"><span>ნამუშევარი გაგზავნილია. თინა 48 საათში პასუხობს.</span></div>':
       '<form class="upload hw-form" onsubmit="event.preventDefault();LMS.submitHw(\''+x.id+'\',this)"><div class="field"><label>ნამუშევრის ფოტო</label><input name="f" type="file" accept="image/*" required></div><div class="field"><label>კომენტარი (არასავალდებულო)</label><textarea name="t" rows="2"></textarea></div><button class="btn btn-plum" type="submit">დავალების გაგზავნა</button> <a class="btn-link" style="margin-left:12px" href="#lesson/'+x.course+'/'+(x.lesson-1)+'">გაკვეთილის ნახვა</a></form>')+'</div>';}
@@ -2300,6 +2338,11 @@ function cfgDefault(){
       {name:'ნინო მ.',email:'nino@example.com',courses:['master-1','french'],done:{'master-1':7,'french':0},joined:Date.now()-1000*60*60*24*12},
       {name:'მარიამ კ.',email:'mariam@example.com',courses:['bundle','master-1','master-2','french','extreme'],done:{'master-1':22,'master-2':3,'french':6,'extreme':0},joined:Date.now()-1000*60*60*24*40},
       {name:'ანა გ.',email:'ana@example.com',courses:['extreme'],done:{'extreme':2},joined:Date.now()-1000*60*60*24*3}],
+    sales:[
+      {t:Date.now()-1000*60*60*24*40,email:'mariam@example.com',course:'bundle',amount:990},
+      {t:Date.now()-1000*60*60*24*12,email:'nino@example.com',course:'master-1',amount:590},
+      {t:Date.now()-1000*60*60*24*12,email:'nino@example.com',course:'french',amount:190},
+      {t:Date.now()-1000*60*60*24*3,email:'ana@example.com',course:'extreme',amount:190}],
     students:[
       {name:'სტუდენტის სახელი',where:'თბილისი · საკუთარი სტუდია',text:'ერთი წინადადება, სად არის ახლა.',course:'მასტერ-პროგრამა, ნაწილი 1 და 2',photo:null},
       {name:'სტუდენტის სახელი',where:'ბათუმი · სალონის მასტერი',text:'ერთი წინადადება შედეგზე.',course:'ექსტრემალური სიგრძე',photo:null},
@@ -2390,18 +2433,30 @@ var TR={
   apply:function(){if(!CFG.tr)return;Object.keys(CFG.tr).forEach(function(k){var t=CFG.tr[k];if(!DICT[k]&&t.en)DICT[k]=[t.en,t.ru||t.en,t.el||t.en];});}
 };
 
+
+/* ===== Site activity (visits are counted in this browser only until the backend exists) ===== */
+var STATS={key:'tr_stats',
+  day:function(t){var d=new Date(t||Date.now()),p=function(n){return String(n).padStart(2,'0');};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());},
+  load:function(){try{return JSON.parse(localStorage.getItem(this.key)||'{}');}catch(e){return {};}},
+  bump:function(k){var o=this.load(),d=this.day();o[d]=o[d]||{v:0,i:0,o:0};o[d][k]=(o[d][k]||0)+1;try{localStorage.setItem(this.key,JSON.stringify(o));}catch(e){}},
+  init:function(){var s=this;s.bump('v');try{if(!sessionStorage.getItem('tr_in')){sessionStorage.setItem('tr_in','1');s.bump('i');}}catch(e){}
+    var left=false;function out(){if(left)return;left=true;s.bump('o');}
+    window.addEventListener('pagehide',out);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')out();});}
+};
+STATS.init();
+
 /* ---- admin panel ---- */
 var ADMIN={
-  ok:false,tab:'courses',
+  ok:false,tab:'activity',
   login:function(p){if(p===ADMIN_PASS){this.ok=true;try{sessionStorage.setItem('tr_admin','1');}catch(e){}go('admin');}else alert('არასწორი პაროლი');},
   logout:function(){this.ok=false;try{sessionStorage.removeItem('tr_admin');}catch(e){}go('home');},
   render:function(){
     try{if(sessionStorage.getItem('tr_admin')==='1')this.ok=true;}catch(e){}
     var root=document.getElementById('admin');
     if(!this.ok){root.innerHTML='<div class="login-box"><h1>ადმინი</h1><p>მხოლოდ თინასთვის. შეიყვანეთ პაროლი.</p><form onsubmit="event.preventDefault();ADMIN.login(this.p.value)"><div class="field"><label>პაროლი</label><input name="p" type="password" required></div><button class="btn btn-plum" type="submit">შესვლა</button></form></div>';return;}
-    var tabs=[['courses','კურსები და ფასები'],['photos','ფოტოები'],['bio','ბიო და ტექსტები'],['homework','დავალებები'],['students','სტუდენტები'],['data','შენახვა / ექსპორტი']];
+    var tabs=[['activity','აქტიურობა და გაყიდვები'],['homework','სტუდენტები და დავალებები'],['courses','კურსები და ფასები'],['photos','ფოტოები'],['bio','ბიო და ტექსტები'],['students','კურსდამთავრებულები'],['data','შენახვა / ექსპორტი']];
     root.innerHTML='<div class="lms-grid"><aside class="side"><div class="who">ადმინ პანელი</div><div class="mail">ცვლილებები ინახება ამ ბრაუზერში „შენახვა“-ზე დაჭერით</div><nav>'+tabs.map(function(t){return '<a href="#admin/'+t[0]+'"'+(ADMIN.tab===t[0]?' aria-current="page"':'')+'>'+t[1]+'</a>';}).join('')+'<a href="#home" onclick="ADMIN.logout()">გასვლა</a></nav></aside><div id="adm-body"></div></div>';
-    this['tab_'+this.tab]();
+    if(this.tab==='student'){this.profile(parseInt(this.sub,10)||0);}else this['tab_'+this.tab]();
   },
   saveBar:function(){return '<div class="adm-save"><button class="btn btn-plum" type="button" onclick="ADMIN.save()">შენახვა და საიტზე გამოჩენა</button><span>საიტი ხელახლა ჩაიტვირთება</span></div>';},
   save:function(){var s=this,ov=document.getElementById('adm-ov');if(!ov){ov=document.createElement('div');ov.id='adm-ov';document.body.appendChild(ov);}
@@ -2451,48 +2506,73 @@ var ADMIN={
      '<p class="lead" style="font-size:.9rem">შენახვისას ტექსტი ავტომატურად ითარგმნება ინგლისურად, რუსულად და ბერძნულად. შესწორება — „შენახვა / ექსპორტი“ განყოფილებაში.</p>';
   },
   /* --- homework --- */
-  tab_homework:function(){var b=document.getElementById('adm-body'),s=this;
-    var st={todo:'აქტიური',sent:'შესამოწმებელი',done:'შემოწმებული'},cname=function(id){var c=CATALOG.filter(function(k){return k.id===id;})[0];return c?c.title:id;};
-    var idx=CFG.homework.map(function(x,i){return i;}).sort(function(a,b){return (CFG.homework[b].created||0)-(CFG.homework[a].created||0);});
-    var lastAdded=idx.length?idx[0]:-1;
-    function row(i){var x=CFG.homework[i],left=x.due-Date.now(),soon=x.status!=='done'&&left<1000*60*60*48;
-      return '<div class="adm-row hw'+(x.status==='sent'?' hot':'')+(i===lastAdded?' last':'')+'"><div class="adm-main">'+(i===lastAdded?'<em class="adm-new">ბოლოს დამატებული</em>':'')+'<b>'+esc(x.title)+'</b><span class="adm-meta"><i>კურსი:</i> '+esc(cname(x.course))+'</span><span class="adm-meta"><i>გაკვეთილი:</i> '+x.lesson+'</span><span class="adm-meta adm-due'+(soon?' soon':'')+(left<0?' over':'')+'"><i>ვადა:</i> '+ADMIN.fmt(x.due)+(left<0?' — გავიდა':soon?' — მალე':'')+'</span></div><div class="adm-btns">'+(x.status==='sent'?'<button type="button" class="pri" onclick="ADMIN.gradeHw('+i+')">შემოწმება</button>':'')+'<button type="button" onclick="ADMIN.editHw('+i+')">რედაქტირება</button><button type="button" class="del" onclick="ADMIN.del(\'homework\','+i+')">✕</button></div></div>';}
-    function group(key,title){var list=idx.filter(function(i){return CFG.homework[i].status===key;});return '<h2 class="adm-h">'+title+' <small>'+list.length+'</small></h2>'+(list.length?'<div class="adm-list">'+list.map(row).join('')+'</div>':'<p class="lead adm-empty">— ცარიელია</p>');}
-    b.innerHTML='<h1>დავალებები</h1>'+this.saveBar()+
-     '<div class="adm-addbar"><button class="btn btn-plum" type="button" onclick="ADMIN.addHw()">+ ახალი დავალება</button><span>ახალი დავალება ზემოთ, სიის თავში გამოჩნდება. სტუდენტების გამოგზავნილი ნამუშევრები — „შესამოწმებელი" ბლოკში.</span></div>'+
-     '<div id="adm-edit"></div>'+group('sent','შესამოწმებელი')+group('todo','აქტიური (ელოდება სტუდენტს)')+group('done','შემოწმებული');
+  cname:function(id){var c=CATALOG.filter(function(k){return k.id===id;})[0];return c?c.title:id;},
+  lessonsOf:function(id){var c=COURSES.filter(function(k){return k.id===id;})[0];return c?LMS.flat(c).length:0;},
+  hwOf:function(u){return CFG.homework.filter(function(x){return x.student?x.student.toLowerCase()===(u.email||'').toLowerCase():u.courses.indexOf(x.course)>-1;});},
+  hwLine:function(x,i,full){var left=x.due-Date.now(),st={todo:'ელოდება',sent:'შესამოწმებელი',done:'შემოწმებული'}[x.status];
+    return '<div class="adm-hwline'+(x.status==='sent'?' sent':x.status==='done'?' done':left<1000*60*60*48?' soon':'')+'"><b>'+esc(x.title)+(x.student?'':' <small>ყველასთვის</small>')+'</b><span>'+esc(this.cname(x.course))+' · გაკვ. '+x.lesson+' · '+st+'</span><span class="adm-due'+(left<0&&x.status!=='done'?' over':'')+'">'+(x.status==='done'?'✓':left<0?'ვადა გავიდა':LMS.countdown(left).t)+'</span>'+(full?'<span class="adm-btns"><button type="button" onclick="ADMIN.editHw('+i+')">✎</button><button type="button" class="del" onclick="ADMIN.del(\'homework\','+i+')">✕</button></span>':'')+'</div>';},
+  tab_activity:function(){var b=document.getElementById('adm-body'),st=STATS.load(),sales=CFG.sales||[],days=[],N=14,today=STATS.day();
+    for(var k=N-1;k>=0;k--){var d=STATS.day(Date.now()-k*864e5),s=st[d]||{v:0,i:0,o:0},ss=sales.filter(function(x){return STATS.day(x.t)===d;});days.push({d:d,v:s.v||0,i:s.i||0,o:s.o||0,n:ss.length,a:ss.reduce(function(t,x){return t+(x.amount||0);},0)});}
+    var sum=function(arr,f){return arr.reduce(function(t,x){return t+x[f];},0);},last7=days.slice(-7),mv=Math.max(1,Math.max.apply(null,days.map(function(x){return x.v;}))),ma=Math.max(1,Math.max.apply(null,days.map(function(x){return x.a;})));
+    var all30=sales.filter(function(x){return Date.now()-x.t<30*864e5;}),tot=sales.reduce(function(t,x){return t+(x.amount||0);},0);
+    var bars=function(f,m,cls){return '<div class="adm-chart '+cls+'">'+days.map(function(x){var v=x[f];return '<div class="adm-bar" title="'+x.d.slice(5)+': '+v+'"><i style="height:'+Math.round(v/m*100)+'%"></i><span>'+x.d.slice(8)+'</span></div>';}).join('')+'</div>';};
+    var t=days[days.length-1];
+    b.innerHTML='<h1>აქტიურობა და გაყიდვები</h1><p class="lead">ვიზიტები ამჟამად მხოლოდ ამ ბრაუზერიდან ითვლება — ყველა ვიზიტორის რეალური რიცხვი ბექენდის/ანალიტიკის მიერთების შემდეგ იქნება. გაყიდვები — სტუდენტისთვის პაკეტის მინიჭებისას ავტომატურად იწერება.</p>'+
+     '<h2 class="adm-h">დღეს — '+today.slice(8)+'.'+today.slice(5,7)+'</h2><div class="stats"><div class="stat"><b>'+t.i+'</b><span>შემოსული</span></div><div class="stat"><b>'+t.o+'</b><span>გასული</span></div><div class="stat"><b>'+t.v+'</b><span>გვერდის ნახვა</span></div></div>'+
+     '<div class="stats"><div class="stat"><b>'+t.n+'</b><span>გაყიდვა დღეს</span></div><div class="stat"><b>'+t.a+' ₾</b><span>შემოსავალი დღეს</span></div><div class="stat"><b>'+sum(last7,'a')+' ₾</b><span>ბოლო 7 დღე · '+sum(last7,'n')+' გაყიდვა</span></div></div>'+
+     '<div class="stats"><div class="stat"><b>'+all30.reduce(function(x,y){return x+(y.amount||0);},0)+' ₾</b><span>ბოლო 30 დღე · '+all30.length+' გაყიდვა</span></div><div class="stat"><b>'+tot+' ₾</b><span>სულ · '+sales.length+' გაყიდვა</span></div><div class="stat"><b>'+CFG.enrolled.length+'</b><span>აქტიური სტუდენტი</span></div></div>'+
+     '<h2 class="adm-h">გაყიდვები დღეების მიხედვით (₾) — ბოლო 14 დღე</h2>'+bars('a',ma,'sales')+
+     '<h2 class="adm-h">ვიზიტები დღეების მიხედვით — ბოლო 14 დღე</h2>'+bars('v',mv,'visits')+
+     '<h2 class="adm-h">ბოლო გაყიდვები</h2><div class="adm-list">'+(sales.slice().sort(function(a,b){return b.t-a.t;}).slice(0,12).map(function(x){var u=CFG.enrolled.filter(function(e){return e.email===x.email;})[0];return '<div class="adm-row sale"><div class="adm-main"><b>'+esc(u?u.name:x.email)+'</b><span>'+esc(ADMIN.cname(x.course))+' · '+ADMIN.fmt(x.t)+'</span></div><div class="adm-amt">'+(x.amount||0)+' ₾</div></div>';}).join('')||'<p class="lead adm-empty">— ჯერ არ არის</p>')+'</div>';
   },
+  tab_homework:function(){var b=document.getElementById('adm-body'),s=this;
+    var rows=CFG.enrolled.map(function(u,i){var hw=s.hwOf(u),open=hw.filter(function(x){return x.status!=='done';}),sent=hw.filter(function(x){return x.status==='sent';}),soon=open.filter(function(x){return x.status==='todo'&&x.due-Date.now()<1000*60*60*48;});
+      var head='<div class="adm-acc-head"><b>'+esc(u.name)+'</b><span class="adm-chips"><i>'+u.courses.length+' პაკეტი</i><i>'+open.length+' დავალება</i>'+(sent.length?'<i class="c-sent">'+sent.length+' შესამოწმებელი</i>':'')+(soon.length?'<i class="c-soon">'+soon.length+' მალე</i>':'')+'</span><em>▾</em></div>';
+      var body='<div class="adm-acc-body"><div class="adm-pks">'+u.courses.map(function(id){var n=s.lessonsOf(id),d=(u.done||{})[id]||0;return '<span class="adm-pk">'+esc(s.cname(id))+(n?' <i>'+d+'/'+n+'</i>':'')+'</span>';}).join('')+'</div>'+
+        (open.length?'<div class="adm-hws">'+open.sort(function(a,b){return a.due-b.due;}).slice(0,4).map(function(x){return s.hwLine(x,CFG.homework.indexOf(x),false);}).join('')+'</div>':'<div class="adm-hwline muted">ღია დავალება არ აქვს</div>')+
+        '<div style="margin-top:12px"><a class="btn btn-plum" href="#admin/student/'+i+'">პროფილის გახსნა — დავალების მიცემა</a></div></div>';
+      return '<details class="adm-acc"'+(sent.length?' open':'')+'><summary>'+head+'</summary>'+body+'</details>';}).join('');
+    var common=CFG.homework.map(function(x,i){return [x,i];}).filter(function(p){return !p[0].student;});
+    b.innerHTML='<h1>სტუდენტები და დავალებები</h1><p class="lead">დააჭირეთ სახელს — გაიშლება პაკეტები და დავალებები. „პროფილის გახსნა“ — დავალების მიცემა, ფაილის მიმაგრება, შემოწმება.</p>'+this.saveBar()+
+     '<div class="adm-addbar"><button class="btn btn-ghost" type="button" onclick="ADMIN.addEnrolled()">+ სტუდენტი</button><button class="btn btn-ghost" type="button" onclick="ADMIN.addHw()">+ საერთო დავალება (ყველასთვის)</button></div><div id="adm-edit"></div>'+
+     (rows||'<p class="lead adm-empty">— ჯერ არავინ</p>')+
+     '<details class="adm-acc common"><summary><div class="adm-acc-head"><b>საერთო დავალებები</b><span class="adm-chips"><i>'+common.length+'</i></span><em>▾</em></div></summary><div class="adm-acc-body"><div class="adm-hws">'+(common.map(function(p){return s.hwLine(p[0],p[1],true);}).join('')||'<div class="adm-hwline muted">არ არის</div>')+'</div></div></details>';
+  },
+  profile:function(i){var b=document.getElementById('adm-body'),s=this,u=CFG.enrolled[i];if(!u){go('admin/homework');return;}
+    var hw=s.hwOf(u),group=function(st,t){var l=hw.filter(function(x){return x.status===st;});return '<h2 class="adm-h">'+t+' <small>'+l.length+'</small></h2>'+(l.length?'<div class="adm-hws">'+l.map(function(x){var idx=CFG.homework.indexOf(x);return s.hwLine(x,idx,true)+(st==='sent'?'<div class="adm-grade">'+(x.photo?'<a href="'+x.photo+'" target="_blank"><img src="'+x.photo+'" alt=""></a>':'<span class="muted">ფოტო არ არის</span>')+'<div>'+(x.note?'<p><b>სტუდენტის კომენტარი:</b> '+esc(x.note)+'</p>':'')+'<div class="field"><label>თინას შეფასება</label><textarea rows="2" oninput="CFG.homework['+idx+'].grade=this.value">'+esc(x.grade||'')+'</textarea></div><button class="btn btn-plum" type="button" onclick="CFG.homework['+idx+'].status=\'done\';ADMIN.save()">შემოწმებულია — გაგზავნა</button></div></div>':'');}).join('')+'</div>':'<div class="adm-hwline muted">— არცერთი</div>');};
+    b.innerHTML='<div class="crumbs"><a href="#admin/homework">სტუდენტები</a> / '+esc(u.name)+'</div><div class="adm-prof-head"><div><h1>'+esc(u.name)+'</h1><span>'+esc(u.email||'ელფოსტა არ არის')+' · ჩაერთო '+s.fmt(u.joined||Date.now()).slice(0,10)+'</span></div><button class="btn btn-ghost" type="button" onclick="ADMIN.editEnrolled('+i+')">პაკეტების რედაქტირება</button></div>'+this.saveBar()+'<div id="adm-edit"></div>'+
+     '<div class="adm-pks">'+(u.courses.map(function(id){var n=s.lessonsOf(id),d=(u.done||{})[id]||0;return '<span class="adm-pk">'+esc(s.cname(id))+(n?' <i>'+d+'/'+n+'</i>':'')+'</span>';}).join('')||'<span class="muted">პაკეტი არ აქვს — ჯერ მიანიჭეთ</span>')+'</div>'+
+     '<div class="adm-form"><h2>ახალი დავალება — '+esc(u.name)+'</h2><div class="field"><label>სათაური</label><input id="nh-title" placeholder="მაგ. აპექსი ერთ ფრჩხილზე"></div><div class="adm-2"><div class="field"><label>კურსი</label><select id="nh-course">'+(u.courses.length?u.courses:CATALOG.map(function(c){return c.id;})).map(function(id){return '<option value="'+id+'">'+esc(s.cname(id))+'</option>';}).join('')+'</select></div><div class="field"><label>გაკვეთილი</label><input id="nh-lesson" type="number" min="1" value="1"></div></div><div class="field"><label>რა უნდა გააკეთოს</label><textarea id="nh-task" rows="3"></textarea></div><div class="adm-2"><div class="field"><label>ვადა</label><input id="nh-due" type="datetime-local"></div><div class="field"><label>ფაილი / ფოტო (სქემა, ნიმუში, PDF)</label><input id="nh-file" type="file" accept="image/*,.pdf"></div></div><button class="btn btn-plum" type="button" onclick="ADMIN.giveHw('+i+')">დავალების მიცემა და შენახვა</button></div>'+
+     group('sent','შესამოწმებელი')+group('todo','აქტიური')+group('done','შემოწმებული');
+    var dv=new Date(Date.now()+1000*60*60*24*7),p=function(n){return String(n).padStart(2,'0');};document.getElementById('nh-due').value=dv.getFullYear()+'-'+p(dv.getMonth()+1)+'-'+p(dv.getDate())+'T18:00';},
+  giveHw:function(i){var u=CFG.enrolled[i],g=function(id){return document.getElementById(id);},title=g('nh-title').value.trim();if(!title){alert('ჩაწერეთ სათაური');return;}
+    var x={id:'hw'+Date.now().toString(36),student:u.email,course:g('nh-course').value,lesson:parseInt(g('nh-lesson').value,10)||1,title:title,task:g('nh-task').value.trim(),due:new Date(g('nh-due').value).getTime()||Date.now()+6048e5,status:'todo',created:Date.now()};
+    var f=g('nh-file').files[0];if(f){if(f.size>900000){alert('ფაილი 900 KB-ზე დიდია');return;}var r=new FileReader();r.onload=function(){x.attach=r.result;x.attachName=f.name;CFG.homework.push(x);ADMIN.save();};r.readAsDataURL(f);}else{CFG.homework.push(x);this.save();}},
   addHw:function(){CFG.homework.push({id:'hw'+Date.now().toString(36),course:CATALOG[0].id,lesson:1,title:'ახალი დავალება',task:'რა უნდა გააკეთოს სტუდენტმა',due:Date.now()+1000*60*60*24*7,status:'todo',created:Date.now()});this.tab_homework();this.editHw(CFG.homework.length-1);window.scrollTo({top:0,behavior:'smooth'});},
   editHw:function(i){var x=CFG.homework[i],e=document.getElementById('adm-edit');var dv=new Date(x.due),pad=function(n){return String(n).padStart(2,'0');},local=dv.getFullYear()+'-'+pad(dv.getMonth()+1)+'-'+pad(dv.getDate())+'T'+pad(dv.getHours())+':'+pad(dv.getMinutes());
     e.innerHTML='<div class="adm-form"><h2>დავალება</h2><div class="field"><label>სათაური</label><input value="'+esc(x.title)+'" oninput="CFG.homework['+i+'].title=this.value"></div>'+
      '<div class="adm-2"><div class="field"><label>კურსი</label><select onchange="CFG.homework['+i+'].course=this.value">'+CATALOG.map(function(c){return '<option value="'+c.id+'"'+(c.id===x.course?' selected':'')+'>'+esc(c.title)+'</option>';}).join('')+'</select></div><div class="field"><label>გაკვეთილის ნომერი</label><input type="number" min="1" value="'+x.lesson+'" oninput="CFG.homework['+i+'].lesson=parseInt(this.value,10)||1"></div></div>'+
      '<div class="field"><label>დავალების ტექსტი</label><textarea rows="4" oninput="CFG.homework['+i+'].task=this.value">'+esc(x.task)+'</textarea></div>'+
+     '<div class="field"><label>ვისთვის</label><select onchange="CFG.homework['+i+'].student=this.value||null"><option value=""'+(!x.student?' selected':'')+'>ყველასთვის (ვისაც ეს კურსი აქვს)</option>'+CFG.enrolled.map(function(u){return '<option value="'+esc(u.email)+'"'+(x.student===u.email?' selected':'')+'>'+esc(u.name)+' — '+esc(u.email)+'</option>';}).join('')+'</select></div>'+
+     '<div class="field"><label>ფაილი / ფოტო</label><input type="file" accept="image/*,.pdf" onchange="ADMIN.file(this,function(d){CFG.homework['+i+'].attach=d;CFG.homework['+i+'].attachName=this&&this.files?this.files[0].name:\'file\'})">'+(x.attach?' <button type="button" class="btn-link" onclick="delete CFG.homework['+i+'].attach;ADMIN.editHw('+i+')">ფაილის წაშლა</button>':'')+'</div>'+
      '<div class="adm-2"><div class="field"><label>ვადა</label><input type="datetime-local" value="'+local+'" onchange="CFG.homework['+i+'].due=new Date(this.value).getTime()"></div><div class="field"><label>სტატუსი</label><select onchange="CFG.homework['+i+'].status=this.value"><option value="todo"'+(x.status==='todo'?' selected':'')+'>ელოდება</option><option value="sent"'+(x.status==='sent'?' selected':'')+'>გამოგზავნილია</option><option value="done"'+(x.status==='done'?' selected':'')+'>შემოწმებულია</option></select></div></div>'+
-     '<button class="btn btn-plum" type="button" onclick="ADMIN.save()">შენახვა</button> <button class="btn btn-ghost" type="button" onclick="ADMIN.tab_homework()">დახურვა</button></div>';e.scrollIntoView({behavior:'smooth'});},
+     '<button class="btn btn-plum" type="button" onclick="ADMIN.save()">შენახვა</button> <button class="btn btn-ghost" type="button" onclick="ADMIN.render()">დახურვა</button></div>';e.scrollIntoView({behavior:'smooth'});},
   gradeHw:function(i){var x=CFG.homework[i],e=document.getElementById('adm-edit');
     e.innerHTML='<div class="adm-form"><h2>შემოწმება: '+esc(x.title)+'</h2>'+(x.photo?'<img src="'+x.photo+'" style="max-width:320px;border-radius:12px;display:block;margin-bottom:12px">':'<p class="lead">ფოტო ბექენდის მიერთების შემდეგ გამოჩნდება.</p>')+(x.note?'<p><b>სტუდენტის კომენტარი:</b> '+esc(x.note)+'</p>':'')+
      '<div class="field"><label>თინას შეფასება</label><textarea rows="3" oninput="CFG.homework['+i+'].grade=this.value">'+esc(x.grade||'')+'</textarea></div><button class="btn btn-plum" type="button" onclick="CFG.homework['+i+'].status=\'done\';ADMIN.save()">შემოწმებულია — გაგზავნა სტუდენტთან</button> <button class="btn btn-ghost" type="button" onclick="ADMIN.tab_homework()">დახურვა</button></div>';e.scrollIntoView({behavior:'smooth'});},
   /* --- students --- */
   tab_students:function(){var b=document.getElementById('adm-body');
-    var cname=function(id){var c=CATALOG.filter(function(k){return k.id===id;})[0];return c?c.title:id;},lessons=function(id){var c=COURSES.filter(function(k){return k.id===id;})[0];return c?LMS.flat(c).length:0;};
-    var act=CFG.enrolled.map(function(u,i){
-      var hws=CFG.homework.filter(function(x){return u.courses.indexOf(x.course)>-1&&x.status!=='done';}).sort(function(a,b){return a.due-b.due;});
-      var pk=u.courses.map(function(id){var n=lessons(id),d=(u.done||{})[id]||0;return '<span class="adm-pk">'+esc(cname(id))+(n?' <i>'+d+'/'+n+'</i>':'')+'</span>';}).join('');
-      var hw=hws.length?hws.map(function(x){var left=x.due-Date.now();return '<div class="adm-hwline'+(left<1000*60*60*48?' soon':'')+'"><b>'+esc(x.title)+'</b><span>'+esc(cname(x.course))+' · გაკვ. '+x.lesson+'</span><span class="adm-due'+(left<0?' over':'')+'">'+(left<0?'ვადა გავიდა':LMS.countdown(left).t)+'</span></div>';}).join(''):'<div class="adm-hwline muted">დავალება არ აქვს</div>';
-      return '<div class="adm-student"><div class="adm-st-head"><div><b>'+esc(u.name)+'</b><span>'+esc(u.email)+' · ჩაერთო '+ADMIN.fmt(u.joined||Date.now()).slice(0,10)+'</span></div><div class="adm-btns"><button type="button" onclick="ADMIN.editEnrolled('+i+')">რედაქტირება</button><button type="button" class="del" onclick="ADMIN.del(\'enrolled\','+i+')">✕</button></div></div><div class="adm-pks">'+pk+'</div><div class="adm-hws">'+hw+'</div></div>';}).join('');
-    b.innerHTML='<h1>სტუდენტები</h1>'+this.saveBar()+
-     '<h2 class="adm-h">აქტიური სტუდენტები <small>'+CFG.enrolled.length+'</small></h2><p class="lead">ვის რა პაკეტი/კურსი აქვს, სად არის პროგრესი და რა დავალება ელოდება ვადით. „+ სტუდენტი" — წვდომის ხელით მიცემა (ბექენდის მიერთებამდე).</p>'+
-     '<div class="adm-addbar"><button class="btn btn-plum" type="button" onclick="ADMIN.addEnrolled()">+ სტუდენტი</button></div><div id="adm-edit"></div>'+(act||'<p class="lead adm-empty">— ჯერ არავინ</p>')+
-     '<h2 class="adm-h" style="margin-top:44px">წარმატებული სტუდენტები (საიტზე ჩანს) <small>'+CFG.students.length+'</small></h2><p class="lead">პირველი ოთხი მთავარ გვერდზეც ჩანს. ისრებით შეცვალეთ რიგი.</p>'+
+    b.innerHTML='<h1>წარმატებული სტუდენტები</h1><p class="lead">ეს ბარათები საიტზე ჩანს (პირველი ოთხი — მთავარზეც). აქტიური სტუდენტები და დავალებები — „სტუდენტები და დავალებები“ განყოფილებაშია.</p>'+this.saveBar()+
      '<div class="adm-list">'+CFG.students.map(function(s,i){return '<div class="adm-row"><div class="adm-th"'+(s.photo?' style="background:url('+s.photo+') center/cover"':'')+'></div><div class="adm-main"><b>'+esc(s.name)+'</b><span>'+esc(s.where)+' · '+esc(s.course)+'</span></div><div class="adm-btns"><button type="button" onclick="ADMIN.move(\'students\','+i+',-1)">↑</button><button type="button" onclick="ADMIN.move(\'students\','+i+',1)">↓</button><button type="button" onclick="ADMIN.editStudent('+i+')">რედაქტირება</button><button type="button" class="del" onclick="ADMIN.del(\'students\','+i+')">✕</button></div></div>';}).join('')+'</div>'+
      '<button class="btn btn-ghost" type="button" onclick="CFG.students.push({name:\'სახელი\',where:\'ქალაქი · პოზიცია\',text:\'\',course:\'\',photo:null});ADMIN.tab_students();ADMIN.editStudent(CFG.students.length-1)">+ ახალი კურსდამთავრებული</button><div id="adm-edit2"></div>';
   },
   fmt:function(t){var d=new Date(t),p=function(n){return String(n).padStart(2,'0');};return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear()+'  '+p(d.getHours())+':'+p(d.getMinutes());},
-  addEnrolled:function(){CFG.enrolled.unshift({name:'სახელი',email:'',courses:[],done:{},joined:Date.now()});this.tab_students();this.editEnrolled(0);},
+  addEnrolled:function(){CFG.enrolled.unshift({name:'სახელი',email:'',courses:[],done:{},joined:Date.now()});this.tab_homework();this.editEnrolled(0);},
   editEnrolled:function(i){var u=CFG.enrolled[i],e=document.getElementById('adm-edit');
     e.innerHTML='<div class="adm-form"><h2>სტუდენტი — წვდომა</h2><div class="adm-2"><div class="field"><label>სახელი</label><input value="'+esc(u.name)+'" oninput="CFG.enrolled['+i+'].name=this.value"></div><div class="field"><label>ელფოსტა (ამით შედის)</label><input type="email" value="'+esc(u.email)+'" oninput="CFG.enrolled['+i+'].email=this.value"></div></div>'+
-     '<div class="field"><label>პაკეტები / კურსები</label><div class="adm-checks">'+CATALOG.map(function(c){return '<label><input type="checkbox" '+(u.courses.indexOf(c.id)>-1?'checked':'')+' onchange="var a=CFG.enrolled['+i+'].courses,k=\''+c.id+'\';if(this.checked){if(a.indexOf(k)<0)a.push(k)}else a.splice(a.indexOf(k),1)"> '+esc(c.title)+'</label>';}).join('')+'</div></div>'+
-     '<button class="btn btn-plum" type="button" onclick="ADMIN.save()">შენახვა</button> <button class="btn btn-ghost" type="button" onclick="ADMIN.tab_students()">დახურვა</button></div>';e.scrollIntoView({behavior:'smooth'});},
+     '<div class="field"><label>პაკეტები / კურსები</label><div class="adm-checks">'+CATALOG.map(function(c){return '<label><input type="checkbox" '+(u.courses.indexOf(c.id)>-1?'checked':'')+' onchange="ADMIN.toggleCourse('+i+',\''+c.id+'\',this.checked)"> '+esc(c.title)+' <small>'+esc(c.price)+'</small></label>';}).join('')+'</div></div>'+
+     '<button class="btn btn-plum" type="button" onclick="ADMIN.save()">შენახვა</button> <button class="btn btn-ghost" type="button" onclick="ADMIN.render()">დახურვა</button></div>';e.scrollIntoView({behavior:'smooth'});},
+  toggleCourse:function(i,id,on){var u=CFG.enrolled[i],a=u.courses;if(on){if(a.indexOf(id)<0)a.push(id);var c=CATALOG.filter(function(k){return k.id===id;})[0],amt=c?parseFloat(String(c.price).replace(/[^\d.]/g,''))||0:0;CFG.sales=CFG.sales||[];if(!CFG.sales.some(function(s){return s.email===u.email&&s.course===id;}))CFG.sales.push({t:Date.now(),email:u.email,course:id,amount:amt});}else{a.splice(a.indexOf(id),1);}},
   editStudent:function(i){var s=CFG.students[i],e=document.getElementById('adm-edit2')||document.getElementById('adm-edit');
     e.innerHTML='<div class="adm-form"><h2>სტუდენტი</h2><div class="adm-2"><div class="field"><label>სახელი</label><input value="'+esc(s.name)+'" oninput="CFG.students['+i+'].name=this.value"></div><div class="field"><label>ქალაქი · პოზიცია</label><input value="'+esc(s.where)+'" oninput="CFG.students['+i+'].where=this.value"></div></div><div class="field"><label>ტექსტი</label><textarea rows="3" oninput="CFG.students['+i+'].text=this.value">'+esc(s.text)+'</textarea></div><div class="field"><label>გავლილი კურსი</label><input value="'+esc(s.course)+'" oninput="CFG.students['+i+'].course=this.value"></div><div class="field"><label>ნამუშევრის ფოტო</label><input type="file" accept="image/*" onchange="ADMIN.file(this,function(d){CFG.students['+i+'].photo=d;ADMIN.tab_students();ADMIN.editStudent('+i+')})"></div><button class="btn btn-plum" type="button" onclick="ADMIN.save()">შენახვა</button> <button class="btn btn-ghost" type="button" onclick="ADMIN.tab_students()">დახურვა</button></div>';e.scrollIntoView({behavior:'smooth'});},
   /* --- data --- */
@@ -2567,7 +2647,7 @@ var go;
     if(p0=='lesson'){LMS.renderLesson(parts[1],parts[2]);show('lesson');return;}
     if(p0=='mycert'){LMS.renderCert();show('mycert');return;}
     if(p0=='hw'){LMS.renderHomework();show('hw');return;}
-    if(p0=='admin'){if(parts[1])ADMIN.tab=parts[1];ADMIN.render();show('admin');return;}
+    if(p0=='admin'){if(parts[1])ADMIN.tab=parts[1];ADMIN.sub=parts[2];ADMIN.render();show('admin');return;}
     if(pages.indexOf(h)>-1){show(h);return;}
     var el=document.getElementById(h);
     if(el){var m=el.closest('main[data-page]');show(m?m.dataset.page:'home',h);return;}
