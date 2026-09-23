@@ -2727,6 +2727,7 @@ var go;
   }
   function route(h){
     h=(h||'home').replace(/^#/,'');var parts=h.split('/'),p0=parts[0];
+    updateBack(h);
     if(lms.indexOf(p0)>-1&&!LMS.user){show('login');return;}
     if(p0=='login'&&LMS.user){route('dashboard');return;}
     if(p0=='catalog'){SHOP.catalog(parts[1]);show('catalog');return;}
@@ -2756,6 +2757,24 @@ var go;
   });
   document.addEventListener('click',function(e){if(!e.target.closest('header'))document.body.classList.remove('menu-open');});
   window.addEventListener('popstate',function(){route(location.hash);});
+  /* --- one-click back button for drill-down views (kurs/, course/, lesson/, admin/student/, hw, mycert) --- */
+  var BACK_T={ka:'უკან',en:'Back',ru:'Назад',el:'Πίσω'};
+  var backBtn=document.createElement('button');
+  backBtn.type='button';backBtn.id='back-btn';backBtn.hidden=true;
+  backBtn.style.cssText='position:fixed;left:16px;bottom:16px;z-index:60;padding:.6rem 1.1rem;border:0;border-radius:999px;background:#E5177A;color:#fff;font:inherit;font-size:.95rem;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.2)';
+  backBtn.addEventListener('click',function(){history.back();});
+  document.body.appendChild(backBtn);
+  function updateBack(h){
+    if(!backBtn)return;
+    h=(h||'').replace(/^#/,'');
+    var deep=h.indexOf('/')>-1||['hw','mycert'].indexOf(h)>-1;
+    var lang=(typeof LANG!=='undefined'&&LANG)||'ka';
+    backBtn.textContent='← '+(BACK_T[lang]||BACK_T.ka);
+    backBtn.setAttribute('aria-label',BACK_T[lang]||BACK_T.ka);
+    backBtn.hidden=!(deep&&history.length>1);
+  }
+  /* keep the back label in sync when the language is switched mid-page */
+  if(typeof window.setLang==='function'){var _setLang=window.setLang;window.setLang=function(l){_setLang(l);updateBack(location.hash);};}
   initLang();
   route(location.hash);
 })();
