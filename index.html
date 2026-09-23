@@ -2507,6 +2507,13 @@ function applyConfig(){
     el.setAttribute('data-img','awards.'+i);
     var src=(CFG.awards||[])[i];if(src)bg(el,src);
   });
+  /* Award years were the one field in the row with no data-edit, so they could not be typed
+     into. Given a t.* key they route through CFG.t like every other editable text; the saved
+     value is applied here too so this does not depend on running before the generic CFG.t pass. */
+  document.querySelectorAll('.award .year').forEach(function(el,i){
+    var k='t.awardYear.'+i;el.setAttribute('data-edit',k);
+    if(CFG.t&&CFG.t[k]!=null)el.innerHTML=CFG.t[k];
+  });
   renderShop();
   // students
   var sHTML=CFG.students.map(function(s,i){return '<article class="student"><div class="work '+(s.photo?'':['ph9','ph2','ph6','ph8'][i%4])+'"'+(s.photo?' style="background:url('+s.photo+') center/cover"':'')+'></div><div class="student-body"><h3 data-edit="students.'+i+'.name">'+esc(s.name)+'</h3><div class="where" data-edit="students.'+i+'.where">'+esc(s.where)+'</div><p data-edit="students.'+i+'.text">'+esc(s.text)+'</p><span class="course" data-edit="students.'+i+'.course">'+esc(s.course)+'</span></div></article>';}).join('');
