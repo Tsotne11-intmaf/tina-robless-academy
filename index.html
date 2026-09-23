@@ -1171,6 +1171,18 @@ header.scrolled{box-shadow:0 14px 30px -18px rgba(184,15,95,.35)}
 .adm-checks{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;background:var(--blush-soft);border-radius:12px;padding:12px}
 .adm-checks label{display:flex;gap:8px;align-items:flex-start;font-size:.9rem}
 @media (max-width:700px){.adm-checks{grid-template-columns:1fr}.adm-hwline{grid-template-columns:1fr;gap:2px}}
+
+/* admin: translation overlay & editor */
+#adm-ov{position:fixed;inset:0;z-index:99;background:rgba(43,15,31,.55);backdrop-filter:blur(6px);display:grid;place-items:center}
+#adm-ov[hidden]{display:none}
+#adm-ov > div{background:#fff;border-radius:18px;padding:28px 34px;text-align:center;min-width:260px;box-shadow:0 30px 70px -30px rgba(0,0,0,.6)}
+#adm-ov b{display:block;font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.4rem;margin-bottom:8px}
+#adm-ov span{display:block;font-size:1.6rem;font-variant-numeric:tabular-nums;color:var(--plum)}
+#adm-ov i{display:block;font-style:normal;font-size:.85rem;color:var(--ink-soft);margin-top:6px}
+.adm-trlist{display:grid;gap:8px;margin-bottom:16px}
+.adm-trlist details{border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.adm-trlist summary{cursor:pointer;font-weight:500;font-size:.95rem}
+.adm-trlist .field{margin:10px 0 0}
 </style>
 </head>
 <body>
@@ -2291,7 +2303,7 @@ function cardHTML(c){
   return '<article class="card'+(c.badge==='premium'?' is-premium':'')+(c.cat==='package'?' is-package':'')+'"><div class="thumb '+(c.photo?'':(c.img||''))+'"'+(c.photo?' style="background:url('+c.photo+') center/cover"':'')+'>'+badgeHTML(c)+'</div><div class="card-body"><h3><a href="#kurs/'+c.id+'">'+esc(c.title)+'</a></h3><p>'+esc(c.desc)+'</p>'+inc+'<div class="card-foot"><span class="dur">'+esc(c.dur)+'</span><span class="pw">'+priceHTML(c)+'</span></div></div></article>';
 }
 function applyConfig(){
-  CFG=cfgLoad();
+  CFG=cfgLoad();TR.apply();
   // catalog → global CATALOG (sorted by priority)
   CFG.catalog.sort(function(a,b){return a.order-b.order;});
   CATALOG.length=0;CFG.catalog.forEach(function(c){CATALOG.push(c);});
@@ -2328,6 +2340,37 @@ function applyConfig(){
   document.querySelectorAll('.students-grid').forEach(function(g,i){g.innerHTML=i===0?CFG.students.slice(0,4).map(function(s,j){return sHTML.split('</article>')[j]+'</article>';}).join(''):sHTML;});
 }
 
+
+/* ===== Auto-translation of admin-entered text (KA → EN/RU/EL) ===== */
+var TR={
+  langs:['en','ru','el'],
+  google:function(q,to){return fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=ka&tl='+to+'&dt=t&q='+encodeURIComponent(q)).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){return d[0].map(function(x){return x[0];}).join('');});},
+  mymemory:function(q,to){return fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(q)+'&langpair=ka|'+to).then(function(r){return r.json();}).then(function(d){if(!d.responseData||!d.responseData.translatedText||/QUERY LENGTH|INVALID/i.test(d.responseData.translatedText))throw 0;return d.responseData.translatedText;});},
+  one:function(q,to){var s=this;return s.google(q,to).catch(function(){return s.mymemory(q,to);});},
+  // every text the admin can type that the site shows to visitors
+  strings:function(){
+    var out=[],add=function(v){if(typeof v==='string'){v=v.trim();if(v&&/[\u10A0-\u10FF]/.test(v)&&out.indexOf(v)<0)out.push(v);}else if(Array.isArray(v))v.forEach(add);};
+    add(CFG.hero.title);add(CFG.hero.sub);add(CFG.hero.btn);add(CFG.hero.tags);
+    add(CFG.about.p1);add(CFG.about.p2);add(CFG.about.creds);
+    CFG.catalog.forEach(function(c){add(c.title);add(c.desc);add(c.dur);add(c.learn);add(c.incl);});
+    CFG.homework.forEach(function(x){add(x.title);add(x.task);add(x.grade);});
+    CFG.students.forEach(function(s){add(s.name);add(s.where);add(s.text);add(s.course);});
+    return out;
+  },
+  missing:function(){CFG.tr=CFG.tr||{};return this.strings().filter(function(k){return !DICT[k]&&!(CFG.tr[k]&&CFG.tr[k].en&&CFG.tr[k].ru&&CFG.tr[k].el);});},
+  run:function(onProgress){var s=this,list=s.missing(),i=0,total=list.length*3;CFG.tr=CFG.tr||{};
+    function next(){if(i>=list.length)return Promise.resolve();var k=list[i++];CFG.tr[k]=CFG.tr[k]||{};
+      return s.langs.reduce(function(pr,l){return pr.then(function(){if(CFG.tr[k][l])return;return s.one(k,l).then(function(t){CFG.tr[k][l]=t;}).catch(function(){}).then(function(){if(onProgress)onProgress(Math.min(total,(i-1)*3+s.langs.indexOf(l)+1),total);});});},Promise.resolve()).then(next);}
+    return next().then(function(){return list.length;});},
+  editorHTML:function(){var keys=Object.keys(CFG.tr||{}).slice(0,80);
+    var rows=keys.map(function(k,n){var t=CFG.tr[k];function f(l){return '<div class="field"><label>'+l.toUpperCase()+'</label><input value="'+esc(t[l]||'')+'" data-k="'+n+'" data-l="'+l+'" oninput="TR.edit(this)"></div>';}
+      return '<details data-key="'+esc(k)+'"><summary>'+esc(k.length>70?k.slice(0,70)+'…':k)+'</summary>'+f('en')+f('ru')+f('el')+'</details>';}).join('');
+    this._keys=keys;
+    return '<div class="adm-form"><h2>თარგმანების შესწორება</h2><div class="adm-trlist">'+(rows||'<p class="lead">ჯერ არაფერია ნათარგმნი.</p>')+'</div><button class="btn btn-plum" type="button" onclick="if(cfgSave())location.reload()">შესწორებების შენახვა</button></div>';},
+  edit:function(inp){var k=this._keys[parseInt(inp.dataset.k,10)];if(k&&CFG.tr[k])CFG.tr[k][inp.dataset.l]=inp.value;},
+  apply:function(){if(!CFG.tr)return;Object.keys(CFG.tr).forEach(function(k){var t=CFG.tr[k];if(!DICT[k]&&t.en)DICT[k]=[t.en,t.ru||t.en,t.el||t.en];});}
+};
+
 /* ---- admin panel ---- */
 var ADMIN={
   ok:false,tab:'courses',
@@ -2342,7 +2385,11 @@ var ADMIN={
     this['tab_'+this.tab]();
   },
   saveBar:function(){return '<div class="adm-save"><button class="btn btn-plum" type="button" onclick="ADMIN.save()">შენახვა და საიტზე გამოჩენა</button><span>საიტი ხელახლა ჩაიტვირთება</span></div>';},
-  save:function(){if(cfgSave())location.reload();},
+  save:function(){var s=this,ov=document.getElementById('adm-ov');if(!ov){ov=document.createElement('div');ov.id='adm-ov';document.body.appendChild(ov);}
+    var n=TR.missing().length;if(!n){if(cfgSave())location.reload();return;}
+    ov.innerHTML='<div><b>ითარგმნება ავტომატურად…</b><span id="adm-ov-p">0 / '+(n*3)+'</span><i>ინგლისური · რუსული · ბერძნული</i></div>';ov.hidden=false;
+    TR.run(function(a,b){var p=document.getElementById('adm-ov-p');if(p)p.textContent=a+' / '+b;}).then(function(){ov.hidden=true;if(cfgSave())location.reload();}).catch(function(){ov.hidden=true;alert('თარგმანი ვერ მოხერხდა (ინტერნეტი?). ტექსტი ქართულად შეინახება.');if(cfgSave())location.reload();});},
+  translateAll:function(){this.save();},
   file:function(input,cb){var f=input.files[0];if(!f)return;if(f.size>900000){alert('ფოტო ძალიან დიდია ('+Math.round(f.size/1024)+' KB). გთხოვთ 900 KB-ზე პატარა ატვირთოთ — ბრაუზერის მეხსიერება შეზღუდულია.');input.value='';return;}var r=new FileReader();r.onload=function(){cb(r.result);};r.readAsDataURL(f);},
   /* --- courses --- */
   tab_courses:function(){
@@ -2382,7 +2429,7 @@ var ADMIN={
      '<div class="adm-form"><h2>მთავარი გვერდი</h2><div class="field"><label>სათაური</label><input value="'+esc(H.title)+'" oninput="CFG.hero.title=this.value"></div><div class="field"><label>ქვესათაური</label><textarea rows="3" oninput="CFG.hero.sub=this.value">'+esc(H.sub)+'</textarea></div><div class="field"><label>ღილაკის ტექსტი</label><input value="'+esc(H.btn)+'" oninput="CFG.hero.btn=this.value"></div></div>'+
      '<div class="adm-form"><h2>ჩემ შესახებ</h2><div class="field"><label>პირველი აბზაცი</label><textarea rows="4" oninput="CFG.about.p1=this.value">'+esc(A.p1)+'</textarea></div><div class="field"><label>მეორე აბზაცი</label><textarea rows="5" oninput="CFG.about.p2=this.value">'+esc(A.p2)+'</textarea></div><div class="field"><label>კვალიფიკაციები / ტეგები (თითო ხაზზე)</label><textarea rows="4" oninput="CFG.about.creds=this.value.split(\'\\n\').filter(Boolean)">'+esc(A.creds.join('\n'))+'</textarea></div>'+
      '<div class="adm-2"><div class="field"><label>Instagram</label><input value="'+esc(A.instagram)+'" oninput="CFG.about.instagram=this.value"></div><div class="field"><label>TikTok</label><input value="'+esc(A.tiktok)+'" oninput="CFG.about.tiktok=this.value"></div></div><div class="field"><label>Facebook</label><input value="'+esc(A.facebook)+'" oninput="CFG.about.facebook=this.value"></div></div>'+
-     '<p class="lead" style="font-size:.9rem">შენიშვნა: აქ შეყვანილი ტექსტი ქართულად ჩანს ყველა ენაზე, სანამ თარგმანებს არ დავამატებთ.</p>';
+     '<p class="lead" style="font-size:.9rem">შენახვისას ტექსტი ავტომატურად ითარგმნება ინგლისურად, რუსულად და ბერძნულად. შესწორება — „შენახვა / ექსპორტი“ განყოფილებაში.</p>';
   },
   /* --- homework --- */
   tab_homework:function(){var b=document.getElementById('adm-body'),s=this;
@@ -2432,6 +2479,8 @@ var ADMIN={
   tab_data:function(){var b=document.getElementById('adm-body');var size=0;try{size=(localStorage.getItem(CFG_KEY)||'').length;}catch(e){}
     b.innerHTML='<h1>შენახვა / ექსპორტი</h1><p class="lead">ცვლილებები ინახება ამ ბრაუზერში. რომ სხვა კომპიუტერზეც იყოს ან სარეზერვო ასლი გქონდეთ — ჩამოტვირთეთ ფაილი და იქ ატვირთეთ. ბექენდის მიერთების შემდეგ ეს ავტომატურად მოხდება.</p>'+
      '<div class="stats"><div class="stat"><b>'+CFG.catalog.length+'</b><span>კურსი</span></div><div class="stat"><b>'+CFG.homework.length+'</b><span>დავალება</span></div><div class="stat"><b>'+Math.round(size/1024)+' KB</b><span>შენახული მონაცემები (ლიმიტი ≈ 5000 KB)</span></div></div>'+
+     '<div class="adm-form"><h2>ავტომატური თარგმანი</h2><p class="lead">ყველა ტექსტი, რომელსაც ადმინში წერთ (სათაურები, აღწერები, ბიო, დავალებები), შენახვისას თავისით ითარგმნება ინგლისურად, რუსულად და ბერძნულად. უთარგმნელი ახლა: <b>'+TR.missing().length+'</b>. თარგმანის შესწორება შეგიძლიათ ქვემოთ.</p><button class="btn btn-ghost" type="button" onclick="ADMIN.translateAll()">თარგმნა ახლა</button></div>'+
+     TR.editorHTML()+
      '<div class="adm-form"><button class="btn btn-plum" type="button" onclick="ADMIN.exportJSON()">ჩამოტვირთე კონფიგურაცია (JSON)</button> <label class="btn btn-ghost" style="cursor:pointer">ატვირთე კონფიგურაცია <input type="file" accept="application/json" hidden onchange="ADMIN.importJSON(this)"></label></div>'+
      '<div class="adm-form"><h2>საწყის მდგომარეობაზე დაბრუნება</h2><p class="lead">შლის ყველა ცვლილებას ამ ბრაუზერში.</p><button class="btn btn-ghost" type="button" onclick="if(confirm(\'ნამდვილად წავშალოთ ყველა ცვლილება?\')){localStorage.removeItem(CFG_KEY);location.reload()}">გადატვირთვა</button></div>';
   },
