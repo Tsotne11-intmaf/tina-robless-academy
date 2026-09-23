@@ -1148,6 +1148,9 @@ header.scrolled{box-shadow:0 14px 30px -18px rgba(184,15,95,.35)}
 @media (prefers-reduced-motion:reduce){header{transition:none}header.hide{transform:none}}
 /* Phones/small tablets: header stays pinned while scrolling instead of sliding away */
 @media (max-width:860px){header.hide{transform:none}}
+/* Phones: keep the admin / student tab sidebar pinned under the 64px header while scrolling.
+   Overrides .side{position:static} from the 640px block; higher specificity so source order is irrelevant. */
+@media (max-width:640px){.lms-grid>.side{position:sticky;top:64px;z-index:15;background:#fff;max-height:52vh;overflow:auto}}
 
 /* admin: homework & students overview */
 .adm-addbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0 18px;font-size:.9rem;color:var(--ink-soft)}
