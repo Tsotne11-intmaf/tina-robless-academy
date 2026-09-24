@@ -1168,9 +1168,6 @@ h2{font-size:clamp(2.1rem,4vw,3.2rem)}
 .sec-head>div>h2{position:relative;padding-bottom:16px}
 .sec-head>div>h2::after{content:"";position:absolute;left:0;bottom:0;width:72px;height:3px;border-radius:3px;background:var(--plum)}
 /* ===== Student sign in / sign up ===== */
-.auth-tabs{display:flex;gap:8px;margin:0 0 18px}
-.auth-tabs button{flex:1;padding:10px 12px;border:1px solid var(--line);background:transparent;border-radius:var(--r-pill);font:inherit;font-size:.95rem;color:var(--ink-soft);cursor:pointer}
-.auth-tabs button.on{background:var(--plum);border-color:var(--plum);color:#fff}
 .auth-check{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--ink-soft);margin:4px 0 16px;cursor:pointer}
 .auth-check input{margin-top:3px;flex:none}
 .auth-msg{margin-top:14px;font-size:.92rem;padding:10px 12px;border-radius:12px;background:var(--blush-soft);color:var(--ink)}
@@ -2103,10 +2100,6 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 <section class="lms"><div class="wrap">
   <div class="login-box">
     <h1>ჩემი კაბინეტი</h1>
-    <div class="auth-tabs">
-      <button type="button" class="on" data-auth-tab="in" onclick="LMS.tab('in')">შესვლა</button>
-      <button type="button" data-auth-tab="up" onclick="LMS.tab('up')">რეგისტრაცია</button>
-    </div>
 
     <div data-auth="in">
       <p>შედით Google-ით ან იმ ელფოსტითა და პაროლით, რომლითაც დარეგისტრირდით.</p>
@@ -2132,6 +2125,7 @@ body.editing .cards.home-slider{scroll-snap-type:none}
         <label class="auth-check"><input type="checkbox" name="marketing_ok"> მსურს სიახლეების და ფასდაკლებების მიღება ელფოსტით</label>
         <button class="btn btn-plum" type="submit">რეგისტრაცია</button>
       </form>
+      <p class="hint">უკვე გაქვთ ანგარიში? <a class="btn-link" href="#login" onclick="LMS.tab('in')">შესვლა</a></p>
     </div>
 
     <p class="auth-msg" id="auth-msg" hidden></p>
