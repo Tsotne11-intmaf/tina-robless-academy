@@ -1170,6 +1170,12 @@ h2{font-size:clamp(2.1rem,4vw,3.2rem)}
 /* ===== Student sign in / sign up ===== */
 .auth-check{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--ink-soft);margin:4px 0 16px;cursor:pointer}
 .auth-check input{margin-top:3px;flex:none}
+/* show/hide password — typing a password you cannot see is the usual reason a
+   correct one gets rejected */
+.pass-wrap{position:relative}
+.pass-wrap input{width:100%;padding-right:92px}
+.pass-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--plum);font:inherit;font-size:.85rem;cursor:pointer;padding:6px 8px;border-radius:8px}
+.pass-eye:hover{background:var(--blush-soft)}
 .auth-msg{margin-top:14px;font-size:.92rem;padding:10px 12px;border-radius:12px;background:var(--blush-soft);color:var(--ink)}
 .auth-msg.ok{background:#E7F6EC;color:#1B5E36}
 .auth-msg.bad{background:#FDE7EF;color:var(--plum-deep)}
@@ -2107,7 +2113,7 @@ body.editing .cards.home-slider{scroll-snap-type:none}
       <div class="auth-or"><span>ან</span></div>
       <form onsubmit="event.preventDefault();LMS.login(this)">
         <div class="field"><label for="lg-email">ელფოსტა</label><input id="lg-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
-        <div class="field"><label for="lg-pass">პაროლი</label><input id="lg-pass" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required></div>
+        <div class="field"><label for="lg-pass">პაროლი</label><div class="pass-wrap"><input id="lg-pass" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required><button type="button" class="pass-eye" onclick="LMS.eye(this)" aria-label="პაროლის ჩვენება">ჩვენება</button></div></div>
         <button class="btn btn-plum" type="submit">შესვლა</button>
       </form>
       <p class="hint">ჯერ არ გაქვთ ანგარიში? <a class="btn-link" href="#login" onclick="LMS.tab('up')">რეგისტრაცია</a></p>
@@ -2121,7 +2127,7 @@ body.editing .cards.home-slider{scroll-snap-type:none}
         <div class="field"><label for="su-name">სახელი და გვარი</label><input id="su-name" name="full_name" autocomplete="name" required></div>
         <div class="field"><label for="su-email">ელფოსტა</label><input id="su-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
         <div class="field"><label for="su-phone">ტელეფონი (სურვილისამებრ)</label><input id="su-phone" name="phone" type="tel" autocomplete="tel" placeholder="+995 5xx xxx xxx"></div>
-        <div class="field"><label for="su-pass">პაროლი</label><input id="su-pass" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="მინიმუმ 8 სიმბოლო" required></div>
+        <div class="field"><label for="su-pass">პაროლი</label><div class="pass-wrap"><input id="su-pass" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="მინიმუმ 8 სიმბოლო" required><button type="button" class="pass-eye" onclick="LMS.eye(this)" aria-label="პაროლის ჩვენება">ჩვენება</button></div></div>
         <label class="auth-check"><input type="checkbox" name="marketing_ok"> მსურს სიახლეების და ფასდაკლებების მიღება ელფოსტით</label>
         <button class="btn btn-plum" type="submit">რეგისტრაცია</button>
       </form>
@@ -2486,6 +2492,14 @@ var LMS={
    document.querySelectorAll('[data-auth]').forEach(function(d){d.hidden=d.dataset.auth!==which;});
    document.querySelectorAll('[data-auth-tab]').forEach(function(b){b.classList.toggle('on',b.dataset.authTab===which);});
    this.msg('');
+ },
+ eye:function(btn){
+   var i=btn.parentNode.querySelector('input');if(!i)return;
+   var show=i.type==='password';
+   i.type=show?'text':'password';
+   btn.textContent=show?'დამალვა':'ჩვენება';
+   btn.setAttribute('aria-label',show?'პაროლის დამალვა':'პაროლის ჩვენება');
+   i.focus();
  },
  msg:function(text,kind){
    var el=document.getElementById('auth-msg');if(!el)return;
