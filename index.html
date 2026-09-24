@@ -1176,10 +1176,15 @@ h2{font-size:clamp(2.1rem,4vw,3.2rem)}
 .auth-msg{margin-top:14px;font-size:.92rem;padding:10px 12px;border-radius:12px;background:var(--blush-soft);color:var(--ink)}
 .auth-msg.ok{background:#E7F6EC;color:#1B5E36}
 .auth-msg.bad{background:#FDE7EF;color:var(--plum-deep)}
+/* Hidden until /auth/v1/settings confirms the provider is really enabled — otherwise
+   clicking it sends the visitor to a raw JSON "provider is not enabled" page. */
+.btn-google,.auth-or{display:none}
+body.oauth-google .btn-google{display:inline-flex}
+body.oauth-google .auth-or{display:flex}
 .btn-google{width:100%;justify-content:center;gap:10px;background:#fff;color:#3C4043;border:1px solid #DADCE0;font-weight:500}
 .btn-google:hover{background:#F8F9FA}
 .btn-google svg{flex:none}
-.auth-or{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--ink-soft);font-size:.85rem}
+.auth-or{align-items:center;gap:12px;margin:16px 0;color:var(--ink-soft);font-size:.85rem}
 .auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line)}
 /* Language switcher inside the mobile menu. The 380px block sets .lang{display:none}; this
    selector is more specific so the in-menu copy stays reachable on narrow phones. */
@@ -2404,6 +2409,11 @@ var SB=(function(){
       var p=session?req('/auth/v1/logout',{method:'POST'})['catch'](function(){}):Promise.resolve();
       return p.then(function(){save(null);});
     },
+    /* Public endpoint listing which providers are actually turned on. Used to decide
+       whether to show the Google button at all: clicking it while the provider is
+       disabled navigates the visitor to a raw JSON error page, which is a terrible
+       thing to hand a customer. */
+    settings:function(){return req('/auth/v1/settings',{auth:false});},
     /* Google sign-in. One button covers both registering and returning: Supabase
        creates the account on first use and signs them in on every use after. */
     oauth:function(provider){
@@ -3078,6 +3088,11 @@ var go;
   /* A signed-in student is restored asynchronously, so the first route() above may
      have bounced them to the login page. Re-route once the session is confirmed. */
   if(window.LMS&&LMS.restore)LMS.restore().then(function(u){if(u)route(location.hash);});
+  /* Reveal the Google button only once Supabase confirms the provider is live, so it
+     turns itself on the moment the credentials are configured — no code change needed. */
+  if(window.SB&&SB.settings)SB.settings().then(function(s){
+    if(s&&s.external&&s.external.google)document.body.classList.add('oauth-google');
+  })['catch'](function(){});
 })();
 </script>
 
