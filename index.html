@@ -1154,6 +1154,19 @@ header.scrolled{box-shadow:0 14px 30px -18px rgba(184,15,95,.35)}
    body gets matching top padding since fixed removes it from flow, and scroll-padding keeps
    in-page anchors from landing underneath it. */
 @media (max-width:640px){header{position:fixed;left:0;right:0;top:0}body{padding-top:65px}html{scroll-padding-top:70px}}
+/* ===== Headlines carry the sections on their own =====
+   The descriptive paragraph under the hero headline and under each section heading is
+   hidden. Headings are correspondingly larger, heavier and get a short brand-pink rule.
+   Weight 500 is deliberate: headings render in Noto Serif Georgian (Fraunces has no
+   Georgian glyphs) which is only loaded at 300/400/500, so 600+ would be faux bold. */
+.hero p.sub,.sec-head p{display:none}
+.hero-cta{margin-top:30px}
+h1,h2{font-weight:500;letter-spacing:-0.025em}
+.hero h1{font-weight:500}
+h1{font-size:clamp(2.8rem,6vw,5rem)}
+h2{font-size:clamp(2.1rem,4vw,3.2rem)}
+.sec-head>div>h2{position:relative;padding-bottom:16px}
+.sec-head>div>h2::after{content:"";position:absolute;left:0;bottom:0;width:72px;height:3px;border-radius:3px;background:var(--plum)}
 /* Language switcher inside the mobile menu. The 380px block sets .lang{display:none}; this
    selector is more specific so the in-menu copy stays reachable on narrow phones. */
 @media (max-width:1120px){.lang-li .lang{display:inline-flex}.lang-li{padding-top:14px!important}}
