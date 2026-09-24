@@ -2331,7 +2331,7 @@ var SHOP={
    '<h2 style="font-size:1.7rem;margin:40px 0 14px">კომენტარები <small style="font-family:var(--sans);font-size:.9rem;color:var(--ink-soft)">'+cm.length+'</small></h2>'+
    '<div class="comments" id="comments-'+id+'">'+cm.map(function(k){return '<div class="comment"><b>'+k.n+'</b> <span>'+k.d+'</span><p>'+k.t+'</p></div>';}).join('')+'</div>'+
    '<form class="upload" onsubmit="event.preventDefault();SHOP.addComment(\''+id+'\',this)"><div class="field"><label>თქვენი სახელი</label><input name="n" required></div><div class="field"><label>კომენტარი ან კითხვა</label><textarea name="t" rows="3" required></textarea></div><button class="btn btn-plum" type="submit">კომენტარის დამატება</button></form>'+
-   '</div><aside class="buy'+(c.badge==='premium'?' is-premium':'')+'">'+(c.badge?'<div style="margin-bottom:12px">'+badgeHTML(c)+'</div>':'')+'<div class="buy-price'+(c.badge==='premium'?' gold':'')+'">'+c.price+(c.was?' <s>'+c.was+'</s>':'')+'</div><div class="buy-dur">'+c.dur+'</div><a class="btn btn-plum" style="justify-content:center;width:100%" href="#checkout">კურსის ყიდვა</a><a class="btn btn-ghost" style="justify-content:center;width:100%;margin-top:10px" href="#login">უკვე გაქვთ? შესვლა</a><h4>რა შედის</h4><ul>'+c.incl.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul><p class="small">ერთჯერადი გადახდა · უვადო წვდომა · სერტიფიკატი · <a href="#refund" style="border-bottom:1px solid var(--blush)">14 დღე თანხის დაბრუნება</a></p></aside></div>';},
+   '</div><aside class="buy'+(c.badge==='premium'?' is-premium':'')+'">'+(c.badge?'<div style="margin-bottom:12px">'+badgeHTML(c)+'</div>':'')+'<div class="buy-price'+(c.badge==='premium'?' gold':'')+'">'+c.price+(c.was?' <s>'+c.was+'</s>':'')+'</div><div class="buy-dur">'+c.dur+'</div><a class="btn btn-plum" style="justify-content:center;width:100%" href="#login" onclick="return LMS.buy(\''+c.id+'\')">კურსის ყიდვა</a><a class="btn btn-ghost" style="justify-content:center;width:100%;margin-top:10px" href="#login">უკვე გაქვთ? შესვლა</a><h4>რა შედის</h4><ul>'+c.incl.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul><p class="small">ერთჯერადი გადახდა · უვადო წვდომა · სერტიფიკატი · <a href="#refund" style="border-bottom:1px solid var(--blush)">14 დღე თანხის დაბრუნება</a></p></aside></div>';},
  addComment:function(id,f){var e=f.elements;COMMENTS[id].unshift({n:e.n.value,t:e.t.value,d:'ახლახან'});this.course(id);window.scrollTo(0,document.getElementById('comments-'+id).offsetTop-120);},
  addSample:function(id,f){var s=this,e=f.elements,file=e.f.files[0],n=e.n.value;if(!file)return;var r=new FileReader();r.onload=function(){SAMPLES[id].unshift({n:n,src:r.result});s.course(id);window.scrollTo(0,document.getElementById('samples-'+id).offsetTop-120);};r.readAsDataURL(file);}
 };
@@ -2506,11 +2506,37 @@ var LMS={
      s.msg(err.status===422?'ასეთი ელფოსტა უკვე რეგისტრირებულია.':('რეგისტრაცია ვერ მოხერხდა: '+err.message),'bad');
    });
  },
+ /* Buying requires an account, so the purchase button routes through here. The
+    course the visitor wanted is remembered and reopened once they are signed in,
+    rather than dumping them on a generic dashboard and making them find it again. */
+ buy:function(id){
+   var s=this;
+   if(!s.user){
+     try{sessionStorage.setItem('tr_buy',id);}catch(e){}
+     go('login');
+     setTimeout(function(){
+       s.tab('up');
+       s.msg('შეძენამდე საჭიროა ანგარიში. დარეგისტრირდით და დაგიბრუნდებათ კურსის გვერდი.');
+     },30);
+     return false;
+   }
+   /* Signed in, but there is no payment gateway yet, so say so plainly instead of
+      pretending the click did something. */
+   s.msg('');
+   alert('გადახდის სისტემა ჯერ არ არის ჩართული. შესყიდვისთვის დაგვიკავშირდით — თინა დაგამატებთ კურსზე.');
+   return false;
+ },
+ /* Sends the student back to whatever they were trying to buy, if anything. */
+ afterAuth:function(){
+   var back=null;
+   try{back=sessionStorage.getItem('tr_buy');sessionStorage.removeItem('tr_buy');}catch(e){}
+   go(back?('kurs/'+back):'dashboard');
+ },
  login:function(form){
    var s=this,e=form.elements,email=e.email.value.trim(),pass=e.password.value;
    s.msg('მოწმდება…');
    SB.signIn(email,pass).then(function(){return s.loadMe();}).then(function(){
-     s.msg('');go('dashboard');
+     s.msg('');s.afterAuth();
    })['catch'](function(err){
      s.msg(err.status===400?'ელფოსტა ან პაროლი არასწორია (ან ელფოსტა ჯერ არ დაგიდასტურებიათ).':('შესვლა ვერ მოხერხდა: '+err.message),'bad');
    });
