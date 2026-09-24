@@ -1167,6 +1167,20 @@ h1{font-size:clamp(2.8rem,6vw,5rem)}
 h2{font-size:clamp(2.1rem,4vw,3.2rem)}
 .sec-head>div>h2{position:relative;padding-bottom:16px}
 .sec-head>div>h2::after{content:"";position:absolute;left:0;bottom:0;width:72px;height:3px;border-radius:3px;background:var(--plum)}
+/* ===== Student sign in / sign up ===== */
+.auth-tabs{display:flex;gap:8px;margin:0 0 18px}
+.auth-tabs button{flex:1;padding:10px 12px;border:1px solid var(--line);background:transparent;border-radius:var(--r-pill);font:inherit;font-size:.95rem;color:var(--ink-soft);cursor:pointer}
+.auth-tabs button.on{background:var(--plum);border-color:var(--plum);color:#fff}
+.auth-check{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--ink-soft);margin:4px 0 16px;cursor:pointer}
+.auth-check input{margin-top:3px;flex:none}
+.auth-msg{margin-top:14px;font-size:.92rem;padding:10px 12px;border-radius:12px;background:var(--blush-soft);color:var(--ink)}
+.auth-msg.ok{background:#E7F6EC;color:#1B5E36}
+.auth-msg.bad{background:#FDE7EF;color:var(--plum-deep)}
+.btn-google{width:100%;justify-content:center;gap:10px;background:#fff;color:#3C4043;border:1px solid #DADCE0;font-weight:500}
+.btn-google:hover{background:#F8F9FA}
+.btn-google svg{flex:none}
+.auth-or{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--ink-soft);font-size:.85rem}
+.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line)}
 /* Language switcher inside the mobile menu. The 380px block sets .lang{display:none}; this
    selector is more specific so the in-menu copy stays reachable on narrow phones. */
 @media (max-width:1120px){.lang-li .lang{display:inline-flex}.lang-li{padding-top:14px!important}}
@@ -2084,14 +2098,39 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 <section class="lms"><div class="wrap">
   <div class="login-box">
     <h1>ჩემი კაბინეტი</h1>
-    <p>შედით იმ ელფოსტით, რომლითაც კურსი შეიძინეთ. პაროლი შესყიდვის შემდეგ ავტომატურად გამოგეგზავნათ.</p>
-    <form onsubmit="event.preventDefault();LMS.login(this.email.value)">
-      <div class="field"><label for="lg-email">ელფოსტა</label><input id="lg-email" name="email" type="email" placeholder="you@example.com" required></div>
-      <div class="field"><label for="lg-pass">პაროლი</label><input id="lg-pass" type="password" placeholder="••••••••" required></div>
-      <button class="btn btn-plum" type="submit">შესვლა</button>
-    </form>
-    <p class="hint">დაგავიწყდათ პაროლი? <a class="btn-link" href="#login">აღდგენა ელფოსტით</a></p>
-    <p class="hint" style="font-size:.8rem">შესვლით ეთანხმებით <a class="btn-link" href="#terms">წესებს</a> და <a class="btn-link" href="#privacy">კონფიდენციალურობის პოლიტიკას</a>.</p>
+    <div class="auth-tabs">
+      <button type="button" class="on" data-auth-tab="in" onclick="LMS.tab('in')">შესვლა</button>
+      <button type="button" data-auth-tab="up" onclick="LMS.tab('up')">რეგისტრაცია</button>
+    </div>
+
+    <div data-auth="in">
+      <p>შედით Google-ით ან იმ ელფოსტითა და პაროლით, რომლითაც დარეგისტრირდით.</p>
+      <button type="button" class="btn btn-google" onclick="SB.oauth('google')"><svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg> Google-ით შესვლა</button>
+      <div class="auth-or"><span>ან</span></div>
+      <form onsubmit="event.preventDefault();LMS.login(this)">
+        <div class="field"><label for="lg-email">ელფოსტა</label><input id="lg-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+        <div class="field"><label for="lg-pass">პაროლი</label><input id="lg-pass" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required></div>
+        <button class="btn btn-plum" type="submit">შესვლა</button>
+      </form>
+      <p class="hint">ჯერ არ გაქვთ ანგარიში? <a class="btn-link" href="#login" onclick="LMS.tab('up')">რეგისტრაცია</a></p>
+    </div>
+
+    <div data-auth="up" hidden>
+      <p>შექმენით ანგარიში — შემდეგ თინა დაგამატებთ შეძენილ კურსზე.</p>
+      <button type="button" class="btn btn-google" onclick="SB.oauth('google')"><svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg> Google-ით რეგისტრაცია</button>
+      <div class="auth-or"><span>ან შეავსეთ ფორმა</span></div>
+      <form onsubmit="event.preventDefault();LMS.signup(this)">
+        <div class="field"><label for="su-name">სახელი და გვარი</label><input id="su-name" name="full_name" autocomplete="name" required></div>
+        <div class="field"><label for="su-email">ელფოსტა</label><input id="su-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+        <div class="field"><label for="su-phone">ტელეფონი (სურვილისამებრ)</label><input id="su-phone" name="phone" type="tel" autocomplete="tel" placeholder="+995 5xx xxx xxx"></div>
+        <div class="field"><label for="su-pass">პაროლი</label><input id="su-pass" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="მინიმუმ 8 სიმბოლო" required></div>
+        <label class="auth-check"><input type="checkbox" name="marketing_ok"> მსურს სიახლეების და ფასდაკლებების მიღება ელფოსტით</label>
+        <button class="btn btn-plum" type="submit">რეგისტრაცია</button>
+      </form>
+    </div>
+
+    <p class="auth-msg" id="auth-msg" hidden></p>
+    <p class="hint" style="font-size:.8rem">გაგრძელებით ეთანხმებით <a class="btn-link" href="#terms">წესებს</a> და <a class="btn-link" href="#privacy">კონფიდენციალურობის პოლიტიკას</a>.</p>
     <p class="hint">ჯერ არ გაქვთ კურსი? <a class="btn-link" href="#courses">კურსების ნახვა</a></p>
   </div>
 </div></section>
@@ -2299,6 +2338,112 @@ var SHOP={
 };
 </script>
 <script>
+/* ===== Supabase — student accounts and information collection =====
+   Plain fetch, no library and no build step, to keep the single-file architecture.
+   The publishable key belongs in client code; it grants nothing on its own. All
+   protection comes from the row level security policies in supabase/schema.sql,
+   which is why an anonymous visitor cannot insert a profile, grant themselves a
+   course, or make themselves an admin.
+   The admin panel is untouched and still runs on localStorage. */
+var SB=(function(){
+  var API='https://gsyzrfkoggscbcrnwyir.supabase.co';
+  var KEY='sb_publishable_KzhVLceZFgr-MUqeASA5Dg_I014h0uo';
+  var SKEY='tr_sb_session';
+  var session=null;
+
+  function save(s){session=s;try{s?localStorage.setItem(SKEY,JSON.stringify(s)):localStorage.removeItem(SKEY);}catch(e){}}
+  function headers(auth){
+    var h={apikey:KEY,'Content-Type':'application/json'};
+    if(auth&&session&&session.access_token)h.Authorization='Bearer '+session.access_token;
+    return h;
+  }
+  function req(path,o){
+    o=o||{};
+    var init={method:o.method||'GET',headers:headers(o.auth!==false)};
+    if(o.headers)for(var k in o.headers)init.headers[k]=o.headers[k];
+    if(o.body)init.body=JSON.stringify(o.body);
+    return fetch(API+path,init).then(function(r){
+      return r.text().then(function(t){
+        var d=null;try{d=t?JSON.parse(t):null;}catch(e){d=t;}
+        if(!r.ok){
+          var msg=(d&&(d.msg||d.message||d.error_description||d.error))||('HTTP '+r.status);
+          var err=new Error(msg);err.status=r.status;err.data=d;throw err;
+        }
+        return d;
+      });
+    });
+  }
+  function store(d){
+    if(!d||!d.access_token)throw new Error('no token');
+    save({access_token:d.access_token,refresh_token:d.refresh_token,
+          expires_at:Date.now()+((d.expires_in||3600)*1000),user:d.user||null});
+    return session;
+  }
+  /* Access tokens are short lived, so refresh a minute before expiry rather than
+     letting a student's first click after an hour fail with a 401. */
+  function stale(){return !session||!session.expires_at||Date.now()>(session.expires_at-60000);}
+  function refresh(){
+    if(!session||!session.refresh_token)return Promise.reject(new Error('no session'));
+    return req('/auth/v1/token?grant_type=refresh_token',{method:'POST',auth:false,body:{refresh_token:session.refresh_token}}).then(store);
+  }
+  function ready(){return stale()?refresh():Promise.resolve(session);}
+
+  return {
+    init:function(){try{session=JSON.parse(localStorage.getItem(SKEY)||'null');}catch(e){session=null;}return session;},
+    get:function(){return session;},
+    signedIn:function(){return !!(session&&session.refresh_token);},
+    /* meta lands in raw_user_meta_data, which the on_auth_user_created trigger
+       reads to populate profiles.full_name */
+    signUp:function(email,password,meta){
+      return req('/auth/v1/signup',{method:'POST',auth:false,body:{email:email,password:password,data:meta||{}}});
+    },
+    signIn:function(email,password){
+      return req('/auth/v1/token?grant_type=password',{method:'POST',auth:false,body:{email:email,password:password}}).then(store);
+    },
+    signOut:function(){
+      var p=session?req('/auth/v1/logout',{method:'POST'})['catch'](function(){}):Promise.resolve();
+      return p.then(function(){save(null);});
+    },
+    /* Google sign-in. One button covers both registering and returning: Supabase
+       creates the account on first use and signs them in on every use after. */
+    oauth:function(provider){
+      var back=location.origin+location.pathname;
+      location.href=API+'/auth/v1/authorize?provider='+encodeURIComponent(provider)+
+                    '&redirect_to='+encodeURIComponent(back);
+    },
+    /* Supabase hands the session back in the URL fragment (#access_token=...), which
+       is the same place this site keeps its router state. Consume and clear it before
+       route() ever runs, or the router sees garbage and the tokens sit in the address
+       bar to be copied out of history. */
+    consumeOAuthHash:function(){
+      var h=location.hash||'';
+      if(h.indexOf('access_token=')<0&&h.indexOf('error=')<0)return false;
+      var p={};
+      h.replace(/^#/,'').split('&').forEach(function(kv){
+        var i=kv.indexOf('=');if(i>0)p[decodeURIComponent(kv.slice(0,i))]=decodeURIComponent(kv.slice(i+1).replace(/\+/g,' '));
+      });
+      var landed='#login';
+      if(p.access_token){
+        save({access_token:p.access_token,refresh_token:p.refresh_token||null,
+              expires_at:Date.now()+((parseInt(p.expires_in,10)||3600)*1000),user:null});
+        landed='#dashboard';
+      }
+      try{history.replaceState(null,'',location.pathname+location.search+landed);}
+      catch(e){location.hash=landed;}
+      return !!p.access_token;
+    },
+    me:function(){return ready().then(function(){return req('/auth/v1/user');});},
+    select:function(path){return ready().then(function(){return req('/rest/v1/'+path);});},
+    update:function(path,body){
+      return ready().then(function(){
+        return req('/rest/v1/'+path,{method:'PATCH',headers:{Prefer:'return=representation'},body:body});
+      });
+    }
+  };
+})();
+SB.init();
+</script>
+<script>
 /* ===== Student area: demo data + logic. Replace with real backend later. ===== */
 var COURSES=[
  {id:'master-1',title:'გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 1',hours:40,modules:[
@@ -2329,8 +2474,69 @@ var HOMEWORK=[
 
 var LMS={
  user:null,done:{},   // done[courseId] = number of completed lessons (sequential)
- login:function(email){var u=(window.CFG&&CFG.enrolled||[]).filter(function(x){return x.email&&x.email.toLowerCase()===email.toLowerCase();})[0];this.user={email:email,name:u?u.name:email.split('@')[0]};this.done=u?Object.assign({},u.done||{}):{'master-1':7,'french':0};this.courses=u?u.courses:null;go('dashboard');},
- logout:function(){this.user=null;go('home');},
+ /* --- auth (Supabase) -------------------------------------------------------
+    Replaces the old demo login, which accepted any email and ignored the password
+    entirely. Enrollments and progress now come from the database, so what a student
+    can open is decided server side by the RLS policies, not by this file. --------- */
+ tab:function(which){
+   document.querySelectorAll('[data-auth]').forEach(function(d){d.hidden=d.dataset.auth!==which;});
+   document.querySelectorAll('[data-auth-tab]').forEach(function(b){b.classList.toggle('on',b.dataset.authTab===which);});
+   this.msg('');
+ },
+ msg:function(text,kind){
+   var el=document.getElementById('auth-msg');if(!el)return;
+   el.textContent=text||'';el.hidden=!text;
+   el.className='auth-msg'+(kind?' '+kind:'');
+ },
+ signup:function(form){
+   var s=this,e=form.elements,email=e.email.value.trim(),pass=e.password.value,
+       name=e.full_name.value.trim(),phone=e.phone.value.trim(),mk=e.marketing_ok.checked;
+   s.msg('იგზავნება…');
+   SB.signUp(email,pass,{full_name:name,phone:phone,marketing_ok:mk}).then(function(){
+     form.reset();
+     /* Email confirmation is on, so signUp returns a user but no session — the
+        student cannot be logged in yet and must click the link first. */
+     s.msg('ანგარიში შეიქმნა. გთხოვთ დაადასტუროთ ელფოსტა — გამოგზავნილია ბმული '+email+'-ზე.','ok');
+     s.tab('in');
+   })['catch'](function(err){
+     s.msg(err.status===422?'ასეთი ელფოსტა უკვე რეგისტრირებულია.':('რეგისტრაცია ვერ მოხერხდა: '+err.message),'bad');
+   });
+ },
+ login:function(form){
+   var s=this,e=form.elements,email=e.email.value.trim(),pass=e.password.value;
+   s.msg('მოწმდება…');
+   SB.signIn(email,pass).then(function(){return s.loadMe();}).then(function(){
+     s.msg('');go('dashboard');
+   })['catch'](function(err){
+     s.msg(err.status===400?'ელფოსტა ან პაროლი არასწორია (ან ელფოსტა ჯერ არ დაგიდასტურებიათ).':('შესვლა ვერ მოხერხდა: '+err.message),'bad');
+   });
+ },
+ /* Pulls the signed-in student's profile, enrollments and progress. The enrollment
+    select only returns rows that have not expired, so an out-of-date course simply
+    disappears from their account — that check lives in the database, not here. */
+ loadMe:function(){
+   var s=this;
+   return SB.me().then(function(u){
+     s.user={id:u.id,email:u.email,name:(u.user_metadata&&u.user_metadata.full_name)||u.email.split('@')[0]};
+     return Promise.all([
+       SB.select('enrollments?select=course_id,expires_at'),
+       SB.select('progress?select=course_id,lessons_done')
+     ]);
+   }).then(function(r){
+     var enr=r[0]||[],prog=r[1]||[];
+     s.courses=enr.map(function(x){return x.course_id;});
+     s.expires={};enr.forEach(function(x){s.expires[x.course_id]=x.expires_at;});
+     s.done={};prog.forEach(function(p){s.done[p.course_id]=p.lessons_done;});
+     return s.user;
+   });
+ },
+ /* Restores a session on page load so a student is not thrown out on every refresh. */
+ restore:function(){
+   var s=this;
+   if(!SB.signedIn())return Promise.resolve(null);
+   return s.loadMe()['catch'](function(){SB.signOut();return null;});
+ },
+ logout:function(){var s=this;SB.signOut().then(function(){s.user=null;s.done={};s.courses=null;go('home');});},
  flat:function(c){var a=[];c.modules.forEach(function(m,mi){m.lessons.forEach(function(l,li){a.push({m:mi,l:li,mt:m.title,t:l.t,d:l.d});});});return a;},
  pct:function(c){return Math.round((this.done[c.id]||0)/this.flat(c).length*100);},
  side:function(active){var u=this.user;return '<div class="who">'+u.name+'</div><div class="mail">'+u.email+'</div><nav>'+
@@ -2865,7 +3071,13 @@ var go;
   /* keep the back label in sync when the language is switched mid-page */
   if(typeof window.setLang==='function'){var _setLang=window.setLang;window.setLang=function(l){_setLang(l);updateBack(location.hash);};}
   initLang();
+  /* Must run before route(): a Google sign-in returns with the session in the URL
+     fragment, which this router would otherwise try to interpret as a page. */
+  if(window.SB&&SB.consumeOAuthHash)SB.consumeOAuthHash();
   route(location.hash);
+  /* A signed-in student is restored asynchronously, so the first route() above may
+     have bounced them to the login page. Re-route once the session is confirmed. */
+  if(window.LMS&&LMS.restore)LMS.restore().then(function(u){if(u)route(location.hash);});
 })();
 </script>
 

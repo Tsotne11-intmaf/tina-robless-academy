@@ -72,8 +72,18 @@ security definer
 set search_path = public
 as $$
 begin
+  -- Email signup puts the name in full_name; Google OAuth sends it as name.
+  -- coalesce covers both so a Google user does not land with a null name.
   insert into public.profiles (id, email, full_name)
-  values (new.id, new.email, new.raw_user_meta_data->>'full_name')
+  values (
+    new.id,
+    new.email,
+    coalesce(
+      new.raw_user_meta_data->>'full_name',
+      new.raw_user_meta_data->>'name',
+      split_part(new.email, '@', 1)
+    )
+  )
   on conflict (id) do nothing;
   return new;
 end;
