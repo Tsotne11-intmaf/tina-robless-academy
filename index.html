@@ -2644,15 +2644,27 @@ var LMS={
  pct:function(c){return Math.round((this.done[c.id]||0)/this.flat(c).length*100);},
  side:function(active){var u=this.user;return '<div class="who">'+u.name+'</div><div class="mail">'+u.email+'</div><nav>'+
   '<a href="#dashboard"'+(active=='dash'?' aria-current="page"':'')+'>ჩემი კურსები</a>'+
-  COURSES.map(function(c){return '<a href="#course/'+c.id+'"'+(active==c.id?' aria-current="page"':'')+'>'+c.title+'</a>';}).join('')+
+  this.mine().map(function(c){return '<a href="#course/'+c.id+'"'+(active==c.id?' aria-current="page"':'')+'>'+c.title+'</a>';}).join('')+
   '<a href="#hw"'+(active=='hw'?' aria-current="page"':'')+'>დავალებები'+(this.hwPending()?'<i class="hw-count'+(this.hwUrgent()?' hot':'')+'">'+this.hwPending()+'</i>':'')+'</a>'+
   '<a href="#mycert">ჩემი სერტიფიკატები</a><a href="#login" onclick="LMS.logout()">გასვლა</a></nav>';},
- renderDash:function(){var s=this,total=0,doneN=0;var my=this.courses?COURSES.filter(function(c){return s.courses.indexOf(c.id)>-1;}):COURSES;if(!my.length)my=COURSES;COURSES.forEach(function(c){total+=s.flat(c).length;doneN+=s.done[c.id]||0;});
+ /* Courses this student is actually enrolled in. this.courses comes from the
+    enrollments table, whose select policy already drops expired rows, so an empty
+    list genuinely means "owns nothing" and must render as nothing. The old code
+    fell back to showing every course in that case, which is why an account that had
+    bought nothing still saw the full catalogue in its cabinet. */
+ mine:function(){
+   var s=this;
+   if(!s.courses)return [];
+   return COURSES.filter(function(c){return s.courses.indexOf(c.id)>-1;});
+ },
+ owns:function(id){return !!(this.courses&&this.courses.indexOf(id)>-1);},
+ renderDash:function(){var s=this,total=0,doneN=0;var my=this.mine();my.forEach(function(c){total+=s.flat(c).length;doneN+=s.done[c.id]||0;});
   document.getElementById('side-dash').innerHTML=this.side('dash');
   document.getElementById('dash').innerHTML='<h1 style="font-size:2.2rem;margin-bottom:8px"><span>გამარჯობა,</span> '+this.user.name+'</h1><p class="lead" style="margin-bottom:28px">გააგრძელეთ იქიდან, სადაც გაჩერდით. ყველა კურსი უვადოდ თქვენია.</p>'+
    (this.hwPending()?'<a class="hw-alert" href="#hw"><b>'+this.hwPending()+'</b> <span>დავალება ელოდება</span>'+(this.hwUrgent()?' · <span>'+this.hwUrgent()+' ვადა მალე იწურება</span>':'')+' →</a>':'')+
-   '<div class="stats"><div class="stat"><b>'+COURSES.length+'</b><span>კურსი კაბინეტში</span></div><div class="stat"><b>'+doneN+' / '+total+'</b><span>გაკვეთილი დასრულებული</span></div><div class="stat"><b>'+COURSES.filter(function(c){return s.pct(c)==100;}).length+'</b><span>სერტიფიკატი მიღებული</span></div></div>'+
-   COURSES.map(function(c){var p=s.pct(c),f=s.flat(c),n=s.done[c.id]||0,next=f[Math.min(n,f.length-1)];
+   '<div class="stats"><div class="stat"><b>'+my.length+'</b><span>კურსი კაბინეტში</span></div><div class="stat"><b>'+doneN+' / '+total+'</b><span>გაკვეთილი დასრულებული</span></div><div class="stat"><b>'+my.filter(function(c){return s.pct(c)==100;}).length+'</b><span>სერტიფიკატი მიღებული</span></div></div>'+
+   (my.length?'':'<div class="pcard" style="display:block"><h3 style="margin-bottom:6px">ჯერ არცერთი კურსი არ გაქვთ</h3><p class="lead" style="margin:0 0 14px">შეძენის შემდეგ კურსი აქ გამოჩნდება.</p><a class="btn btn-plum" href="#catalog">კურსების ნახვა</a></div>')+
+   my.map(function(c){var p=s.pct(c),f=s.flat(c),n=s.done[c.id]||0,next=f[Math.min(n,f.length-1)];
     return '<div class="pcard"><div><h3>'+c.title+'</h3><div class="meta">'+f.length+' გაკვეთილი · '+c.hours+' საათი · '+(p==100?'დასრულებულია':'შემდეგი: '+next.t)+'</div><div class="progress"><i style="width:'+p+'%"></i></div></div>'+
     '<div><div class="pct">'+p+'%</div><a class="btn btn-plum" href="#'+(p==100?'mycert':'lesson/'+c.id+'/'+Math.min(n,f.length-1))+'">'+(p==100?'სერტიფიკატი':n==0?'დაწყება':'გაგრძელება')+'</a></div></div>';}).join('');},
  renderCourse:function(id){var s=this,c=COURSES.filter(function(x){return x.id==id;})[0];if(!c){go('dashboard');return;}
@@ -3134,8 +3146,10 @@ var go;
     if(p0=='catalog'){SHOP.catalog(parts[1]);show('catalog');return;}
     if(p0=='kurs'){SHOP.course(parts[1]);show('kurs');return;}
     if(p0=='dashboard'){LMS.renderDash();show('dashboard');return;}
-    if(p0=='course'){LMS.renderCourse(parts[1]);show('course');return;}
-    if(p0=='lesson'){LMS.renderLesson(parts[1],parts[2]);show('lesson');return;}
+    /* Ownership is checked here rather than inside renderCourse/renderLesson: those
+       run before show(), so an early return there still left the page displayed. */
+    if(p0=='course'){if(!LMS.owns(parts[1])){route('dashboard');return;}LMS.renderCourse(parts[1]);show('course');return;}
+    if(p0=='lesson'){if(!LMS.owns(parts[1])){route('dashboard');return;}LMS.renderLesson(parts[1],parts[2]);show('lesson');return;}
     if(p0=='mycert'){LMS.renderCert();show('mycert');return;}
     if(p0=='hw'){LMS.renderHomework();show('hw');return;}
     if(p0=='admin'){if(parts[1])ADMIN.tab=parts[1];ADMIN.sub=parts[2];ADMIN.render();show('admin');return;}
