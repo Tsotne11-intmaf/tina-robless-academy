@@ -2741,20 +2741,18 @@ function cfgDefault(){
     poster:null,
     catalog:CATALOG.map(function(c,i){return Object.assign({},c,{order:i,home:['master-1','master-2','french','extreme','crystals','money'].indexOf(c.id)>-1,photo:null});}),
     homework:HOMEWORK.map(function(x){return Object.assign({},x);}),
-    enrolled:[
-      {name:'ნინო მ.',email:'nino@example.com',courses:['master-1','french'],done:{'master-1':7,'french':0},joined:Date.now()-1000*60*60*24*12},
-      {name:'მარიამ კ.',email:'mariam@example.com',courses:['bundle','master-1','master-2','french','extreme'],done:{'master-1':22,'master-2':3,'french':6,'extreme':0},joined:Date.now()-1000*60*60*24*40},
-      {name:'ანა გ.',email:'ana@example.com',courses:['extreme'],done:{'extreme':2},joined:Date.now()-1000*60*60*24*3}],
+    /* Empty on purpose: the site is live, so there are no invented students and no
+       invented revenue. Real accounts live in Supabase; this list is only what the
+       admin panel has been told about locally. */
+    enrolled:[],
     timeline:[].slice.call(document.querySelectorAll('.timeline li')).map(function(li){var b=li.querySelector('b'),s=li.querySelector('span');return {t:b?b.textContent:li.textContent,s:s?s.textContent:''};}),
     certs:[].slice.call(document.querySelectorAll('.cert-slot .preview')).map(function(){return null;}),
     awards:[].slice.call(document.querySelectorAll('.award .proof:not([data-img="poster"])')).map(function(){return null;}),
     t:{},gallery:[null,null,null,null,null,null],
     shop:{open:false,products:[]},
-    sales:[
-      {t:Date.now()-1000*60*60*24*40,email:'mariam@example.com',course:'bundle',amount:990},
-      {t:Date.now()-1000*60*60*24*12,email:'nino@example.com',course:'master-1',amount:590},
-      {t:Date.now()-1000*60*60*24*12,email:'nino@example.com',course:'french',amount:190},
-      {t:Date.now()-1000*60*60*24*3,email:'ana@example.com',course:'extreme',amount:190}],
+    /* No invented revenue either — the activity tab should read zero until a real
+       sale happens, otherwise the numbers Tina sees are fiction. */
+    sales:[],
     students:[
       {name:'სტუდენტის სახელი',where:'თბილისი · საკუთარი სტუდია',text:'ერთი წინადადება, სად არის ახლა.',course:'მასტერ-პროგრამა, ნაწილი 1 და 2',photo:null},
       {name:'სტუდენტის სახელი',where:'ბათუმი · სალონის მასტერი',text:'ერთი წინადადება შედეგზე.',course:'ექსტრემალური სიგრძე',photo:null},
