@@ -52,6 +52,9 @@ create table if not exists public.profiles (
   created_at    timestamptz not null default now()
 );
 
+-- Added after the first run; safe to re-apply.
+alter table public.profiles add column if not exists avatar_url text;
+
 alter table public.profiles enable row level security;
 
 create policy "profiles: read own"
@@ -189,6 +192,39 @@ on conflict (id) do nothing;
 insert into storage.buckets (id, name, public)
 values ('submissions', 'submissions', false)
 on conflict (id) do nothing;
+
+-- Profile photos. Public read so the admin homework lists can simply show them
+-- beside a name without minting signed URLs for every row; each student may only
+-- write inside their own uid folder, so one cannot replace another's picture.
+-- Nothing private belongs here - it is a face next to a name, nothing more.
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+create policy "avatars: public read"
+  on storage.objects for select
+  using (bucket_id = 'avatars');
+
+create policy "avatars: write own"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "avatars: update own"
+  on storage.objects for update
+  using (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "avatars: delete own"
+  on storage.objects for delete
+  using (
+    bucket_id = 'avatars'
+    and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin())
+  );
 
 create policy "media: public read"
   on storage.objects for select

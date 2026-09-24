@@ -1170,6 +1170,9 @@ h2{font-size:clamp(2.1rem,4vw,3.2rem)}
 /* ===== Student sign in / sign up ===== */
 .auth-check{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--ink-soft);margin:4px 0 16px;cursor:pointer}
 .auth-check input{margin-top:3px;flex:none}
+/* student profile */
+.prof-top{display:flex;gap:20px;align-items:center;margin-bottom:22px;flex-wrap:wrap}
+.prof-pic{width:108px;height:108px;border-radius:50%;flex:none;background:var(--blush-soft);display:grid;place-items:center;color:var(--ink-soft);font-size:.85rem;border:1px solid var(--line)}
 /* show/hide password — typing a password you cannot see is the usual reason a
    correct one gets rejected */
 .pass-wrap{position:relative}
@@ -2167,6 +2170,13 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 </div></section>
 </main>
 
+<main data-page="profile" hidden>
+<section class="lms"><div class="wrap lms-grid">
+  <aside class="side" id="side-profile"></aside>
+  <div id="profile"></div>
+</div></section>
+</main>
+
 <main data-page="course" hidden>
 <section class="lms"><div class="wrap lms-grid">
   <aside class="side" id="side-course"></aside>
@@ -2481,6 +2491,22 @@ var SB=(function(){
       return ready().then(function(){
         return req('/rest/v1/'+path,{method:'PATCH',headers:{Prefer:'return=representation'},body:body});
       });
+    },
+    /* Raw file upload — req() JSON-encodes its body, which would corrupt an image,
+       so storage goes through fetch directly. x-upsert lets a student replace their
+       own photo instead of erroring on the second attempt. */
+    upload:function(bucket,path,file){
+      return ready().then(function(){
+        return fetch(API+'/storage/v1/object/'+bucket+'/'+path,{
+          method:'POST',
+          headers:{apikey:KEY,Authorization:'Bearer '+session.access_token,
+                   'x-upsert':'true','Content-Type':file.type||'application/octet-stream'},
+          body:file
+        }).then(function(r){
+          if(!r.ok)return r.text().then(function(t){throw new Error(t||('HTTP '+r.status));});
+          return API+'/storage/v1/object/public/'+bucket+'/'+path;
+        });
+      });
     }
   };
 })();
@@ -2623,10 +2649,13 @@ var LMS={
      s.user={id:u.id,email:u.email,name:(u.user_metadata&&u.user_metadata.full_name)||u.email.split('@')[0]};
      return Promise.all([
        SB.select('enrollments?select=course_id,expires_at'),
-       SB.select('progress?select=course_id,lessons_done')
+       SB.select('progress?select=course_id,lessons_done'),
+       SB.select('profiles?select=*&id=eq.'+u.id)
      ]);
    }).then(function(r){
      var enr=r[0]||[],prog=r[1]||[];
+     s.profile=(r[2]&&r[2][0])||null;
+     if(s.profile&&s.profile.full_name)s.user.name=s.profile.full_name;
      s.courses=enr.map(function(x){return x.course_id;});
      s.expires={};enr.forEach(function(x){s.expires[x.course_id]=x.expires_at;});
      s.done={};prog.forEach(function(p){s.done[p.course_id]=p.lessons_done;});
@@ -2646,7 +2675,64 @@ var LMS={
   '<a href="#dashboard"'+(active=='dash'?' aria-current="page"':'')+'>ჩემი კურსები</a>'+
   this.mine().map(function(c){return '<a href="#course/'+c.id+'"'+(active==c.id?' aria-current="page"':'')+'>'+c.title+'</a>';}).join('')+
   '<a href="#hw"'+(active=='hw'?' aria-current="page"':'')+'>დავალებები'+(this.hwPending()?'<i class="hw-count'+(this.hwUrgent()?' hot':'')+'">'+this.hwPending()+'</i>':'')+'</a>'+
-  '<a href="#mycert">ჩემი სერტიფიკატები</a><a href="#login" onclick="LMS.logout()">გასვლა</a></nav>';},
+  '<a href="#mycert"'+(active=='cert'?' aria-current="page"':'')+'>ჩემი სერტიფიკატები</a>'+
+  '<a href="#profile"'+(active=='profile'?' aria-current="page"':'')+'>ჩემი პროფილი</a>'+
+  '<a href="#login" onclick="LMS.logout()">გასვლა</a></nav>';},
+ /* --- profile -------------------------------------------------------------
+    Name, phone and photo, stored on the student's own profiles row. The photo
+    goes to the public avatars bucket under the student's own uid, so Tina can
+    show a face beside a name in the homework lists without signed URLs.
+    No card details are stored here, and none should be: card data is regulated
+    and belongs with the payment provider, which returns a token and a masked
+    last-four for display. The slot below is wired for that token. */
+ renderProfile:function(){
+   var s=this,u=s.user||{};
+   document.getElementById('side-profile').innerHTML=s.side('profile');
+   var av=s.profile&&s.profile.avatar_url;
+   document.getElementById('profile').innerHTML=
+     '<h1 style="font-size:2.2rem;margin-bottom:8px">ჩემი პროფილი</h1>'+
+     '<p class="lead" style="margin-bottom:24px">ეს ინფორმაცია ჩანს თინასთან, რომ დავალებების შემოწმებისას გიცნობდეთ.</p>'+
+     '<div class="adm-form"><div class="prof-top">'+
+       '<div class="prof-pic"'+(av?' style="background:url('+av+') center/cover"':'')+'>'+(av?'':'ფოტო')+'</div>'+
+       '<div><label class="btn btn-ghost" style="cursor:pointer">ფოტოს ატვირთვა<input type="file" accept="image/*" hidden onchange="LMS.avatar(this)"></label>'+
+       '<p class="hint" style="margin-top:8px">კვადრატული ფოტო გამოიყურება საუკეთესოდ.</p></div>'+
+     '</div>'+
+     '<form onsubmit="event.preventDefault();LMS.saveProfile(this)">'+
+       '<div class="field"><label>სახელი და გვარი</label><input name="full_name" value="'+esc((s.profile&&s.profile.full_name)||u.name||'')+'" required></div>'+
+       '<div class="field"><label>ტელეფონი</label><input name="phone" type="tel" value="'+esc((s.profile&&s.profile.phone)||'')+'" placeholder="+995 5xx xxx xxx"></div>'+
+       '<div class="field"><label>ელფოსტა</label><input value="'+esc(u.email||'')+'" disabled></div>'+
+       '<label class="auth-check"><input type="checkbox" name="marketing_ok"'+((s.profile&&s.profile.marketing_ok)?' checked':'')+'> მსურს სიახლეების მიღება ელფოსტით</label>'+
+       '<button class="btn btn-plum" type="submit">შენახვა</button>'+
+     '</form></div>'+
+     '<div class="adm-form"><h2>გადახდის ბარათი</h2><p class="lead" style="margin:0">ბარათის მონაცემებს საიტი არ ინახავს — ეს კანონით დაცული ინფორმაციაა და რჩება გადახდის სისტემასთან. გადახდის ჩართვის შემდეგ აქ გამოჩნდება მხოლოდ ბოლო 4 ციფრი.</p></div>'+
+     '<p class="auth-msg" id="prof-msg" hidden></p>';
+ },
+ pmsg:function(t,kind){var el=document.getElementById('prof-msg');if(!el)return;el.textContent=t||'';el.hidden=!t;el.className='auth-msg'+(kind?' '+kind:'');},
+ avatar:function(input){
+   var s=this,f=input.files[0];if(!f)return;
+   if(f.size>2000000){s.pmsg('ფოტო ძალიან დიდია — 2 MB-მდე.','bad');input.value='';return;}
+   s.pmsg('იტვირთება…');
+   var ext=(f.name.split('.').pop()||'jpg').toLowerCase();
+   SB.upload('avatars',s.user.id+'/avatar.'+ext,f).then(function(url){
+     /* cache-buster: the path is stable, so browsers would keep the old image */
+     return SB.update('profiles?id=eq.'+s.user.id,{avatar_url:url+'?v='+Date.now()});
+   }).then(function(rows){
+     s.profile=rows&&rows[0]?rows[0]:s.profile;s.renderProfile();s.pmsg('ფოტო განახლდა.','ok');
+   })['catch'](function(err){s.pmsg('ატვირთვა ვერ მოხერხდა: '+err.message,'bad');});
+ },
+ saveProfile:function(form){
+   var s=this,e=form.elements;
+   s.pmsg('ინახება…');
+   SB.update('profiles?id=eq.'+s.user.id,{
+     full_name:e.full_name.value.trim(),
+     phone:e.phone.value.trim()||null,
+     marketing_ok:e.marketing_ok.checked
+   }).then(function(rows){
+     s.profile=rows&&rows[0]?rows[0]:s.profile;
+     if(s.profile&&s.profile.full_name)s.user.name=s.profile.full_name;
+     s.renderProfile();s.pmsg('შენახულია.','ok');
+   })['catch'](function(err){s.pmsg('შენახვა ვერ მოხერხდა: '+err.message,'bad');});
+ },
  /* Courses this student is actually enrolled in. this.courses comes from the
     enrollments table, whose select policy already drops expired rows, so an empty
     list genuinely means "owns nothing" and must render as nothing. The old code
@@ -3122,7 +3208,7 @@ applyConfig();
 var go;
 (function(){
   var pages=['home','certificates','students','about','shop','login','dashboard','course','lesson','mycert','catalog','kurs','terms','privacy','refund','hw','admin'];
-  var lms=['dashboard','course','lesson','mycert','hw'];
+  var lms=['dashboard','course','lesson','mycert','hw','profile'];
   function show(page,scrollId){
     document.querySelectorAll('main[data-page]').forEach(function(m){m.hidden=(m.dataset.page!==page);});
     document.querySelectorAll('[data-nav]').forEach(function(a){
@@ -3144,6 +3230,7 @@ var go;
     if(p0=='catalog'){SHOP.catalog(parts[1]);show('catalog');return;}
     if(p0=='kurs'){SHOP.course(parts[1]);show('kurs');return;}
     if(p0=='dashboard'){LMS.renderDash();show('dashboard');return;}
+    if(p0=='profile'){LMS.renderProfile();show('profile');return;}
     /* Ownership is checked here rather than inside renderCourse/renderLesson: those
        run before show(), so an early return there still left the page displayed. */
     if(p0=='course'){if(!LMS.owns(parts[1])){route('dashboard');return;}LMS.renderCourse(parts[1]);show('course');return;}
