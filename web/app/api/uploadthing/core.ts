@@ -28,13 +28,14 @@ export const ourFileRouter = {
   avatar: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
     .middleware(requireUser)
     .onUploadComplete(async ({ metadata, file }) => {
-      /* Written straight onto the student's own profile row. The RLS update policy
-         is "auth.uid() = id", so this can only ever touch their own record. */
-      const supabase = await createClient();
-      await supabase
-        .from("profiles")
-        .update({ avatar_url: file.ufsUrl })
-        .eq("id", metadata.userId);
+      /* No database write here, deliberately.
+
+         This hook is called by UploadThing's servers, not by the student's browser,
+         so there are no session cookies to build a Supabase client from. The write
+         that used to live here ran as the anonymous role against an "auth.uid() = id"
+         policy, matched no rows, and reported no error - the avatar appeared to save
+         and was gone on the next load. The browser posts the URL to /api/avatar
+         instead, where the session exists and RLS applies as usual. */
       return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
 

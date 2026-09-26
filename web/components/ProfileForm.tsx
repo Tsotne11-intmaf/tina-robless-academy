@@ -74,9 +74,23 @@ export default function ProfileForm({
           <div>
             <UploadButton
               endpoint="avatar"
-              onClientUploadComplete={(res) => {
-                const url = res?.[0]?.ufsUrl ?? null;
-                if (url) setAvatar(url);
+              onClientUploadComplete={async (res) => {
+                const url = res?.[0]?.ufsUrl;
+                if (!url) return;
+                /* The upload only put the file on UploadThing. Recording it against
+                   the profile is a separate, authenticated call - without it the
+                   picture below would change and then vanish on the next load. */
+                setMsg({ text: "ინახება…" });
+                const r = await fetch("/api/avatar", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ url }),
+                });
+                if (!r.ok) {
+                  setMsg({ text: "ფოტო ვერ შეინახა. სცადეთ თავიდან.", kind: "bad" });
+                  return;
+                }
+                setAvatar(url);
                 setMsg({ text: "ფოტო განახლდა.", kind: "ok" });
                 router.refresh();
               }}

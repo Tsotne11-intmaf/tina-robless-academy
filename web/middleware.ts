@@ -34,9 +34,22 @@ export async function middleware(request: NextRequest) {
   );
 
   // getUser() revalidates against Supabase rather than trusting the cookie's claims.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let { data: { user }, error } = await supabase.auth.getUser();
+
+  /* Failing to ask is not the same as being turned down.
+
+     getUser() is a network call to Supabase on every single request, and the answer
+     used to be read as a plain yes/no: anything other than a user meant "signed out"
+     and the visitor was sent to the login page. A timed-out or 5xx reply therefore
+     looked identical to an expired session, so a student with perfectly valid
+     cookies could be thrown out mid-lesson by one bad round trip. Supabase's own
+     logs show no token being rejected, which is what pointed here.
+
+     A definite refusal - Supabase answering 4xx - still ends the session. Only the
+     inconclusive cases are retried. */
+  if (!user && isInconclusive(error)) {
+    ({ data: { user }, error } = await supabase.auth.getUser());
+  }
 
   const path = request.nextUrl.pathname;
   const needsAuth = PROTECTED.some((p) => path === p || path.startsWith(p + "/"));
@@ -45,10 +58,24 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", path);
-    return NextResponse.redirect(url);
+    const redirect = NextResponse.redirect(url);
+    /* Carry over anything the refresh above wrote. A bare redirect discards those
+       Set-Cookie headers, which can leave the browser holding a refresh token that
+       has already been rotated away - the next request then really would fail. */
+    response.cookies.getAll().forEach((c) => redirect.cookies.set(c));
+    return redirect;
   }
 
   return response;
+}
+
+/* Network trouble rather than a rejected token: supabase-js reports an unreachable
+   endpoint with no status at all, and anything from 429 or 500 upwards is the
+   service asking to be tried again rather than saying no. */
+function isInconclusive(error: unknown): boolean {
+  if (!error) return false;
+  const status = (error as { status?: number }).status;
+  return status === undefined || status === 0 || status === 429 || status >= 500;
 }
 
 export const config = {
