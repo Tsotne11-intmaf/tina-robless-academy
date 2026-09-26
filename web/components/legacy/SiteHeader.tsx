@@ -9,7 +9,7 @@ export default async function SiteHeader() {
     <header>
       
         <div className="wrap nav">
-          <a className="logo" href="/">Tina&nbsp;<span>Robless</span></a>
+          <a className="logo" href="/">Tina <span>Robless</span></a>
           <ul>
             <li><a href="/catalog" data-nav="catalog">{t("კურსები")}</a></li>
             <li><a href="/certificates" data-nav="certificates">{t("სერტიფიკატები")}</a></li>

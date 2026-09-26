@@ -2,6 +2,7 @@
    Markup and styling are faithful to the original. Interactive behaviour is not
    wired here: the legacy inline handlers called globals that do not exist in this
    app, so they are reconnected deliberately rather than guessed at. */
+import CardSlider from "@/components/CardSlider";
 import { getT } from "@/lib/i18n";
 
 export default async function HomePage() {
@@ -17,7 +18,7 @@ export default async function HomePage() {
             <h1 data-edit="hero.title" data-x="t.home.2">{t("გახადე ფრჩხილები ხელოვნების ნიმუში")}</h1>
             <p className="sub" data-edit="t.home.3">{t("5-კვირიანი ონლაინ პროგრამა ამერიკულ ნაშენ სიგრძეზე, არქიტექტურასა და ფრენჩზე — თინა რობლესისგან, თბილისი. უყურეთ ყოველ ნაბიჯს ზემოდან, რეალურ სამუშაო ტემპში, და გადახედეთ იმდენჯერ, რამდენჯერაც დაგჭირდებათ.")}</p>
             <div className="hero-cta">
-              <a className="btn btn-plum" href="#flagship">{t("ჩაეწერე მასტერ-პროგრამაზე — 590&nbsp;₾")}</a>
+              <a className="btn btn-plum" href="#flagship">{t("ჩაეწერე მასტერ-პროგრამაზე — 590 ₾")}</a>
               <a className="btn-link" href="/catalog">{t("ყველა კურსი")}</a>
             </div>
             <div className="hero-meta">
@@ -53,7 +54,7 @@ export default async function HomePage() {
             </div>
             <a className="btn-link" href="/catalog">{t("ყველა კურსის ნახვა")}</a>
           </div>
-          <div className="cards home-slider">
+          <CardSlider><div className="cards home-slider">
             <article className="card">
               <div className="thumb ph1"></div>
               <div className="card-body">
@@ -104,7 +105,7 @@ export default async function HomePage() {
                 <div className="card-foot"><span className="dur">{t("≈ 2 სთ")}</span><span className="price">120 ₾</span></div>
               </div>
             </article>
-          </div>
+          </div></CardSlider>
         </div>
       </section>
       
@@ -156,7 +157,7 @@ export default async function HomePage() {
                 <li data-edit="t.home.40">{t("ნაწილი 1 და ნაწილი 2")}</li>
                 <li data-edit="t.home.41">{t("იდეალური ფრენჩი")}</li>
                 <li data-edit="t.home.42">{t("ექსტრემალური სიგრძე: არქიტექტურა და დაჭერა")}</li>
-                <li data-edit="t.home.43">{t("ორი ლაივ Q&amp;A ზარი თინასთან")}</li>
+                <li data-edit="t.home.43">{t("ორი ლაივ Q&A ზარი თინასთან")}</li>
                 <li data-edit="t.home.44">{t("სერტიფიკატი დასრულებისას")}</li>
               </ul>
               <div className="bundle-price"><span className="now">990 ₾</span><span className="was">1,430 ₾</span></div>
@@ -173,7 +174,7 @@ export default async function HomePage() {
             <div><h2 data-edit="t.home.45">{t("ტექნიკური კურსები")}</h2><p data-edit="t.home.46">{t("გრძელი ფრჩხილების სტრუქტურული უნარები. თითოეული დამოუკიდებელი კურსია.")}</p></div>
             <a className="btn-link" href="/catalog?cat=technique">{t("ყველა ტექნიკური კურსი")}</a>
           </div>
-          <div className="cards home-slider">
+          <CardSlider><div className="cards home-slider">
             <article className="card">
               <div className="thumb ph6"></div>
               <div className="card-body">
@@ -200,7 +201,7 @@ export default async function HomePage() {
                 <div className="card-foot"><span className="dur">{t("≈ 3 სთ")}</span><span className="price">150 ₾</span></div>
               </div>
             </article>
-          </div>
+          </div></CardSlider>
         </div>
       </section>
       
@@ -211,7 +212,7 @@ export default async function HomePage() {
             <div><h2 data-edit="t.home.53">{t("დიზაინის კურსები")}</h2><p data-edit="t.home.54">{t("მოკლე, კონკრეტული გაკვეთილები დიზაინებზე, რომლებსაც კლიენტები ყველაზე ხშირად ითხოვენ.")}</p></div>
             <a className="btn-link" href="/catalog?cat=art">{t("ყველა დიზაინის კურსი")}</a>
           </div>
-          <div className="cards home-slider">
+          <CardSlider><div className="cards home-slider">
             <article className="card">
               <div className="thumb ph9"></div>
               <div className="card-body">
@@ -236,14 +237,14 @@ export default async function HomePage() {
                 <div className="card-foot"><span className="dur">{t("≈ 3 სთ")}</span><span className="price">140 ₾</span></div>
               </div>
             </article>
-          </div>
+          </div></CardSlider>
         </div>
       </section>
       
       
       <section className="about" id="about">
         <div className="wrap about-grid">
-          <div className="portrait" data-img="about.portrait" style={{background: "url(data:image/jpeg"}}></div>
+          <div className="portrait" data-img="about.portrait" style={{background: "url(/img/img-cb3a67f067.jpg) center/cover", borderColor: "var(--line)"}}></div>
           <div>
             <p className="ka" data-edit="t.home.61">{t("თინა კუჭუხიზე · Tina Robless")}</p>
             <h2 data-edit="t.home.62">{t("ჩემ შესახებ")}</h2>

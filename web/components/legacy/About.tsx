@@ -21,7 +21,7 @@ export default async function AboutPage() {
       <section>
         <div className="wrap about-grid">
           <div>
-            <div className="portrait" data-img="about.portrait" style={{background: "url(data:image/jpeg", borderColor: "var(--line)"}}></div>
+            <div className="portrait" data-img="about.portrait" style={{background: "url(/img/img-cb3a67f067.jpg) center/cover", borderColor: "var(--line)"}}></div>
             <div className="creds" style={{marginTop: "22px"}}>
               <span style={{borderColor: "var(--line)", color: "var(--ink)"}}>{t("CMC მსოფლიო ჩემპიონი")}</span><span style={{borderColor: "var(--line)", color: "var(--ink)"}}>{t("Georgia Nails-ის პრეზიდენტი")}</span><span style={{borderColor: "var(--line)", color: "var(--ink)"}}>CAT</span><span style={{borderColor: "var(--line)", color: "var(--ink)"}}>{t("ფრჩხილების მასტერი, თბილისი")}</span><span style={{borderColor: "var(--line)", color: "var(--ink)"}}>{t("პედაგოგი")}</span>
             </div>
