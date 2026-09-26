@@ -10,10 +10,10 @@ export default async function AdminPage() {
   const student = await getStudent();
   if (!student) redirect("/login?next=/admin");
 
-  /* Admin status comes from the admins table, which has no client policy at all, so
-     it cannot be read or written from the browser and can only be granted from the
-     Supabase dashboard. There is no password here to leak: the old tina2026 string
-     sat in the public page source and protected nothing once real data existed. */
+  /* Admin status is read through is_admin(), which looks inside a table no client
+     can touch, so the right can only be granted from the Supabase dashboard. There
+     is no password here to leak: the old tina2026 string sat in the public page
+     source and protected nothing once real data existed. */
   if (!student.isAdmin) {
     return (
       <section className="lms">

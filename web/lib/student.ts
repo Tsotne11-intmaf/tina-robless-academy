@@ -39,7 +39,7 @@ export async function getStudent(): Promise<Student | null> {
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("enrollments").select("course_id,expires_at"),
     supabase.from("progress").select("course_id,lessons_done"),
-    supabase.from("admins").select("user_id").eq("user_id", user.id).maybeSingle(),
+    supabase.rpc("is_admin"),
   ]);
 
   const enrollments = enrRes.data ?? [];
@@ -62,9 +62,15 @@ export async function getStudent(): Promise<Student | null> {
     owned: enrollments.map((e) => e.course_id),
     expires,
     done,
-    // admins has no client policy at all, so this only ever returns a row for a
-    // genuine admin; an ordinary student always reads null here.
-    isAdmin: !!adminRes.data,
+    /* Asked through is_admin(), never by reading the admins table.
+
+       The table has RLS enabled and no policy at all, which denies every client
+       equally - a real admin included. Selecting from it here therefore always came
+       back empty, so isAdmin was permanently false and the panel could not be
+       reached no matter who signed in. is_admin() is SECURITY DEFINER precisely so
+       it can look inside a table the caller cannot, and it is the same function the
+       row policies use, so the badge and the actual permissions cannot disagree. */
+    isAdmin: adminRes.data === true,
   };
 }
 
