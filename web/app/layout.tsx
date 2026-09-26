@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import SiteHeader from "@/components/legacy/SiteHeader";
+import SiteFooter from "@/components/legacy/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Tina Robless Nail Academy — ფრჩხილების სწავლის ტექნიკა იწყება აქ",
@@ -26,7 +28,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <SiteHeader />
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }
