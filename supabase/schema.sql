@@ -265,3 +265,49 @@ create policy "submissions: delete own"
     bucket_id = 'submissions'
     and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin())
   );
+
+-- ---------------------------------------------------------------------------
+-- 6. Homework submissions
+-- ---------------------------------------------------------------------------
+-- Added after the first run; safe to re-apply.
+create table if not exists public.submissions (
+  id          bigint generated always as identity primary key,
+  profile_id  uuid not null references public.profiles(id) on delete cascade,
+  course_id   text not null,
+  task_id     text not null,
+  note        text,
+  photo_url   text,
+  status      text not null default 'sent' check (status in ('sent','done','redo')),
+  grade       text,
+  feedback    text,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists submissions_profile_idx on public.submissions(profile_id);
+
+alter table public.submissions enable row level security;
+
+create policy "submissions: read own"
+  on public.submissions for select
+  using (auth.uid() = profile_id or public.is_admin());
+
+-- A student may only submit for a course they are currently enrolled in, and only
+-- as themselves - the same rule progress uses.
+create policy "submissions: insert own when enrolled"
+  on public.submissions for insert
+  with check (
+    auth.uid() = profile_id
+    and exists (
+      select 1 from public.enrollments e
+      where e.profile_id = auth.uid()
+        and e.course_id = submissions.course_id
+        and (e.expires_at is null or e.expires_at > now())
+    )
+  );
+
+-- Grading is the admin's job, so students cannot update their own row: otherwise a
+-- student could mark their own homework as passed.
+create policy "submissions: admin grades"
+  on public.submissions for update
+  using (public.is_admin())
+  with check (public.is_admin());
