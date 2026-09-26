@@ -4,23 +4,32 @@ import { createClient } from "@/lib/supabase/server";
 
 const f = createUploadthing();
 
-/* This is the whole reason UploadThing needs a server. The token stays in an env
-   var here and is never sent to the browser; the middleware below decides who is
-   allowed to upload before UploadThing ever issues an upload URL.
-   Without this step the token would have to ship in the page, and anyone reading
-   the source could upload to the account. */
+/* The whole reason UploadThing needs a server: the token stays in an env var here
+   and never reaches the browser, and this gate decides who may upload before an
+   upload URL is ever issued. Without it the token would have to ship inside the
+   public page, where anyone reading the source could use it. */
+async function requireUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  // Given a code, UploadThing answers 403 instead of a bare 500, so the client can
+  // tell "you are not signed in" apart from "the server broke".
+  if (!user) {
+    throw new UploadThingError({
+      code: "FORBIDDEN",
+      message: "ავტორიზაცია საჭიროა",
+    });
+  }
+  return { userId: user.id };
+}
+
 export const ourFileRouter = {
   avatar: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
-    .middleware(async () => {
-      const supabase = await createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new UploadThingError("ავტორიზაცია საჭიროა");
-      return { userId: user.id };
-    })
+    .middleware(requireUser)
     .onUploadComplete(async ({ metadata, file }) => {
-      // Write the resulting URL straight onto the student's own profile row.
+      /* Written straight onto the student's own profile row. The RLS update policy
+         is "auth.uid() = id", so this can only ever touch their own record. */
       const supabase = await createClient();
       await supabase
         .from("profiles")
@@ -29,16 +38,8 @@ export const ourFileRouter = {
       return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
 
-  // Homework photos: same auth gate, larger allowance, several files at once.
   homework: f({ image: { maxFileSize: "8MB", maxFileCount: 5 } })
-    .middleware(async () => {
-      const supabase = await createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new UploadThingError("ავტორიზაცია საჭიროა");
-      return { userId: user.id };
-    })
+    .middleware(requireUser)
     .onUploadComplete(async ({ metadata, file }) => {
       return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
