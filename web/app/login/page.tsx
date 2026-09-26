@@ -1,14 +1,25 @@
 import { Suspense } from "react";
 import AuthBox from "@/components/AuthBox";
+import { getAuthStrings } from "@/lib/authStrings";
 
-export const metadata = { title: "ჩემი კაბინეტი — Tina Robless Nail Academy" };
+export async function generateMetadata() {
+  const s = await getAuthStrings();
+  return { title: s.title + " — Tina Robless Nail Academy" };
+}
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const s = await getAuthStrings();
   return (
     <section className="lms">
       <div className="wrap">
-        <Suspense fallback={<div className="login-box"><p className="lead">იტვირთება…</p></div>}>
-          <AuthBox />
+        <Suspense
+          fallback={
+            <div className="login-box">
+              <p className="lead">{s.loading}</p>
+            </div>
+          }
+        >
+          <AuthBox s={s} />
         </Suspense>
       </div>
     </section>

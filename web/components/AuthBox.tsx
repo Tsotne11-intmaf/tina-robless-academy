@@ -3,39 +3,38 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import type { AuthStrings } from "@/lib/authStrings";
+import PasswordField from "@/components/PasswordField";
 
 type Mode = "in" | "up" | "reset";
 
-function Eye({ shown }: { shown: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="20"
-      height="20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M1.8 12S5.7 5.2 12 5.2 22.2 12 22.2 12 18.3 18.8 12 18.8 1.8 12 1.8 12Z" />
-      <circle cx="12" cy="12" r="3.1" />
-      {shown ? <path d="M3.5 3.5l17 17" /> : null}
-    </svg>
-  );
-}
+/* Every string arrives already translated from the server page.
 
-export default function AuthBox() {
+   The panel cannot translate itself: the dictionary is 180 KB and belongs nowhere
+   near the browser bundle, and reading the language cookie client-side would render
+   Georgian first and flip afterwards. The server knows the language before the first
+   byte goes out, so it resolves the strings and passes them down. */
+export default function AuthBox({ s }: { s: AuthStrings }) {
   const supabase = createClient();
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/dashboard";
+  const next = safeNext(params.get("next"));
+  const linkFailed = params.get("authError") === "1";
 
   const [mode, setMode] = useState<Mode>("in");
   const [showPw, setShowPw] = useState(false);
-  const [msg, setMsg] = useState<{ text: string; kind?: "ok" | "bad" } | null>(null);
+  const [msg, setMsg] = useState<{ text: string; kind?: "ok" | "bad" } | null>(
+    linkFailed ? { text: s.linkBad, kind: "bad" } : null
+  );
   const [busy, setBusy] = useState(false);
   const [googleOn, setGoogleOn] = useState(false);
+
+  /* Email links carry a one-time code that only the server can exchange, so they all
+     point at /auth/callback and it forwards to the real destination afterwards. */
+  const callback = (to: string) =>
+    typeof window !== "undefined"
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(to)}`
+      : undefined;
 
   /* The Google button stays hidden until Supabase confirms the provider is really
      enabled. Clicking it while disabled navigates the visitor to a raw JSON error
@@ -46,7 +45,7 @@ export default function AuthBox() {
     if (!url || !key) return;
     fetch(url + "/auth/v1/settings", { headers: { apikey: key } })
       .then((r) => r.json())
-      .then((s) => setGoogleOn(!!(s && s.external && s.external.google)))
+      .then((x) => setGoogleOn(!!(x && x.external && x.external.google)))
       .catch(() => {});
   }, []);
 
@@ -54,7 +53,7 @@ export default function AuthBox() {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     setBusy(true);
-    setMsg({ text: "მოწმდება…" });
+    setMsg({ text: s.checking });
     const { error } = await supabase.auth.signInWithPassword({
       email: String(f.get("email")).trim(),
       password: String(f.get("password")),
@@ -62,10 +61,7 @@ export default function AuthBox() {
     setBusy(false);
     if (error) {
       setMsg({
-        text:
-          error.status === 400
-            ? "ელფოსტა ან პაროლი არასწორია (ან ელფოსტა ჯერ არ დაგიდასტურებიათ)."
-            : "შესვლა ვერ მოხერხდა: " + error.message,
+        text: error.status === 400 ? s.badCreds : s.signInFailed + error.message,
         kind: "bad",
       });
       return;
@@ -80,7 +76,7 @@ export default function AuthBox() {
     const f = new FormData(e.currentTarget);
     const email = String(f.get("email")).trim();
     setBusy(true);
-    setMsg({ text: "იგზავნება…" });
+    setMsg({ text: s.sending });
     const { error } = await supabase.auth.signUp({
       email,
       password: String(f.get("password")),
@@ -90,26 +86,19 @@ export default function AuthBox() {
           phone: String(f.get("phone") || "").trim(),
           marketing_ok: f.get("marketing_ok") === "on",
         },
-        emailRedirectTo:
-          typeof window !== "undefined" ? window.location.origin + next : undefined,
+        emailRedirectTo: callback(next),
       },
     });
     setBusy(false);
     if (error) {
       setMsg({
-        text:
-          error.status === 422
-            ? "ასეთი ელფოსტა უკვე რეგისტრირებულია."
-            : "რეგისტრაცია ვერ მოხერხდა: " + error.message,
+        text: error.status === 422 ? s.emailTaken : s.signUpFailed + error.message,
         kind: "bad",
       });
       return;
     }
     // Confirmation is on, so signUp returns a user but no session yet.
-    setMsg({
-      text: "ანგარიში შეიქმნა. დაადასტურეთ ელფოსტა — ბმული გაიგზავნა " + email + "-ზე.",
-      kind: "ok",
-    });
+    setMsg({ text: s.accountCreated.replace("{email}", email), kind: "ok" });
     setMode("in");
   }
 
@@ -118,55 +107,33 @@ export default function AuthBox() {
     const f = new FormData(e.currentTarget);
     const email = String(f.get("email")).trim();
     setBusy(true);
+    setMsg({ text: s.sending });
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo:
-        typeof window !== "undefined" ? window.location.origin + "/login" : undefined,
+      redirectTo: callback("/reset-password"),
     });
     setBusy(false);
     /* Worded so it never reveals whether an address has an account - Supabase
        returns success either way precisely so this cannot be used to find out. */
-    setMsg({
-      text: "თუ ასეთი ანგარიში არსებობს, აღდგენის ბმული გაიგზავნა " + email + "-ზე.",
-      kind: "ok",
-    });
+    setMsg({ text: s.resetSent.replace("{email}", email), kind: "ok" });
   }
 
-  function passwordField(
-    id: string,
-    autoComplete: string,
-    placeholder: string,
-    minLength?: number
-  ) {
-    return (
-      <div className="field">
-        <label htmlFor={id}>პაროლი</label>
-        <div className="pass-wrap">
-          <input
-            id={id}
-            name="password"
-            type={showPw ? "text" : "password"}
-            autoComplete={autoComplete}
-            placeholder={placeholder}
-            minLength={minLength}
-            required
-          />
-          <button
-            type="button"
-            className="pass-eye"
-            onClick={() => setShowPw((v) => !v)}
-            aria-label={showPw ? "პაროლის დამალვა" : "პაროლის ჩვენება"}
-            title={showPw ? "პაროლის დამალვა" : "პაროლის ჩვენება"}
-          >
-            <Eye shown={showPw} />
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const pw = (id: string, autoComplete: string, placeholder: string, minLength?: number) => (
+    <PasswordField
+      id={id}
+      label={s.password}
+      autoComplete={autoComplete}
+      placeholder={placeholder}
+      minLength={minLength}
+      shown={showPw}
+      onToggle={() => setShowPw((v) => !v)}
+      showLabel={s.showPw}
+      hideLabel={s.hidePw}
+    />
+  );
 
   return (
     <div className="login-box">
-      <h1>ჩემი კაბინეტი</h1>
+      <h1>{s.title}</h1>
 
       {googleOn ? (
         <>
@@ -176,24 +143,24 @@ export default function AuthBox() {
             onClick={() =>
               supabase.auth.signInWithOAuth({
                 provider: "google",
-                options: { redirectTo: window.location.origin + next },
+                options: { redirectTo: callback(next) },
               })
             }
           >
-            Google-ით გაგრძელება
+            {s.googleBtn}
           </button>
           <div className="auth-or">
-            <span>ან</span>
+            <span>{s.or}</span>
           </div>
         </>
       ) : null}
 
       {mode === "in" ? (
         <>
-          <p>შედით იმ ელფოსტითა და პაროლით, რომლითაც დარეგისტრირდით.</p>
+          <p>{s.signInIntro}</p>
           <form onSubmit={signIn}>
             <div className="field">
-              <label htmlFor="lg-email">ელფოსტა</label>
+              <label htmlFor="lg-email">{s.email}</label>
               <input
                 id="lg-email"
                 name="email"
@@ -203,21 +170,21 @@ export default function AuthBox() {
                 required
               />
             </div>
-            {passwordField("lg-pass", "current-password", "••••••••")}
+            {pw("lg-pass", "current-password", "••••••••")}
             <button className="btn btn-plum" type="submit" disabled={busy}>
-              შესვლა
+              {s.signIn}
             </button>
           </form>
           <p className="hint">
-            დაგავიწყდათ პაროლი?{" "}
+            {s.forgot}{" "}
             <a className="btn-link" onClick={() => { setMode("reset"); setMsg(null); }}>
-              აღდგენა ელფოსტით
+              {s.forgotLink}
             </a>
           </p>
           <p className="hint">
-            ჯერ არ გაქვთ ანგარიში?{" "}
+            {s.noAccount}{" "}
             <a className="btn-link" onClick={() => { setMode("up"); setMsg(null); }}>
-              რეგისტრაცია
+              {s.register}
             </a>
           </p>
         </>
@@ -225,14 +192,14 @@ export default function AuthBox() {
 
       {mode === "up" ? (
         <>
-          <p>შექმენით ანგარიში — შემდეგ თინა დაგამატებთ შეძენილ კურსზე.</p>
+          <p>{s.signUpIntro}</p>
           <form onSubmit={signUp}>
             <div className="field">
-              <label htmlFor="su-name">სახელი და გვარი</label>
+              <label htmlFor="su-name">{s.fullName}</label>
               <input id="su-name" name="full_name" autoComplete="name" required />
             </div>
             <div className="field">
-              <label htmlFor="su-email">ელფოსტა</label>
+              <label htmlFor="su-email">{s.email}</label>
               <input
                 id="su-email"
                 name="email"
@@ -243,7 +210,7 @@ export default function AuthBox() {
               />
             </div>
             <div className="field">
-              <label htmlFor="su-phone">ტელეფონი (სურვილისამებრ)</label>
+              <label htmlFor="su-phone">{s.phoneOpt}</label>
               <input
                 id="su-phone"
                 name="phone"
@@ -252,19 +219,18 @@ export default function AuthBox() {
                 placeholder="+995 5xx xxx xxx"
               />
             </div>
-            {passwordField("su-pass", "new-password", "მინიმუმ 8 სიმბოლო", 8)}
+            {pw("su-pass", "new-password", s.pwMin, 8)}
             <label className="auth-check">
-              <input type="checkbox" name="marketing_ok" /> მსურს სიახლეების და
-              ფასდაკლებების მიღება ელფოსტით
+              <input type="checkbox" name="marketing_ok" /> {s.marketing}
             </label>
             <button className="btn btn-plum" type="submit" disabled={busy}>
-              რეგისტრაცია
+              {s.register}
             </button>
           </form>
           <p className="hint">
-            უკვე გაქვთ ანგარიში?{" "}
+            {s.haveAccount}{" "}
             <a className="btn-link" onClick={() => { setMode("in"); setMsg(null); }}>
-              შესვლა
+              {s.signIn}
             </a>
           </p>
         </>
@@ -272,20 +238,20 @@ export default function AuthBox() {
 
       {mode === "reset" ? (
         <>
-          <p>მიუთითეთ ელფოსტა — გამოგიგზავნით პაროლის აღდგენის ბმულს.</p>
+          <p>{s.resetIntro}</p>
           <form onSubmit={reset}>
             <div className="field">
-              <label htmlFor="rs-email">ელფოსტა</label>
+              <label htmlFor="rs-email">{s.email}</label>
               <input id="rs-email" name="email" type="email" autoComplete="email" required />
             </div>
             <button className="btn btn-plum" type="submit" disabled={busy}>
-              ბმულის გამოგზავნა
+              {s.sendLink}
             </button>
           </form>
           <p className="hint">
-            გაგახსენდათ?{" "}
+            {s.remembered}{" "}
             <a className="btn-link" onClick={() => { setMode("in"); setMsg(null); }}>
-              შესვლა
+              {s.signIn}
             </a>
           </p>
         </>
@@ -296,9 +262,16 @@ export default function AuthBox() {
       ) : null}
 
       <p className="hint" style={{ fontSize: ".8rem" }}>
-        გაგრძელებით ეთანხმებით <a className="btn-link" href="/terms">წესებს</a> და{" "}
-        <a className="btn-link" href="/privacy">კონფიდენციალურობის პოლიტიკას</a>.
+        {s.termsPre} <a className="btn-link" href="/terms">{s.termsLink}</a> {s.and}{" "}
+        <a className="btn-link" href="/privacy">{s.privacyLink}</a>.
       </p>
     </div>
   );
+}
+
+/* The same guard the callback applies, for the same reason: ?next= arrives from the
+   URL bar and must not be able to send anyone off-site. */
+function safeNext(value: string | null): string {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/dashboard";
+  return value;
 }
