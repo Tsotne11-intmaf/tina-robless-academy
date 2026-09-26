@@ -11,9 +11,6 @@ export default function Home() {
             Tina&nbsp;<span>Robless</span>
           </Link>
           <div className="nav-right">
-            <Link href="/upload-test" style={{ fontWeight: 500 }}>
-              ატვირთვის ტესტი
-            </Link>
             <Link className="btn btn-plum" href="#courses">
               კურსების ნახვა
             </Link>
