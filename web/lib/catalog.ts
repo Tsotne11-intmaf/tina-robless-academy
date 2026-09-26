@@ -1,6 +1,14 @@
 // Extracted from the legacy single-file app. Source of truth for the catalogue
 // until this data moves into Supabase.
 
+export type CourseItem = {
+  id: string; cat: string; title: string; dur: string; price: string;
+  desc: string; img?: string; photo?: string | null; was?: string;
+  badge?: string | null; home?: boolean; order?: number;
+  learn?: string[]; incl?: string[]; thumb?: string;
+  access?: string; accessDays?: number;
+};
+
 export const CATS: Record<string,string> = {
   "all": "ყველა",
   "package": "პაკეტები",
@@ -10,7 +18,7 @@ export const CATS: Record<string,string> = {
   "business": "ბიზნესი"
 };
 
-export const CATALOG = [
+export const CATALOG: CourseItem[] = [
   {
     "id": "master-1",
     "img": "ph1",
