@@ -18,7 +18,7 @@ export default async function HomePage() {
             <p className="sub" data-edit="t.home.3">{t("5-კვირიანი ონლაინ პროგრამა ამერიკულ ნაშენ სიგრძეზე, არქიტექტურასა და ფრენჩზე — თინა რობლესისგან, თბილისი. უყურეთ ყოველ ნაბიჯს ზემოდან, რეალურ სამუშაო ტემპში, და გადახედეთ იმდენჯერ, რამდენჯერაც დაგჭირდებათ.")}</p>
             <div className="hero-cta">
               <a className="btn btn-plum" href="#flagship">{t("ჩაეწერე მასტერ-პროგრამაზე — 590&nbsp;₾")}</a>
-              <a className="btn-link" href="#catalog">{t("ყველა კურსი")}</a>
+              <a className="btn-link" href="/catalog">{t("ყველა კურსი")}</a>
             </div>
             <div className="hero-meta">
               <span>{t("ერთჯერადი გადახდა")}</span>
@@ -51,13 +51,13 @@ export default async function HomePage() {
               <h2 data-edit="t.home.10">{t("ყველაზე პოპულარული კურსები")}</h2>
               <p data-edit="t.home.11">{t("დაიწყეთ ერთი ტექნიკით ან პირდაპირ სრული პროგრამით. ყველა კურსი გადაღებულია თინას თვალით, ნამდვილ კლიენტზე.")}</p>
             </div>
-            <a className="btn-link" href="#catalog">{t("ყველა კურსის ნახვა")}</a>
+            <a className="btn-link" href="/catalog">{t("ყველა კურსის ნახვა")}</a>
           </div>
           <div className="cards home-slider">
             <article className="card">
               <div className="thumb ph1"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.12"><a href="#kurs/master-1">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 1")}</a></h3>
+                <h3 data-edit="t.home.12"><a href="/kurs/master-1">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 1")}</a></h3>
                 <p data-edit="t.home.13">{t("ფორმის დაყენება, ამერიკული სიგრძის მოდელირება, დაჭერა (pinch), არქიტექტურა და სუფთა დასრულება. კურსი, რომელსაც თინას სტუდენტები პირველად ითხოვენ.")}</p>
                 <div className="card-foot"><span className="dur">{t("მინ. 5 დღე")}</span><span className="price">590 ₾</span></div>
               </div>
@@ -65,7 +65,7 @@ export default async function HomePage() {
             <article className="card">
               <div className="thumb ph7"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.14"><a href="#kurs/master-2">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 2")}</a></h3>
+                <h3 data-edit="t.home.14"><a href="/kurs/master-2">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 2")}</a></h3>
                 <p data-edit="t.home.15">{t("გადაიტანეთ 1-ლი ნაწილი ყოველდღიურ სალონურ საქმეში: კორექცია, სისწრაფე და ექსტრემალური სიგრძის მტკიცედ შენარჩუნება 4+ კვირით.")}</p>
                 <div className="card-foot"><span className="dur">{t("მინ. 8 კვირა")}</span><span className="price">650 ₾</span></div>
               </div>
@@ -73,7 +73,7 @@ export default async function HomePage() {
             <article className="card">
               <div className="thumb ph2"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.16"><a href="#kurs/french">{t("იდეალური ფრენჩი")}</a></h3>
+                <h3 data-edit="t.home.16"><a href="/kurs/french">{t("იდეალური ფრენჩი")}</a></h3>
                 <p data-edit="t.home.17">{t("თინას საფირმო „ღიმილის ხაზი“ გრძელ ფრჩხილებზე — თავისუფალი და რევერსული მეთოდები კვადრატზე, ნუშზე და სტილეტზე.")}</p>
                 <span className="incl">{t("ასევე შედის:")} <a href="#flagship">{t("მასტერ-პროგრამა — ნაწილი 1")}</a></span>
                 <div className="card-foot"><span className="dur">{t("≈ 5 სთ")}</span><span className="price">190 ₾</span></div>
@@ -82,7 +82,7 @@ export default async function HomePage() {
             <article className="card">
               <div className="thumb ph5"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.18"><a href="#kurs/extreme">{t("ექსტრემალური სიგრძე: არქიტექტურა და დაჭერა")}</a></h3>
+                <h3 data-edit="t.home.18"><a href="/kurs/extreme">{t("ექსტრემალური სიგრძე: არქიტექტურა და დაჭერა")}</a></h3>
                 <p data-edit="t.home.19">{t("სად უნდა იყოს აპექსი, რამდენი მასალა, როგორ და როდის დავაჭიროთ — რომ XXL ნამუშევრები არ გატყდეს და არ აიწიოს.")}</p>
                 <span className="incl">{t("ასევე შედის:")} <a href="#flagship">{t("მასტერ-პროგრამა — ნაწილი 1")}</a></span>
                 <div className="card-foot"><span className="dur">{t("≈ 6 სთ")}</span><span className="price">190 ₾</span></div>
@@ -91,7 +91,7 @@ export default async function HomePage() {
             <article className="card">
               <div className="thumb ph8"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.20"><a href="#kurs/crystals">{t("კრისტალები, ჩარმები და 3D")}</a></h3>
+                <h3 data-edit="t.home.20"><a href="/kurs/crystals">{t("კრისტალები, ჩარმები და 3D")}</a></h3>
                 <p data-edit="t.home.21">{t("ქვების ისე დამაგრება, რომ გრძელ ფრჩხილზე ერთი თვე გაუძლოს, პლუს ჩარმებისა და ჯაჭვების ტექნიკა თინას TikTok-ნამუშევრებიდან.")}</p>
                 <div className="card-foot"><span className="dur">{t("≈ 3 სთ")}</span><span className="price">140 ₾</span></div>
               </div>
@@ -99,7 +99,7 @@ export default async function HomePage() {
             <article className="card">
               <div className="thumb ph9"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.22"><a href="#kurs/money">{t("Nail Money: ფასები და სოციალური ქსელები")}</a></h3>
+                <h3 data-edit="t.home.22"><a href="/kurs/money">{t("Nail Money: ფასები და სოციალური ქსელები")}</a></h3>
                 <p data-edit="t.home.23">{t("როგორ აფასებს თინა გრძელ ნამუშევრებს თბილისში, როგორ ავსებს ჩანაწერს და როგორ მოაგროვა 19K+ აუდიტორია TikTok-ზე სალონიდან გადაღებული ვიდეოებით.")}</p>
                 <div className="card-foot"><span className="dur">{t("≈ 2 სთ")}</span><span className="price">120 ₾</span></div>
               </div>
@@ -133,7 +133,7 @@ export default async function HomePage() {
             <article className="card">
               <div className="thumb ph1"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.34"><a href="#kurs/master-1">{t("ნაწილი 1 — ააშენე ფრჩხილი")}</a></h3>
+                <h3 data-edit="t.home.34"><a href="/kurs/master-1">{t("ნაწილი 1 — ააშენე ფრჩხილი")}</a></h3>
                 <p data-edit="t.home.35">{t("მომზადება, ფორმები, მოდელირება, აპექსი და C-მოხრა, დაჭერა, ფორმის გამოყვანა, ფრენჩი. 5 მოდული, 22 გაკვეთილი.")}</p>
                 <div className="card-foot"><span className="dur">{t("მინ. 5 დღე")}</span><span className="price">590 ₾</span></div>
               </div>
@@ -141,7 +141,7 @@ export default async function HomePage() {
             <article className="card">
               <div className="thumb ph7"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.36"><a href="#kurs/master-2">{t("ნაწილი 2 — იმუშავე სალონში")}</a></h3>
+                <h3 data-edit="t.home.36"><a href="/kurs/master-2">{t("ნაწილი 2 — იმუშავე სალონში")}</a></h3>
                 <p data-edit="t.home.37">{t("კორექცია ექსტრემალურ სიგრძეზე, სამუშაო დროის შემცირება, რთული შემთხვევები, კლიენტის კონსულტაცია. 8 კვირა საშინაო დავალებებით.")}</p>
                 <div className="card-foot"><span className="dur">{t("მინ. 8 კვირა")}</span><span className="price">650 ₾</span></div>
               </div>
@@ -150,7 +150,7 @@ export default async function HomePage() {
           <div className="bundle">
             <div className="thumb ph1"></div>
             <div className="bundle-body">
-              <h3 data-edit="t.home.38"><a href="#kurs/bundle">{t("მასტერ-პროგრამა — სრული პაკეტი")}</a></h3>
+              <h3 data-edit="t.home.38"><a href="/kurs/bundle">{t("მასტერ-პროგრამა — სრული პაკეტი")}</a></h3>
               <p data-edit="t.home.39">{t("ნაწილი 1 და 2 პლუს მათში შემავალი სამი ტექნიკური კურსი, ერთი გადახდით.")}</p>
               <ul>
                 <li data-edit="t.home.40">{t("ნაწილი 1 და ნაწილი 2")}</li>
@@ -160,7 +160,7 @@ export default async function HomePage() {
                 <li data-edit="t.home.44">{t("სერტიფიკატი დასრულებისას")}</li>
               </ul>
               <div className="bundle-price"><span className="now">990 ₾</span><span className="was">1,430 ₾</span></div>
-              <a className="btn btn-plum" href="#kurs/bundle">{t("სრული პაკეტის ყიდვა")}</a>
+              <a className="btn btn-plum" href="/kurs/bundle">{t("სრული პაკეტის ყიდვა")}</a>
             </div>
           </div>
         </div>
@@ -171,13 +171,13 @@ export default async function HomePage() {
         <div className="wrap">
           <div className="sec-head">
             <div><h2 data-edit="t.home.45">{t("ტექნიკური კურსები")}</h2><p data-edit="t.home.46">{t("გრძელი ფრჩხილების სტრუქტურული უნარები. თითოეული დამოუკიდებელი კურსია.")}</p></div>
-            <a className="btn-link" href="#catalog/technique">{t("ყველა ტექნიკური კურსი")}</a>
+            <a className="btn-link" href="/catalog?cat=technique">{t("ყველა ტექნიკური კურსი")}</a>
           </div>
           <div className="cards home-slider">
             <article className="card">
               <div className="thumb ph6"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.47"><a href="#kurs/american">{t("ამერიკული ფრჩხილები ფორმებზე")}</a></h3>
+                <h3 data-edit="t.home.47"><a href="/kurs/american">{t("ამერიკული ფრჩხილები ფორმებზე")}</a></h3>
                 <p data-edit="t.home.48">{t("მოდელირების სრული მეთოდი, რომელსაც თინა ყოველდღე იყენებს: ფორმის მორგება, მასალის კონტროლი, კვადრატის, ნუშისა და სტილეტის გამოყვანა.")}</p>
                 <span className="incl">{t("ასევე შედის:")} <a href="#flagship">{t("მასტერ-პროგრამა — ნაწილი 1")}</a></span>
                 <div className="card-foot"><span className="dur">{t("≈ 8 სთ")}</span><span className="price">220 ₾</span></div>
@@ -186,7 +186,7 @@ export default async function HomePage() {
             <article className="card">
               <div className="thumb ph4"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.49"><a href="#kurs/correction">{t("კორექცია გრძელ ფრჩხილებზე")}</a></h3>
+                <h3 data-edit="t.home.49"><a href="/kurs/correction">{t("კორექცია გრძელ ფრჩხილებზე")}</a></h3>
                 <p data-edit="t.home.50">{t("ზრდა ფორმის დაკარგვის გარეშე: რა მოვხსნათ, რა დავტოვოთ და როგორ აღვადგინოთ აპექსი.")}</p>
                 <span className="incl">{t("ასევე შედის:")} <a href="#flagship">{t("მასტერ-პროგრამა — ნაწილი 2")}</a></span>
                 <div className="card-foot"><span className="dur">{t("≈ 4 სთ")}</span><span className="price">170 ₾</span></div>
@@ -195,7 +195,7 @@ export default async function HomePage() {
             <article className="card">
               <div className="thumb mid">{t("კურსის ფოტო")}</div>
               <div className="card-body">
-                <h3 data-edit="t.home.51"><a href="#kurs/efile">{t("აპარატული მანიკური ნაშენისთვის")}</a></h3>
+                <h3 data-edit="t.home.51"><a href="/kurs/efile">{t("აპარატული მანიკური ნაშენისთვის")}</a></h3>
                 <p data-edit="t.home.52">{t("სუფთა კუტიკულა, რომ მასალა ძირში იდეალურად დაჯდეს — მომზადება, რომელიც წყვეტს, გაუძლებს თუ არა ნამუშევარი.")}</p>
                 <div className="card-foot"><span className="dur">{t("≈ 3 სთ")}</span><span className="price">150 ₾</span></div>
               </div>
@@ -209,13 +209,13 @@ export default async function HomePage() {
         <div className="wrap">
           <div className="sec-head">
             <div><h2 data-edit="t.home.53">{t("დიზაინის კურსები")}</h2><p data-edit="t.home.54">{t("მოკლე, კონკრეტული გაკვეთილები დიზაინებზე, რომლებსაც კლიენტები ყველაზე ხშირად ითხოვენ.")}</p></div>
-            <a className="btn-link" href="#catalog/art">{t("ყველა დიზაინის კურსი")}</a>
+            <a className="btn-link" href="/catalog?cat=art">{t("ყველა დიზაინის კურსი")}</a>
           </div>
           <div className="cards home-slider">
             <article className="card">
               <div className="thumb ph9"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.55"><a href="#kurs/chrome">{t("ქრომი და კატის თვალი")}</a></h3>
+                <h3 data-edit="t.home.55"><a href="/kurs/chrome">{t("ქრომი და კატის თვალი")}</a></h3>
                 <p data-edit="t.home.56">{t("სარკისებრი ქრომი ზოლების გარეშე და კატის თვალის ეფექტი გრძელ, მოხრილ ფრჩხილზე.")}</p>
                 <div className="card-foot"><span className="dur">{t("≈ 2 სთ")}</span><span className="price">120 ₾</span></div>
               </div>
@@ -223,7 +223,7 @@ export default async function HomePage() {
             <article className="card">
               <div className="thumb ph4"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.57"><a href="#kurs/ombre">{t("ომბრე და ბეიბი-ბუმერი")}</a></h3>
+                <h3 data-edit="t.home.57"><a href="/kurs/ombre">{t("ომბრე და ბეიბი-ბუმერი")}</a></h3>
                 <p data-edit="t.home.58">{t("რბილი გადასვლები ექსტრემალურ სიგრძეზე გელით, აეროგრაფის გარეშე.")}</p>
                 <div className="card-foot"><span className="dur">{t("≈ 2.5 სთ")}</span><span className="price">120 ₾</span></div>
               </div>
@@ -231,7 +231,7 @@ export default async function HomePage() {
             <article className="card">
               <div className="thumb ph7"></div>
               <div className="card-body">
-                <h3 data-edit="t.home.59"><a href="#kurs/pink">{t("ვარდისფერი ნამუშევრები: 10 სალონური დიზაინი")}</a></h3>
+                <h3 data-edit="t.home.59"><a href="/kurs/pink">{t("ვარდისფერი ნამუშევრები: 10 სალონური დიზაინი")}</a></h3>
                 <p data-edit="t.home.60">{t("თინას ათი ყველაზე მოთხოვნადი ვარდისფერი დიზაინი, თავიდან ბოლომდე, თითოეული 15 წუთზე ნაკლებში.")}</p>
                 <div className="card-foot"><span className="dur">{t("≈ 3 სთ")}</span><span className="price">140 ₾</span></div>
               </div>
@@ -252,7 +252,7 @@ export default async function HomePage() {
             <div className="creds">
               <span>{t("CMC მსოფლიო ჩემპიონი")}</span><span>{t("Georgia Nails-ის პრეზიდენტი")}</span><span>CAT</span><span>{t("ფრჩხილების მასტერი, თბილისი")}</span><span>{t("პედაგოგი")}</span>
             </div>
-            <a className="btn btn-plum" href="#about">{t("მეტი ჩემ შესახებ")}</a>
+            <a className="btn btn-plum" href="/about">{t("მეტი ჩემ შესახებ")}</a>
             <div className="socials" style={{marginTop: "30px"}}>
               <a href="https://www.instagram.com/tinarobless_/" target="_blank" rel="noopener">Instagram @tinarobless_</a>
               <a href="https://www.tiktok.com/@tinarobless" target="_blank" rel="noopener">TikTok @tinarobless</a>
@@ -270,7 +270,7 @@ export default async function HomePage() {
               <h2 data-edit="t.home.65">{t("წარმატებული სტუდენტები")}</h2>
               <p data-edit="t.home.66">{t("მასტერები, რომლებმაც თინასთან ისწავლეს და ახლა საკუთარი კლიენტურა ჰყავთ. მათი ნამუშევრები, მათი სიტყვები.")}</p>
             </div>
-            <a className="btn-link" href="#students">{t("ყველა კურსდამთავრებული")}</a>
+            <a className="btn-link" href="/students">{t("ყველა კურსდამთავრებული")}</a>
           </div>
           <div className="students-grid">
             <article className="student">
@@ -345,7 +345,7 @@ export default async function HomePage() {
               <li data-edit="t.home.85">{t("უკუკავშირი გამოგზავნილ ნამუშევარზე გაცემამდე")}</li>
               <li data-edit="t.home.86">{t("გასაზიარებელი Instagram-ზე, TikTok-ზე და ჩაწერის გვერდზე")}</li>
             </ul>
-            <a className="btn btn-ghost" href="#certificates" style={{marginTop: "26px"}}>{t("სერტიფიკატის ნახვა")}</a>
+            <a className="btn btn-ghost" href="/certificates" style={{marginTop: "26px"}}>{t("სერტიფიკატის ნახვა")}</a>
           </div>
           <div className="cert-card">
             <small data-edit="t.home.87">{t("Tina Robless Nail Academy · თბილისი")}</small>
@@ -392,7 +392,7 @@ export default async function HomePage() {
         <div className="wrap">
           <h2 data-edit="t.home.110">{t("დაიწყე პირველი გრძელი ნამუშევარი ამ კვირაში.")}</h2>
           <p data-edit="t.home.111">{t("აირჩიე კურსი, პირველ გაკვეთილს დღესვე უყურე.")}</p>
-          <a className="btn btn-plum" href="#catalog">{t("კურსების ნახვა")}</a>
+          <a className="btn btn-plum" href="/catalog">{t("კურსების ნახვა")}</a>
         </div>
       </section>
       

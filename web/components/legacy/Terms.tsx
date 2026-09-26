@@ -10,7 +10,7 @@ export default async function TermsPage() {
     <>
       
       <section className="lms"><div className="wrap legal">
-        <div className="crumbs"><a href="#home">{t("მთავარი")}</a> {t("/ წესები და პირობები")}</div>
+        <div className="crumbs"><a href="/">{t("მთავარი")}</a> {t("/ წესები და პირობები")}</div>
         <h1>{t("წესები და პირობები")}</h1>
         <p className="legal-date">{t("ბოლო განახლება: 10 სექტემბერი 2026")}</p>
       <h2>{t("1. ვინ ვართ")}</h2>

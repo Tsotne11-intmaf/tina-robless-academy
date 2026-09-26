@@ -11,7 +11,7 @@ export default async function AboutPage() {
       
       <div className="page-head">
         <div className="wrap">
-          <div className="crumbs"><a href="#home">{t("მთავარი")}</a> {t("/ ჩემ შესახებ")}</div>
+          <div className="crumbs"><a href="/">{t("მთავარი")}</a> {t("/ ჩემ შესახებ")}</div>
           <p className="ka" data-edit="t.about.1">{t("თინა კუჭუხიზე")}</p>
           <h1 data-edit="t.about.2">{t("ჩემ შესახებ")}</h1>
           <p data-edit="t.about.3">{t("ფრჩხილების მასტერი და პედაგოგი თბილისიდან, ონლაინ ცნობილი როგორც Tina Robless.")}</p>
@@ -63,9 +63,9 @@ export default async function AboutPage() {
         <div className="wrap">
           <h2 data-edit="t.about.17">{t("ისწავლე ჩემგან.")}</h2>
           <p data-edit="t.about.18">{t("ყველა კურსი ჩემს სტუდიაშია გადაღებული, ნამდვილ კლიენტებზე.")}</p>
-          <a className="btn btn-plum" href="#catalog">{t("კურსების ნახვა")}</a>
+          <a className="btn btn-plum" href="/catalog">{t("კურსების ნახვა")}</a>
           <span style={{display: "inline-block", width: "14px"}}></span>
-          <a className="btn btn-ghost" href="#certificates">{t("სერტიფიკატების ნახვა")}</a>
+          <a className="btn btn-ghost" href="/certificates">{t("სერტიფიკატების ნახვა")}</a>
         </div>
       </section>
       

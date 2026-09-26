@@ -11,7 +11,7 @@ export default async function ShopPage() {
       
       <section className="shop" style={{minHeight: "70vh", display: "flex", alignItems: "center"}}>
         <div className="wrap">
-          <div className="crumbs" style={{textAlign: "left"}}><a href="#home">{t("მთავარი")}</a> {t("/ მაღაზია")}</div>
+          <div className="crumbs" style={{textAlign: "left"}}><a href="/">{t("მთავარი")}</a> {t("/ მაღაზია")}</div>
           <p className="ka" data-edit="t.shop.1">Coming soon</p>
           <h1 style={{marginBottom: "14px"}} data-edit="t.shop.2">{t("მაღაზია — მალე გაიხსნება")}</h1>
           <p data-edit="t.shop.3">{t("ფორმები, ფუნჯები, ფრეზები და მასალები, რომლებსაც თინა ყველა კურსში იყენებს, პლუს მისი რჩეული გრძელი ნამუშევრებისთვის. დატოვეთ ელფოსტა და გახსნისას პირველი გაიგებთ.")}</p>

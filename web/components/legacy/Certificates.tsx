@@ -11,7 +11,7 @@ export default async function CertificatesPage() {
       
       <div className="page-head">
         <div className="wrap">
-          <div className="crumbs"><a href="#home">{t("მთავარი")}</a> {t("/ სერტიფიკატები")}</div>
+          <div className="crumbs"><a href="/">{t("მთავარი")}</a> {t("/ სერტიფიკატები")}</div>
           <p className="ka" data-edit="t.certificates.1">{t("სერტიფიკატები")}</p>
           <h1 data-edit="t.certificates.2">{t("სერტიფიკატები")}</h1>
           <p data-edit="t.certificates.3">{t("ყველა კურსი სრულდება თინა რობლესის მიერ პირადად ხელმოწერილი სერტიფიკატით. თითოეულს აქვს უნიკალური ნომერი და ამ გვერდზე მოწმდება.")}</p>
@@ -67,15 +67,15 @@ export default async function CertificatesPage() {
             </div>
           </div>
           <div className="cert-slots">
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.8"><a href="#kurs/master-1">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 1")}</a></h3><p data-edit="t.certificates.9">{t("40 საათი · შემოწმებული საბოლოო ნამუშევარი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.10"><a href="#kurs/master-2">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 2")}</a></h3><p data-edit="t.certificates.11">{t("8 კვირა · შემოწმებული სალონური ნამუშევრები")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.12"><a href="#kurs/bundle">{t("მასტერ-პროგრამა — სრული პაკეტი")}</a></h3><p data-edit="t.certificates.13">{t("მასტერ-სერტიფიკატი, ორივე ნაწილი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.14"><a href="#kurs/american">{t("ამერიკული ფრჩხილები ფორმებზე")}</a></h3><p data-edit="t.certificates.15">{t("8 საათი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.16"><a href="#kurs/french">{t("იდეალური ფრენჩი")}</a></h3><p data-edit="t.certificates.17">{t("5 საათი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.18"><a href="#kurs/extreme">{t("ექსტრემალური სიგრძე: არქიტექტურა და დაჭერა")}</a></h3><p data-edit="t.certificates.19">{t("6 საათი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.20"><a href="#kurs/correction">{t("კორექცია გრძელ ფრჩხილებზე")}</a></h3><p data-edit="t.certificates.21">{t("4 საათი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.22"><a href="#kurs/crystals">{t("კრისტალები, ჩარმები და 3D")}</a></h3><p data-edit="t.certificates.23">{t("3 საათი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.24"><a href="#kurs/chrome">{t("ქრომი და კატის თვალი")}</a></h3><p data-edit="t.certificates.25">{t("2 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.8"><a href="/kurs/master-1">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 1")}</a></h3><p data-edit="t.certificates.9">{t("40 საათი · შემოწმებული საბოლოო ნამუშევარი")}</p></div></article>
+            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.10"><a href="/kurs/master-2">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 2")}</a></h3><p data-edit="t.certificates.11">{t("8 კვირა · შემოწმებული სალონური ნამუშევრები")}</p></div></article>
+            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.12"><a href="/kurs/bundle">{t("მასტერ-პროგრამა — სრული პაკეტი")}</a></h3><p data-edit="t.certificates.13">{t("მასტერ-სერტიფიკატი, ორივე ნაწილი")}</p></div></article>
+            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.14"><a href="/kurs/american">{t("ამერიკული ფრჩხილები ფორმებზე")}</a></h3><p data-edit="t.certificates.15">{t("8 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.16"><a href="/kurs/french">{t("იდეალური ფრენჩი")}</a></h3><p data-edit="t.certificates.17">{t("5 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.18"><a href="/kurs/extreme">{t("ექსტრემალური სიგრძე: არქიტექტურა და დაჭერა")}</a></h3><p data-edit="t.certificates.19">{t("6 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.20"><a href="/kurs/correction">{t("კორექცია გრძელ ფრჩხილებზე")}</a></h3><p data-edit="t.certificates.21">{t("4 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.22"><a href="/kurs/crystals">{t("კრისტალები, ჩარმები და 3D")}</a></h3><p data-edit="t.certificates.23">{t("3 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.24"><a href="/kurs/chrome">{t("ქრომი და კატის თვალი")}</a></h3><p data-edit="t.certificates.25">{t("2 საათი")}</p></div></article>
           </div>
         </div>
       </section>
@@ -139,7 +139,7 @@ export default async function CertificatesPage() {
         <div className="wrap">
           <h2 data-edit="t.certificates.39">{t("მოიპოვე შენი.")}</h2>
           <p data-edit="t.certificates.40">{t("დაასრულე ნებისმიერი კურსი, გამოგზავნე საბოლოო ნამუშევარი და თინა ხელს მოაწერს.")}</p>
-          <a className="btn btn-plum" href="#catalog">{t("კურსების ნახვა")}</a>
+          <a className="btn btn-plum" href="/catalog">{t("კურსების ნახვა")}</a>
         </div>
       </section>
       

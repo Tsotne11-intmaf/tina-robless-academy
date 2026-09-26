@@ -9,22 +9,22 @@ export default async function SiteHeader() {
     <header>
       
         <div className="wrap nav">
-          <a className="logo" href="#home">Tina&nbsp;<span>Robless</span></a>
+          <a className="logo" href="/">Tina&nbsp;<span>Robless</span></a>
           <ul>
-            <li><a href="#catalog" data-nav="catalog">{t("კურსები")}</a></li>
-            <li><a href="#certificates" data-nav="certificates">{t("სერტიფიკატები")}</a></li>
-            <li><a href="#students" data-nav="students">{t("სტუდენტები")}</a></li>
-            <li><a href="#about" data-nav="about">{t("ჩემ შესახებ")}</a></li>
-            <li><a href="#shop" data-nav="shop">{t("მაღაზია")} <span className="soon-tag">{t("მალე")}</span></a></li>
-            <li className="m-only"><a href="#login">{t("ჩემი კაბინეტი")}</a></li>
-            <li className="m-only"><a className="btn btn-plum" href="#catalog">{t("კურსების ნახვა")}</a></li>
+            <li><a href="/catalog" data-nav="catalog">{t("კურსები")}</a></li>
+            <li><a href="/certificates" data-nav="certificates">{t("სერტიფიკატები")}</a></li>
+            <li><a href="/students" data-nav="students">{t("სტუდენტები")}</a></li>
+            <li><a href="/about" data-nav="about">{t("ჩემ შესახებ")}</a></li>
+            <li><a href="/shop" data-nav="shop">{t("მაღაზია")} <span className="soon-tag">{t("მალე")}</span></a></li>
+            <li className="m-only"><a href="/login">{t("ჩემი კაბინეტი")}</a></li>
+            <li className="m-only"><a className="btn btn-plum" href="/catalog">{t("კურსების ნახვა")}</a></li>
             
             <li className="m-only lang-li"><LangSwitcher current={lang} /></li>
           </ul>
           <div className="nav-right">
             <LangSwitcher current={lang} />
-            <a href="#login" style={{fontWeight: "500"}}>{t("ჩემი კაბინეტი")}</a>
-            <a className="btn btn-plum" href="#catalog">{t("კურსების ნახვა")}</a>
+            <a href="/login" style={{fontWeight: "500"}}>{t("ჩემი კაბინეტი")}</a>
+            <a className="btn btn-plum" href="/catalog">{t("კურსების ნახვა")}</a>
             <button className="menu-btn" aria-label={t("მენიუს გახსნა")}>☰</button>
           </div>
         </div>

@@ -11,7 +11,7 @@ export default async function StudentsPage() {
       
       <div className="page-head">
         <div className="wrap">
-          <div className="crumbs"><a href="#home">{t("მთავარი")}</a> {t("/ წარმატებული სტუდენტები")}</div>
+          <div className="crumbs"><a href="/">{t("მთავარი")}</a> {t("/ წარმატებული სტუდენტები")}</div>
           <p className="ka" data-edit="t.students.1">{t("წარმატებული სტუდენტები")}</p>
           <h1 data-edit="t.students.2">{t("წარმატებული სტუდენტები")}</h1>
           <p data-edit="t.students.3">{t("მასტერები, რომლებმაც თინასთან ისწავლეს — სტუდიაში და ონლაინ — და ახლა საკუთარი კლიენტურა ჰყავთ. მათი ნამუშევრები, მათი სიტყვები და სად მუშაობენ დღეს.")}</p>
