@@ -2992,7 +2992,7 @@ var ADMIN={
     try{if(sessionStorage.getItem('tr_admin')==='1')this.ok=true;}catch(e){}
     var root=document.getElementById('admin');
     if(!this.ok){root.innerHTML='<div class="login-box"><h1>ადმინი</h1><p>მხოლოდ თინასთვის. შეიყვანეთ პაროლი.</p><form onsubmit="event.preventDefault();ADMIN.login(this.p.value)"><div class="field"><label>პაროლი</label><input name="p" type="password" required></div><button class="btn btn-plum" type="submit">შესვლა</button></form></div>';return;}
-    var tabs=[['activity','აქტიურობა და გაყიდვები'],['homework','სტუდენტები და დავალებები'],['courses','კურსები და ფასები'],['data','შენახვა / ექსპორტი']];
+    var tabs=[['activity','აქტიურობა და გაყიდვები'],['homework','სტუდენტები და დავალებები'],['courses','კურსები და ფასები'],['data','რეგისტრირებული ანგარიშები']];
     root.innerHTML='<div class="lms-grid"><aside class="side"><div class="who">ადმინ პანელი</div><div class="mail">ცვლილებები ინახება ამ ბრაუზერში „შენახვა“-ზე დაჭერით</div><nav>'+tabs.map(function(t){return '<a href="#admin/'+t[0]+'"'+(ADMIN.tab===t[0]?' aria-current="page"':'')+'>'+t[1]+'</a>';}).join('')+'<a href="#home" class="adm-site" onclick="ADMIN.setEdit(true)">✎ საიტზე რედაქტირება</a><a href="#home" onclick="ADMIN.logout()">გასვლა</a></nav></aside><div id="adm-body"></div></div>';
     if(this.tab==='student'){this.profile(parseInt(this.sub,10)||0);}else this['tab_'+this.tab]();
   },
@@ -3125,13 +3125,48 @@ var ADMIN={
   editStudent:function(i){var s=CFG.students[i],e=document.getElementById('adm-edit2')||document.getElementById('adm-edit');
     e.innerHTML='<div class="adm-form"><h2>სტუდენტი</h2><div class="adm-2"><div class="field"><label>სახელი</label><input value="'+esc(s.name)+'" oninput="CFG.students['+i+'].name=this.value"></div><div class="field"><label>ქალაქი · პოზიცია</label><input value="'+esc(s.where)+'" oninput="CFG.students['+i+'].where=this.value"></div></div><div class="field"><label>ტექსტი</label><textarea rows="3" oninput="CFG.students['+i+'].text=this.value">'+esc(s.text)+'</textarea></div><div class="field"><label>გავლილი კურსი</label><input value="'+esc(s.course)+'" oninput="CFG.students['+i+'].course=this.value"></div><div class="field"><label>ნამუშევრის ფოტო</label><input type="file" accept="image/*" onchange="ADMIN.file(this,function(d){CFG.students['+i+'].photo=d;ADMIN.tab_students();ADMIN.editStudent('+i+')})"></div><button class="btn btn-plum" type="button" onclick="ADMIN.save()">შენახვა</button> <button class="btn btn-ghost" type="button" onclick="ADMIN.tab_students()">დახურვა</button></div>';e.scrollIntoView({behavior:'smooth'});},
   /* --- data --- */
+  /* Registered accounts. Read straight from Supabase, so this is the real list of
+     people who signed up rather than anything stored in this browser.
+     It only returns everyone if the viewer is signed in as a Supabase user listed in
+     the admins table - the profiles select policy hands back just your own row
+     otherwise. That is the point: the tina2026 password cannot unlock other people's
+     data, only a real admin session can. */
   tab_data:function(){var b=document.getElementById('adm-body');var size=0;try{size=(localStorage.getItem(CFG_KEY)||'').length;}catch(e){}
-    b.innerHTML='<h1>შენახვა / ექსპორტი</h1><p class="lead">ცვლილებები ინახება ამ ბრაუზერში. რომ სხვა კომპიუტერზეც იყოს ან სარეზერვო ასლი გქონდეთ — ჩამოტვირთეთ ფაილი და იქ ატვირთეთ. ბექენდის მიერთების შემდეგ ეს ავტომატურად მოხდება.</p>'+
-     '<div class="stats"><div class="stat"><b>'+CFG.catalog.length+'</b><span>კურსი</span></div><div class="stat"><b>'+CFG.homework.length+'</b><span>დავალება</span></div><div class="stat"><b>'+Math.round(size/1024)+' KB</b><span>შენახული მონაცემები (ლიმიტი ≈ 5000 KB)</span></div></div>'+
-     '<div class="adm-form"><h2>ავტომატური თარგმანი</h2><p class="lead">ყველა ტექსტი, რომელსაც ადმინში წერთ (სათაურები, აღწერები, ბიო, დავალებები), შენახვისას თავისით ითარგმნება ინგლისურად, რუსულად და ბერძნულად. უთარგმნელი ახლა: <b>'+TR.missing().length+'</b>. თარგმანის შესწორება შეგიძლიათ ქვემოთ.</p><button class="btn btn-ghost" type="button" onclick="ADMIN.translateAll()">თარგმნა ახლა</button></div>'+
-     TR.editorHTML()+
-     '<div class="adm-form"><button class="btn btn-plum" type="button" onclick="ADMIN.exportJSON()">ჩამოტვირთე კონფიგურაცია (JSON)</button> <label class="btn btn-ghost" style="cursor:pointer">ატვირთე კონფიგურაცია <input type="file" accept="application/json" hidden onchange="ADMIN.importJSON(this)"></label></div>'+
-     '<div class="adm-form"><h2>საწყის მდგომარეობაზე დაბრუნება</h2><p class="lead">შლის ყველა ცვლილებას ამ ბრაუზერში.</p><button class="btn btn-ghost" type="button" onclick="if(confirm(\'ნამდვილად წავშალოთ ყველა ცვლილება?\')){localStorage.removeItem(CFG_KEY);location.reload()}">გადატვირთვა</button></div>';
+    b.innerHTML='<h1>რეგისტრირებული ანგარიშები</h1><p class="lead">საიტზე დარეგისტრირებული მომხმარებლები.</p>'+
+     '<div id="acc-list" class="adm-list"><p class="lead">იტვირთება…</p></div>'+
+     '<details class="adm-form"><summary style="cursor:pointer;font-family:var(--serif);font-size:1.15rem">სარეზერვო ასლი და თარგმანი</summary>'+
+       '<div class="stats" style="margin-top:16px"><div class="stat"><b>'+CFG.catalog.length+'</b><span>კურსი</span></div><div class="stat"><b>'+CFG.homework.length+'</b><span>დავალება</span></div><div class="stat"><b>'+Math.round(size/1024)+' KB</b><span>შენახული მონაცემები (ლიმიტი ≈ 5000 KB)</span></div></div>'+
+       '<p class="lead">უთარგმნელი ახლა: <b>'+TR.missing().length+'</b>.</p><button class="btn btn-ghost" type="button" onclick="ADMIN.translateAll()">თარგმნა ახლა</button>'+
+       TR.editorHTML()+
+       '<div style="margin-top:16px"><button class="btn btn-plum" type="button" onclick="ADMIN.exportJSON()">ჩამოტვირთე კონფიგურაცია (JSON)</button> <label class="btn btn-ghost" style="cursor:pointer">ატვირთე კონფიგურაცია <input type="file" accept="application/json" hidden onchange="ADMIN.importJSON(this)"></label></div>'+
+       '<div style="margin-top:16px"><button class="btn btn-ghost" type="button" onclick="if(confirm(\'ნამდვილად წავშალოთ ყველა ცვლილება?\')){localStorage.removeItem(CFG_KEY);location.reload()}">საწყის მდგომარეობაზე დაბრუნება</button></div>'+
+     '</details>';
+    this.loadAccounts();
+  },
+  loadAccounts:function(){
+    var el=document.getElementById('acc-list');if(!el)return;
+    if(!window.SB||!SB.signedIn()){
+      el.innerHTML='<p class="lead">ანგარიშების სანახავად საიტზე შედით იმ ელფოსტით, რომელიც ადმინადაა დამატებული.</p>';
+      return;
+    }
+    SB.select('profiles?select=*&order=created_at.desc').then(function(rows){
+      rows=rows||[];
+      if(rows.length<=1){
+        el.innerHTML='<p class="lead">'+(rows.length?'ჩანს მხოლოდ თქვენი ანგარიში — ესე იგი ეს ანგარიში ადმინებში არ არის დამატებული.':'ჯერ არავინ დარეგისტრირებულა.')+'</p>';
+        if(!rows.length)return;
+      }
+      el.innerHTML=rows.map(function(p){
+        var when=p.created_at?new Date(p.created_at).toLocaleDateString('ka-GE'):'';
+        var pic=p.avatar_url
+          ? '<div class="adm-th" style="border-radius:50%;background:url('+p.avatar_url+') center/cover"></div>'
+          : '<div class="adm-th" style="border-radius:50%"></div>';
+        return '<div class="adm-row">'+pic+
+          '<div class="adm-main"><b>'+esc(p.full_name||'—')+'</b><span>'+esc(p.email||'')+(p.phone?' · '+esc(p.phone):'')+'</span></div>'+
+          '<div class="adm-btns"><span style="color:var(--ink-soft);font-size:.85rem">'+when+'</span></div></div>';
+      }).join('');
+    })['catch'](function(err){
+      el.innerHTML='<p class="lead">ვერ ჩაიტვირთა: '+esc(err.message)+'</p>';
+    });
   },
   exportJSON:function(){var blob=new Blob([JSON.stringify(CFG,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tina-site-config.json';a.click();},
   importJSON:function(input){var f=input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);for(var k in o)CFG[k]=o[k];if(cfgSave())location.reload();}catch(e){alert('ფაილი ვერ წავიკითხე');}};r.readAsText(f);}
