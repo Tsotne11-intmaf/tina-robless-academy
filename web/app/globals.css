@@ -1491,3 +1491,32 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   font-family:inherit;
 }
 .ed-del-btn:hover{background:#B80F5F}
+
+/* ---------------------------------------------------------------------------
+   Phones: long Georgian words, and the room to put them in.
+
+   Georgian builds long unbroken words - "სერტიფიკატები" is thirteen letters
+   with nowhere to break - so the rules that work on a laptop cut them off on a
+   phone rather than wrapping them.
+   --------------------------------------------------------------------------- */
+@media (max-width:560px){
+  /* The clamp floor was 2.8rem, which renders at 44.8px: wider than the column
+     it sits in, so the heading was clipped instead of wrapped. */
+  h1{font-size:clamp(1.85rem,7.5vw,2.6rem);overflow-wrap:anywhere}
+  h2{overflow-wrap:anywhere}
+
+  /* A course title is the one thing on a certificate card worth reading, and
+     the card clips whatever sticks out. */
+  /* nowrap wins over overflow-wrap, so the title has to be told it may wrap
+     before it can be told where. */
+  .cert-slot h3,.cert-slot h3 a{white-space:normal;overflow-wrap:anywhere}
+
+  /* "min. 5 days · 22 lessons · 40 hours" was truncated to "…22 lesso…" by an
+     ellipsis meant for a narrow desktop column. On a phone it gets its own
+     line and says all of it. */
+  .card-foot{flex-wrap:wrap;gap:8px}
+  .card-foot .dur{
+    white-space:normal;overflow:visible;text-overflow:clip;
+    flex:1 1 100%;line-height:1.45;
+  }
+}
