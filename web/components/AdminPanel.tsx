@@ -55,12 +55,25 @@ export default function AdminPanel({
   const [tab, setTab] = useState<Tab>("students");
   const [msg, setMsg] = useState<{ text: string; kind?: "ok" | "bad" } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [query, setQuery] = useState("");
+  /* One grant form open at a time. Showing one under every student turned this
+     screen into a wall of dropdowns, which is the opposite of what it is for. */
+  const [openFor, setOpenFor] = useState<string | null>(null);
 
   const nameOf = (id: string) => {
     const p = profiles.find((x) => x.id === id);
     return p ? p.full_name || p.email : id.slice(0, 8);
   };
   const titleOf = (id: string) => courses.find((c) => c.id === id)?.title ?? id;
+
+  const needle = query.trim().toLowerCase();
+  const shown = needle
+    ? profiles.filter(
+        (p) =>
+          (p.full_name ?? "").toLowerCase().includes(needle) ||
+          p.email.toLowerCase().includes(needle)
+      )
+    : profiles;
 
   /* Granting access is an admin-only write: the enrollments policy refuses an insert
      from anyone not in the admins table, so a student cannot enrol themselves even
@@ -73,19 +86,46 @@ export default function AdminPanel({
       days && Number(days) > 0
         ? new Date(Date.now() + Number(days) * 86400000).toISOString()
         : null;
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("enrollments")
       .upsert(
         { profile_id: profileId, course_id: courseId, expires_at: expires },
         { onConflict: "profile_id,course_id" }
-      );
+      )
+      .select("id")
+      .maybeSingle();
+    if (error) {
+      setBusy(false);
+      setMsg({ text: "ვერ მოხერხდა: " + error.message, kind: "bad" });
+      return;
+    }
+    // The student is told, rather than being left to notice on their next visit.
+    const mail = await notifyStudent({
+      kind: "granted",
+      userId: profileId,
+      courseId,
+      ref: String(data?.id ?? courseId),
+    });
     setBusy(false);
-    setMsg(
-      error
-        ? { text: "ვერ მოხერხდა: " + error.message, kind: "bad" }
-        : { text: "კურსი მიენიჭა.", kind: "ok" }
-    );
-    if (!error) router.refresh();
+    setMsg({ text: "კურსი მიენიჭა" + mail, kind: "ok" });
+    router.refresh();
+  }
+
+  /* Best effort, and deliberately so: the access itself is already saved, so a
+     mail problem must report itself without making the grant look failed. */
+  async function notifyStudent(payload: Record<string, string>) {
+    try {
+      const r = await fetch("/api/admin/notify-student", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) return " (წერილი ვერ გაიგზავნა)";
+      return body.sent ? " და ელფოსტა გაიგზავნა." : ".";
+    } catch {
+      return " (წერილი ვერ გაიგზავნა)";
+    }
   }
 
   async function revoke(id: number) {
@@ -101,19 +141,40 @@ export default function AdminPanel({
     if (!error) router.refresh();
   }
 
-  async function grade(id: number, status: string, gradeText: string, feedback: string) {
+  async function grade(
+    id: number,
+    profileId: string,
+    courseId: string,
+    status: string,
+    gradeText: string,
+    feedback: string
+  ) {
     setBusy(true);
     const { error } = await supabase
       .from("submissions")
       .update({ status, grade: gradeText || null, feedback: feedback || null })
       .eq("id", id);
+    if (error) {
+      setBusy(false);
+      setMsg({ text: "ვერ მოხერხდა: " + error.message, kind: "bad" });
+      return;
+    }
+    /* Only a finished verdict is worth an email. Parking something back in the
+       queue is bookkeeping, not news, and the reference carries the verdict so
+       re-saving the same result does not write again. */
+    let mail = ".";
+    if (status === "done" || status === "redo") {
+      mail = await notifyStudent({
+        kind: "graded",
+        userId: profileId,
+        courseId,
+        ref: `${id}:${status}`,
+        note: feedback ? "" : "",
+      });
+    }
     setBusy(false);
-    setMsg(
-      error
-        ? { text: "ვერ მოხერხდა: " + error.message, kind: "bad" }
-        : { text: "შეფასება შენახულია.", kind: "ok" }
-    );
-    if (!error) router.refresh();
+    setMsg({ text: "შეფასება შენახულია" + mail, kind: "ok" });
+    router.refresh();
   }
 
   /* Announcing a course. The server decides who is eligible and records what it
@@ -157,95 +218,145 @@ export default function AdminPanel({
       {msg ? <p className={"auth-msg" + (msg.kind ? " " + msg.kind : "")}>{msg.text}</p> : null}
 
       {tab === "students" ? (
-        profiles.length === 0 ? (
-          <p className="lead">ჯერ არავინ დარეგისტრირებულა.</p>
-        ) : (
-          profiles.map((p) => {
-            const mine = enrollments.filter((e) => e.profile_id === p.id);
-            return (
-              <div className="adm-form" key={p.id}>
-                <div className="prof-top" style={{ marginBottom: 14 }}>
-                  <div
-                    className="prof-pic"
-                    style={{
-                      width: 56,
-                      height: 56,
-                      ...(p.avatar_url
-                        ? { background: `url(${p.avatar_url}) center/cover` }
-                        : {}),
-                    }}
-                  >
-                    {p.avatar_url ? "" : ""}
-                  </div>
-                  <div>
-                    <b>{p.full_name || "—"}</b>
-                    <div className="mail">
-                      {p.email}
-                      {p.phone ? " · " + p.phone : ""}
-                    </div>
-                    <div className="hint">
-                      დარეგისტრირდა {new Date(p.created_at).toLocaleDateString("ka-GE")}
-                    </div>
-                  </div>
-                </div>
+        <>
+          <div className="field" style={{ maxWidth: 420, marginBottom: 18 }}>
+            <label htmlFor="adm-search">სტუდენტის ძებნა</label>
+            <input
+              id="adm-search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="სახელი ან ელფოსტა"
+            />
+          </div>
 
-                {mine.length ? (
-                  <div className="adm-list" style={{ marginBottom: 12 }}>
-                    {mine.map((e) => (
-                      <div className="adm-row" key={e.id}>
-                        <div className="adm-main">
-                          <b>{titleOf(e.course_id)}</b>
-                          <span>
-                            {e.expires_at
-                              ? "წვდომა " +
-                                new Date(e.expires_at).toLocaleDateString("ka-GE") +
-                                "-მდე"
-                              : "უვადო წვდომა"}
-                          </span>
-                        </div>
-                        <div className="adm-btns">
-                          <button className="btn btn-ghost" onClick={() => revoke(e.id)} disabled={busy}>
-                            ✕ წაშლა
-                          </button>
-                        </div>
+          {shown.length === 0 ? (
+            <p className="lead">
+              {profiles.length === 0
+                ? "ჯერ არავინ დარეგისტრირებულა."
+                : "ასეთი სტუდენტი არ მოიძებნა."}
+            </p>
+          ) : (
+            shown.map((p) => {
+              const mine = enrollments.filter((e) => e.profile_id === p.id);
+              const open = openFor === p.id;
+              return (
+                <div className="stu-card" key={p.id}>
+                  <div className="stu-head">
+                    <div
+                      className="stu-pic"
+                      style={
+                        p.avatar_url
+                          ? { background: `url(${p.avatar_url}) center/cover` }
+                          : undefined
+                      }
+                    >
+                      {p.avatar_url
+                        ? ""
+                        : (p.full_name || p.email).trim().charAt(0).toUpperCase()}
+                    </div>
+                    <div className="stu-who">
+                      <b>{p.full_name || "უსახელო"}</b>
+                      <span>{p.email}</span>
+                      {p.phone ? <span>{p.phone}</span> : null}
+                    </div>
+                  </div>
+
+                  <div className="stu-courses">
+                    <div className="stu-label">
+                      შეძენილი კურსები{mine.length ? ` (${mine.length})` : ""}
+                    </div>
+                    {mine.length ? (
+                      mine.map((e) => {
+                        const gone = !!e.expires_at && new Date(e.expires_at) < new Date();
+                        return (
+                          <div className={"stu-pill" + (gone ? " out" : "")} key={e.id}>
+                            <span className="stu-pill-name">{titleOf(e.course_id)}</span>
+                            <span className="stu-pill-when">
+                              {e.expires_at
+                                ? (gone ? "ვადა ამოიწურა " : "ვადა ") +
+                                  new Date(e.expires_at).toLocaleDateString("ka-GE")
+                                : "უვადოდ"}
+                            </span>
+                            <button
+                              className="stu-x"
+                              onClick={() => revoke(e.id)}
+                              disabled={busy}
+                              title="წვდომის მოხსნა"
+                              aria-label="წვდომის მოხსნა"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="stu-none">ჯერ არცერთი კურსი არ აქვს</p>
+                    )}
+                  </div>
+
+                  {open ? (
+                    <form
+                      className="stu-give"
+                      onSubmit={(ev) => {
+                        ev.preventDefault();
+                        const f = new FormData(ev.currentTarget);
+                        grant(p.id, String(f.get("course")), String(f.get("days") || ""));
+                        setOpenFor(null);
+                      }}
+                    >
+                      <div className="field">
+                        <label>რომელი კურსი?</label>
+                        <select name="course" defaultValue="" required>
+                          <option value="" disabled>
+                            — აირჩიეთ —
+                          </option>
+                          {courses.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.title}
+                            </option>
+                          ))}
+                        </select>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="hint" style={{ marginBottom: 12 }}>კურსები არ აქვს.</p>
-                )}
+                      <div className="field">
+                        <label>რამდენ დღეს გაგრძელდეს?</label>
+                        <input
+                          name="days"
+                          type="number"
+                          min={1}
+                          placeholder="ცარიელი = უვადოდ"
+                        />
+                      </div>
+                      <div className="stu-give-btns">
+                        <button className="btn btn-plum" type="submit" disabled={busy}>
+                          მიცემა და შეტყობინება
+                        </button>
+                        <button
+                          className="btn btn-ghost"
+                          type="button"
+                          onClick={() => setOpenFor(null)}
+                        >
+                          გაუქმება
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <button
+                      className="btn btn-plum stu-add"
+                      onClick={() => setOpenFor(p.id)}
+                      disabled={busy}
+                    >
+                      + კურსის მიცემა
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </>
+      ) : null}
 
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const f = new FormData(e.currentTarget);
-                    grant(p.id, String(f.get("course")), String(f.get("days") || ""));
-                  }}
-                >
-                  <div className="adm-2">
-                    <div className="field">
-                      <label>კურსის მინიჭება</label>
-                      <select name="course" defaultValue="">
-                        <option value="">— აირჩიეთ —</option>
-                        {courses.map((c) => (
-                          <option key={c.id} value={c.id}>{c.title}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="field">
-                      <label>დღე (ცარიელი = უვადო)</label>
-                      <input name="days" type="number" min={1} placeholder="მაგ. 45" />
-                    </div>
-                  </div>
-                  <button className="btn btn-plum" type="submit" disabled={busy}>
-                    წვდომის მიცემა
-                  </button>
-                </form>
-              </div>
-            );
-          })
-        )
-      ) : submissions.length === 0 ? (
+      {tab === "homework" ? (
+        submissions.length === 0 ? (
         <p className="lead">ჯერ არავის ჩაუბარებია დავალება.</p>
       ) : (
         submissions.map((s) => (
@@ -270,6 +381,8 @@ export default function AdminPanel({
                 const f = new FormData(e.currentTarget);
                 grade(
                   s.id,
+                  s.profile_id,
+                  s.course_id,
                   String(f.get("status")),
                   String(f.get("grade") || ""),
                   String(f.get("feedback") || "")
@@ -300,7 +413,8 @@ export default function AdminPanel({
             </form>
           </div>
         ))
-      )}
+        )
+      ) : null}
     
       {tab === "mail" ? (
         <>
