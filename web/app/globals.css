@@ -676,10 +676,21 @@ a.thumb{text-decoration:none}
   /* student area */
   .lms{padding:32px 0 60px}
   .lms-grid{gap:22px}
-  .side{position:static;padding:18px}
-  .side nav{display:flex;flex-wrap:wrap;gap:6px}
-  .side nav a{border:1px solid var(--line);border-radius:var(--r-pill);padding:7px 12px;font-size:.86rem}
-  .side nav a[aria-current="page"]{background:var(--plum);border-color:var(--plum);color:#fff}
+  /* On a phone the cabinet menu is a plain list, not a cloud of pills.
+     Wrapped pills put nine round chips under the student's name - profile,
+     every course they own, homework, certificates, sign out - which is a lot to
+     read and a lot to aim at. A list gives each one a full-width row and an
+     obvious tap target. */
+  .side{position:static;padding:16px 18px}
+  .side nav{display:block}
+  .side nav a{display:flex;align-items:center;justify-content:space-between;
+    border:0;border-top:1px solid var(--blush-soft);border-radius:0;
+    padding:14px 2px;font-size:1rem;background:none;color:var(--ink)}
+  .side nav a::after{content:"›";color:var(--blush);font-size:1.3rem;line-height:1}
+  .side nav a[aria-current="page"]{background:none;color:var(--plum);font-weight:600}
+  .side nav a[aria-current="page"]::after{color:var(--plum)}
+  .side .prof-pic{width:52px;height:52px}
+  .side .who{font-size:1.15rem}
   .login-box{padding:28px 20px}
   .login-box h1{font-size:1.7rem}
   .stats{gap:10px}
@@ -1186,9 +1197,14 @@ body.oauth-google .auth-or{display:flex}
 /* Language switcher inside the mobile menu. The 380px block sets .lang{display:none}; this
    selector is more specific so the in-menu copy stays reachable on narrow phones. */
 @media (max-width:1120px){.lang-li .lang{display:inline-flex}.lang-li{padding-top:14px!important}}
-/* Phones: keep the admin / student tab sidebar pinned under the 65px header while scrolling.
-   Overrides .side{position:static} from the 640px block; higher specificity so source order is irrelevant. */
-@media (max-width:640px){.lms-grid{display:block}.lms-grid>.side{position:sticky;top:65px;z-index:15;background:#fff;max-height:52vh;overflow:auto;margin-bottom:22px}}
+/* Phones: the cabinet menu sits at the top of the page and scrolls away with it.
+   It used to be pinned under the header at max-height 52vh with its own
+   scrollbar, which meant the menu occupied half the screen and the lesson the
+   student had opened was squeezed into the strip below it. */
+@media (max-width:640px){
+  .lms-grid{display:block}
+  .lms-grid>.side{position:static;max-height:none;overflow:visible;margin-bottom:24px}
+}
 
 /* admin: homework & students overview */
 .adm-addbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0 18px;font-size:.9rem;color:var(--ink-soft)}
