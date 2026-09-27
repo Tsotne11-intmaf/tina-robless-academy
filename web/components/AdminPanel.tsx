@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import CoursesTab, { type AdminCourse } from "@/components/CoursesTab";
 
 type Profile = {
   id: string;
@@ -32,7 +33,7 @@ type Submission = {
 };
 type CourseRef = { id: string; title: string };
 
-type Tab = "students" | "homework" | "mail";
+type Tab = "students" | "homework" | "mail" | "courses";
 type EmailLogRow = { id: number; user_id: string; kind: string; ref: string; sent_at: string };
 
 export default function AdminPanel({
@@ -42,6 +43,7 @@ export default function AdminPanel({
   courses,
   emailLog,
   subscriberCount,
+  catalog,
 }: {
   profiles: Profile[];
   enrollments: Enrollment[];
@@ -49,6 +51,7 @@ export default function AdminPanel({
   courses: CourseRef[];
   emailLog: EmailLogRow[];
   subscriberCount: number;
+  catalog: AdminCourse[];
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -253,6 +256,9 @@ export default function AdminPanel({
         </a>
         <a className="chip" aria-pressed={tab === "homework"} onClick={() => setTab("homework")}>
           დავალებები ({submissions.filter((s) => s.status === "sent").length} ახალი)
+        </a>
+        <a className="chip" aria-pressed={tab === "courses"} onClick={() => setTab("courses")}>
+          კურსები ({catalog.length})
         </a>
         <a className="chip" aria-pressed={tab === "mail"} onClick={() => setTab("mail")}>
           შეტყობინებები
@@ -545,6 +551,8 @@ export default function AdminPanel({
         )
       ) : null}
     
+      {tab === "courses" ? <CoursesTab courses={catalog} /> : null}
+
       {tab === "mail" ? (
         <>
           <div className="adm-form">

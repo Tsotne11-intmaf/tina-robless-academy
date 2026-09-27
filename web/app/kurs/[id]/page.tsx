@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CATALOG, CATS } from "@/lib/catalog";
+import { courseById } from "@/lib/catalog-db";
 import { Badge, Price } from "@/components/CourseCard";
 import BuyButton from "@/components/BuyButton";
 import { getT } from "@/lib/i18n";
@@ -20,14 +21,14 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const c = CATALOG.find((x) => x.id === id);
+  const c = await courseById(id);
   if (!c) return { title: "კურსი ვერ მოიძებნა" };
   return { title: c.title + " — Tina Robless Nail Academy", description: c.desc };
 }
 
 export default async function KursPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const c = CATALOG.find((x) => x.id === id);
+  const c = await courseById(id);
   if (!c) notFound();
 
   const t = await getT();

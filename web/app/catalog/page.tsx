@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { CATALOG, CATS } from "@/lib/catalog";
+import { CATS } from "@/lib/catalog";
+import { getCatalog } from "@/lib/catalog-db";
 import CourseCard from "@/components/CourseCard";
 import { getT } from "@/lib/i18n";
 
@@ -18,6 +19,7 @@ export default async function CatalogPage({
 }) {
   const { cat = "all" } = await searchParams;
   const t = await getT();
+  const CATALOG = await getCatalog();
   const list = cat === "all" ? CATALOG : CATALOG.filter((c) => c.cat === cat);
 
   return (
