@@ -1,9 +1,13 @@
 import RefundPage from "@/components/legacy/Refund";
 
-export const metadata = {
-  title: "დაბრუნების პოლიტიკა — Tina Robless Nail Academy",
-  description: "თანხის დაბრუნებისა და კურსზე წვდომის წესები.",
-};
+import { getT } from "@/lib/i18n";
+export async function generateMetadata() {
+  const t = await getT();
+  return {
+    title: t("დაბრუნების პოლიტიკა") + " \u2014 Tina Robless Nail Academy",
+    description: t("თანხის დაბრუნებისა და კურსზე წვდომის წესები."),
+  };
+}
 
 export default function Page() {
   return <RefundPage />;

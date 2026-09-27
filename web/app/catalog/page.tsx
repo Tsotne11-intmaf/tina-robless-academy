@@ -4,10 +4,13 @@ import { getCatalog } from "@/lib/catalog-db";
 import CourseCard from "@/components/CourseCard";
 import { getT } from "@/lib/i18n";
 
-export const metadata = {
-  title: "კურსები — Tina Robless Nail Academy",
-  description: "ფრჩხილების ონლაინ კურსები: მასტერ-პროგრამები, ტექნიკა და დიზაინი.",
-};
+export async function generateMetadata() {
+  const t = await getT();
+  return {
+    title: t("კურსები") + " \u2014 Tina Robless Nail Academy",
+    description: t("ფრჩხილების ონლაინ კურსები: მასტერ-პროგრამები, ტექნიკა და დიზაინი."),
+  };
+}
 
 /* Replaces SHOP.catalog(). The chosen category now lives in the URL as ?cat=, so a
    filtered catalogue can be linked and indexed - the legacy hash router could do

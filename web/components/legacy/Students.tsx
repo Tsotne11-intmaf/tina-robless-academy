@@ -61,7 +61,7 @@ export default async function StudentsPage() {
               <h2 style={{fontSize: "1.8rem"}} data-edit="t.students.27">{ed("t.students.27", "დაამთავრე? მოხვდი გვერდზე.")}</h2>
               <p data-edit="t.students.28">{ed("t.students.28", "გამოგზავნეთ საუკეთესო ნამუშევრის სამი ფოტო, თქვენი ქალაქი და გავლილი კურსი. თინა ყველა განაცხადს განიხილავს და ახალ კურსდამთავრებულებს ყოველთვიურად ამატებს.")}</p>
             </div>
-            <div style={{textAlign: "right"}}><a className="btn btn-plum" href="mailto:hello@tinarobless.ge?subject=Feature%20me">{t("ნამუშევრის გაგზავნა")}</a></div>
+            <div style={{textAlign: "right"}}><a className="btn btn-plum" href="https://www.instagram.com/tinarobless_/" target="_blank" rel="noopener">{t("ნამუშევრის გაგზავნა")}</a></div>
           </div>
         </div>
       </section>

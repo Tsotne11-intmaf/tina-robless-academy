@@ -68,7 +68,7 @@ export default async function CertificatesPage() {
           <div className="sec-head">
             <div>
               <h2 data-edit="t.certificates.6">{ed("t.certificates.6", "სერტიფიკატები კურსების მიხედვით")}</h2>
-              <p data-edit="t.certificates.7">{ed("t.certificates.7", "თითოეულ კურსს საკუთარი სერტიფიკატი აქვს. ქვემოთ ადგილები საბოლოო დიზაინებისთვისაა — ატვირთეთ თითო სურათი კურსზე.")}</p>
+              <p data-edit="t.certificates.7">{ed("t.certificates.7", "თითოეულ კურსს საკუთარი სერტიფიკატი აქვს — კურსის დასრულებისა და საბოლოო ნამუშევრის შემოწმების შემდეგ.")}</p>
             </div>
           </div>
           <div className="cert-slots">
@@ -102,7 +102,7 @@ export default async function CertificatesPage() {
             </div>
             <div className="award">
               <div className="year">—</div>
-              <div><h3 data-edit="t.certificates.30">{ed("t.certificates.30", "Georgia Nails-ის პრეზიდენტი")}</h3><p data-edit="t.certificates.31">{ed("t.certificates.31", "საქართველოს ფრჩხილების ინდუსტრიის წარმომადგენელი CMC-ის საერთაშორისო ჩემპიონატებზე. დაამატეთ წელი და დეტალები.")}</p></div>
+              <div><h3 data-edit="t.certificates.30">{ed("t.certificates.30", "Georgia Nails-ის პრეზიდენტი")}</h3><p data-edit="t.certificates.31">{ed("t.certificates.31", "საქართველოს ფრჩხილების ინდუსტრიის წარმომადგენელი CMC-ის საერთაშორისო ჩემპიონატებზე.")}</p></div>
               <div className="proof" data-img="award.1">{t("დიპლომი / ფოტო")}</div>
             </div>
             <div className="award">
