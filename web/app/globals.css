@@ -1436,3 +1436,23 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   .ed-bar{left:12px; right:12px; bottom:12px; justify-content:center}
   .ed-bar .btn{flex:1 1 auto; justify-content:center}
 }
+
+/* The course list in the admin panel.
+
+   A rectangle rather than the round avatar the student list uses: these are
+   pictures of work, and a 62px circle crops them to nothing useful. */
+.crs-thumb{
+  width:104px; height:72px; flex:0 0 104px;
+  border-radius:12px;
+  background:linear-gradient(160deg,#FFD3E3,#F78BB4);
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:1.4rem; font-weight:600;
+}
+/* Adding a course and editing one are different kinds of action, so they are
+   different colours - every button on this screen used to be the same pink. */
+.btn-new{background:#2B0F1F;color:#fff;border:0}
+.btn-new:hover{background:#45182F;color:#fff}
+
+@media (max-width:560px){
+  .crs-thumb{width:84px;height:58px;flex-basis:84px}
+}

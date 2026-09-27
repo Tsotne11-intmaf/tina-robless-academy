@@ -41,6 +41,9 @@ export default async function AdminPage() {
   const catalog = (await getCatalog()).map((c) => ({
     id: c.id, cat: c.cat, title: c.title, dur: c.dur, price: c.price,
     was: c.was, desc: c.desc, photo: c.photo ?? null, video: c.video ?? null,
+    // The launch courses carry a CSS class rather than a URL; the list needs
+    // both so every course shows its own picture, not just the new ones.
+    img: c.img ?? null,
     badge: c.badge ?? null, featured: !!c.featured, order: c.order,
     // Whether it also exists in the code decides what "hide" means for it.
     inCode: CATALOG.some((b) => b.id === c.id),

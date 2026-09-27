@@ -13,6 +13,7 @@ export type AdminCourse = {
   was?: string;
   desc: string;
   photo?: string | null;
+  img?: string | null;
   video?: string | null;
   badge?: string | null;
   featured?: boolean;
@@ -178,6 +179,11 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
                 background: `url(${photo ?? c?.photo}) center/cover`,
               }}
             />
+          ) : c?.img ? (
+            <div
+              className={"thumb " + c.img}
+              style={{ height: 140, borderRadius: 12, marginBottom: 8 }}
+            />
           ) : null}
           <UploadButton
             endpoint="avatar"
@@ -232,7 +238,7 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
         form(null)
       ) : (
         <button
-          className="btn btn-plum stu-add"
+          className="btn btn-new stu-add"
           style={{ marginBottom: 18 }}
           onClick={() => {
             setAdding(true);
@@ -250,13 +256,14 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
         ) : (
           <div className="stu-card" key={c.id}>
             <div className="stu-head">
+              {/* Its own picture, whether that is an uploaded file or the class
+                  the launch courses carry. A letter in a circle told her nothing
+                  about which course she was looking at. */}
               <div
-                className="stu-pic"
-                style={
-                  c.photo ? { background: `url(${c.photo}) center/cover` } : undefined
-                }
+                className={"crs-thumb " + (c.photo ? "" : c.img ?? "")}
+                style={c.photo ? { background: `url(${c.photo}) center/cover` } : undefined}
               >
-                {c.photo ? "" : c.title.trim().charAt(0)}
+                {c.photo || c.img ? "" : c.title.trim().charAt(0)}
               </div>
               <div className="stu-who">
                 <b>{c.title}</b>
