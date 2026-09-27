@@ -169,7 +169,9 @@ export default function AdminPanel({
         userId: profileId,
         courseId,
         ref: `${id}:${status}`,
-        note: feedback ? "" : "",
+        // Tina's comment travels with the notice, so the student reads it in
+        // the email rather than having to come and look for it.
+        note: feedback,
       });
     }
     setBusy(false);

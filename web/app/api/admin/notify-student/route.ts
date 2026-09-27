@@ -49,6 +49,11 @@ export async function POST(request: Request) {
   }
 
   const name = (profile.full_name as string) || (profile.email as string).split("@")[0];
+
+  /* The note is whatever the admin typed. It is dropped into an HTML mail, so
+     it is escaped here rather than trusted - a stray < would otherwise swallow
+     the rest of the message. */
+  const note = b.note ? escapeHtml(b.note).replace(/\r?\n/g, "<br>") : undefined;
   const course = CATALOG.find((c) => c.id === b.courseId);
 
   /* The reference is what makes a repeat harmless: a fresh grant is a new
@@ -73,7 +78,7 @@ export async function POST(request: Request) {
             : "თქვენს კაბინეტში ახალი კურსი დაემატა. შეგიძლიათ ახლავე დაიწყოთ სწავლა.",
           ctaLabel: "კურსის დაწყება",
           ctaHref: `${SITE}/dashboard`,
-          note: b.note || undefined,
+          note,
         })
       : layout({
           heading: `${name}, თქვენი დავალება შემოწმდა`,
@@ -82,7 +87,7 @@ export async function POST(request: Request) {
             : "თინამ ნახა თქვენი ნამუშევარი და დატოვა შეფასება.",
           ctaLabel: "შეფასების ნახვა",
           ctaHref: `${SITE}/hw`,
-          note: b.note || undefined,
+          note,
         });
 
   const subject =
@@ -98,4 +103,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error }, { status: 502 });
   }
   return NextResponse.json({ ok: true, sent });
+}
+
+const HTML_ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+};
+function escapeHtml(text: string) {
+  return text.replace(/[&<>"]/g, (c) => HTML_ESCAPES[c]);
 }
