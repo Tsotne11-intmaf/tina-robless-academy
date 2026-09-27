@@ -30,9 +30,18 @@ export type Student = {
    clock defeated it. */
 export async function getStudent(): Promise<Student | null> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+
+  /* The same distinction the proxy makes, applied where it actually matters.
+
+     Every protected page sends whoever this returns null for to the login
+     screen, so a timed-out or 5xx answer from Supabase - which is a network
+     problem, not a verdict - would throw out a student whose cookies are
+     perfectly good. A definite refusal still ends the session; only the
+     inconclusive case is asked again. */
+  let { data: { user }, error } = await supabase.auth.getUser();
+  if (!user && isInconclusive(error)) {
+    ({ data: { user }, error } = await supabase.auth.getUser());
+  }
   if (!user) return null;
 
   const [profileRes, enrRes, progRes, adminRes] = await Promise.all([
@@ -107,4 +116,10 @@ export function percent(c: StudentCourse, done: Record<string, number>) {
 /** Courses the student actually owns, as full course objects. */
 export function ownedCourses(s: Student): StudentCourse[] {
   return (COURSES as unknown as StudentCourse[]).filter((c) => s.owned.includes(c.id));
+}
+
+function isInconclusive(error: unknown): boolean {
+  if (!error) return false;
+  const status = (error as { status?: number }).status;
+  return status === undefined || status === 0 || status === 429 || status >= 500;
 }

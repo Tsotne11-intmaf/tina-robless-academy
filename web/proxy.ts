@@ -5,13 +5,19 @@ import { NextResponse, type NextRequest } from "next/server";
    fresh so a student is not silently logged out mid-lesson, and refuse the student
    area outright to anyone not signed in.
 
+   Named proxy rather than middleware because Next 16 deprecated that convention.
+   The rename is not cosmetic here: this file is what carries a refreshed token
+   forward to the page that renders next, and the pages send anyone they cannot
+   identify to the login screen. Staying on a deprecated path for the one piece of
+   the request chain that hands cookies onward is not where to take that chance.
+
    This is the part the single-file version could not do. There, the ownership check
    ran in the browser after the whole page - lesson content included - had already
    been delivered. Here the request never reaches the page. */
 
 const PROTECTED = ["/dashboard", "/course", "/lesson", "/hw", "/mycert", "/profile", "/admin"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
