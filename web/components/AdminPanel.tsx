@@ -59,6 +59,8 @@ export default function AdminPanel({
   /* One grant form open at a time. Showing one under every student turned this
      screen into a wall of dropdowns, which is the opposite of what it is for. */
   const [openFor, setOpenFor] = useState<string | null>(null);
+  const [assignFor, setAssignFor] = useState<string | null>(null);
+  const [only, setOnly] = useState<"all" | "owners">("all");
 
   const nameOf = (id: string) => {
     const p = profiles.find((x) => x.id === id);
@@ -66,14 +68,24 @@ export default function AdminPanel({
   };
   const titleOf = (id: string) => courses.find((c) => c.id === id)?.title ?? id;
 
+  const ownedCount = (id: string) => enrollments.filter((e) => e.profile_id === id).length;
+
   const needle = query.trim().toLowerCase();
-  const shown = needle
-    ? profiles.filter(
-        (p) =>
+  /* Students who bought something come first, because they are the ones with
+     work to mark and access to manage; the rest are still reachable but are not
+     what this screen is usually opened for. Search and filter apply before the
+     ordering so the two never fight each other. */
+  const shown = profiles
+    .filter(
+      (p) =>
+        (!needle ||
           (p.full_name ?? "").toLowerCase().includes(needle) ||
-          p.email.toLowerCase().includes(needle)
-      )
-    : profiles;
+          p.email.toLowerCase().includes(needle)) &&
+        (only === "all" || ownedCount(p.id) > 0)
+    )
+    .sort((a, b) => ownedCount(b.id) - ownedCount(a.id));
+
+  const ownerTotal = profiles.filter((p) => ownedCount(p.id) > 0).length;
 
   /* Granting access is an admin-only write: the enrollments policy refuses an insert
      from anyone not in the admins table, so a student cannot enrol themselves even
@@ -126,6 +138,36 @@ export default function AdminPanel({
     } catch {
       return " (წერილი ვერ გაიგზავნა)";
     }
+  }
+
+  async function assign(profileId: string, f: FormData) {
+    setBusy(true);
+    setMsg({ text: "იგზავნება…" });
+    const r = await fetch("/api/admin/assign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: profileId,
+        courseId: String(f.get("course")),
+        title: String(f.get("title") || "").trim(),
+        task: String(f.get("task") || "").trim(),
+        due: String(f.get("due") || ""),
+      }),
+    });
+    const body = await r.json().catch(() => ({}));
+    setBusy(false);
+    if (!r.ok) {
+      setMsg({ text: "ვერ მოხერხდა: " + (body.error ?? r.status), kind: "bad" });
+      return;
+    }
+    setMsg({
+      text: body.sent
+        ? "დავალება მიეცა და ელფოსტა გაიგზავნა."
+        : "დავალება მიეცა (წერილი ვერ გაიგზავნა).",
+      kind: body.sent ? "ok" : "bad",
+    });
+    setAssignFor(null);
+    router.refresh();
   }
 
   async function revoke(id: number) {
@@ -221,6 +263,19 @@ export default function AdminPanel({
 
       {tab === "students" ? (
         <>
+          <div className="filters" style={{ marginBottom: 14 }}>
+            <a className="chip" aria-pressed={only === "all"} onClick={() => setOnly("all")}>
+              ყველა ({profiles.length})
+            </a>
+            <a
+              className="chip"
+              aria-pressed={only === "owners"}
+              onClick={() => setOnly("owners")}
+            >
+              კურსშეძენილები ({ownerTotal})
+            </a>
+          </div>
+
           <div className="field" style={{ maxWidth: 420, marginBottom: 18 }}>
             <label htmlFor="adm-search">სტუდენტის ძებნა</label>
             <input
@@ -341,14 +396,86 @@ export default function AdminPanel({
                         </button>
                       </div>
                     </form>
-                  ) : (
-                    <button
-                      className="btn btn-plum stu-add"
-                      onClick={() => setOpenFor(p.id)}
-                      disabled={busy}
+                  ) : assignFor === p.id ? (
+                    <form
+                      className="stu-give"
+                      onSubmit={(ev) => {
+                        ev.preventDefault();
+                        assign(p.id, new FormData(ev.currentTarget));
+                      }}
                     >
-                      + კურსის მიცემა
-                    </button>
+                      <div className="field">
+                        <label>რომელ კურსზე?</label>
+                        <select name="course" defaultValue={mine[0]?.course_id ?? ""} required>
+                          <option value="" disabled>
+                            — აირჩიეთ —
+                          </option>
+                          {(mine.length
+                            ? courses.filter((c) => mine.some((e) => e.course_id === c.id))
+                            : courses
+                          ).map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="field">
+                        <label>დავალების სათაური</label>
+                        <input name="title" placeholder="მაგ. აპექსი ერთ ფრჩხილზე" required />
+                      </div>
+                      <div className="field">
+                        <label>რა უნდა გააკეთოს</label>
+                        <textarea
+                          name="task"
+                          rows={3}
+                          placeholder="აღწერეთ დავალება — სტუდენტს წერილშივე მიუვა"
+                          required
+                        />
+                      </div>
+                      <div className="field">
+                        <label>ვადა (სურვილისამებრ)</label>
+                        <input name="due" type="date" />
+                      </div>
+                      <div className="stu-give-btns">
+                        <button className="btn btn-plum" type="submit" disabled={busy}>
+                          მიცემა და შეტყობინება
+                        </button>
+                        <button
+                          className="btn btn-ghost"
+                          type="button"
+                          onClick={() => setAssignFor(null)}
+                        >
+                          გაუქმება
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="stu-give-btns">
+                      <button
+                        className="btn btn-plum stu-add"
+                        onClick={() => {
+                          setOpenFor(p.id);
+                          setAssignFor(null);
+                        }}
+                        disabled={busy}
+                      >
+                        + კურსის მიცემა
+                      </button>
+                      <button
+                        className="btn btn-ghost stu-add"
+                        onClick={() => {
+                          setAssignFor(p.id);
+                          setOpenFor(null);
+                        }}
+                        disabled={busy || mine.length === 0}
+                        title={
+                          mine.length === 0 ? "ჯერ კურსი მიეცით" : undefined
+                        }
+                      >
+                        + დავალების მიცემა
+                      </button>
+                    </div>
                   )}
                 </div>
               );

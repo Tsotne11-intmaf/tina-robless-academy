@@ -17,11 +17,26 @@ export default async function HomeworkPage() {
   );
 
   const supabase = await createClient();
-  // The select policy already limits this to the caller's own rows.
-  const { data } = await supabase
-    .from("submissions")
-    .select("*")
-    .order("created_at", { ascending: false });
+  // The select policy already limits both of these to the caller's own rows.
+  const [subRes, assignRes] = await Promise.all([
+    supabase.from("submissions").select("*").order("created_at", { ascending: false }),
+    supabase
+      .from("assignments")
+      .select("id,course_id,title,task,due_at")
+      .order("created_at", { ascending: false }),
+  ]);
+  const data = subRes.data;
+
+  /* Tasks Tina set for this student personally, shown above the course's own
+     exercises because they were addressed to them. The id is prefixed so it can
+     never collide with a catalogue task id when a submission is matched up. */
+  const personal: Task[] = (assignRes.data ?? []).map((a) => ({
+    id: "a" + a.id,
+    course: a.course_id as string,
+    title: a.title as string,
+    task: a.task as string,
+    due: a.due_at ? new Date(a.due_at as string).getTime() : undefined,
+  }));
 
   return (
     <section className="lms">
@@ -32,7 +47,7 @@ export default async function HomeworkPage() {
           <p className="lead" style={{ marginBottom: 24 }}>
             ატვირთეთ ნამუშევარი — თინა შეამოწმებს და დაგიბრუნებთ კომენტარს.
           </p>
-          <HomeworkPanel tasks={tasks} submissions={(data ?? []) as Submission[]} />
+          <HomeworkPanel tasks={[...personal, ...tasks]} submissions={(data ?? []) as Submission[]} />
         </div>
       </div>
     </section>
