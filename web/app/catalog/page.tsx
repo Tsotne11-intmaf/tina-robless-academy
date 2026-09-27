@@ -2,6 +2,11 @@ import Link from "next/link";
 import { CATALOG, CATS } from "@/lib/catalog";
 import CourseCard from "@/components/CourseCard";
 
+export const metadata = {
+  title: "კურსები — Tina Robless Nail Academy",
+  description: "ფრჩხილების ონლაინ კურსები: მასტერ-პროგრამები, ტექნიკა და დიზაინი.",
+};
+
 /* Replaces SHOP.catalog(). The chosen category now lives in the URL as ?cat=, so a
    filtered catalogue can be linked and indexed - the legacy hash router could do
    neither. Rendered on the server, so the courses are visible without JavaScript. */
