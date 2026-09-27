@@ -273,6 +273,28 @@ export default function AdminPanel({
     router.refresh();
   }
 
+  /* Undoing a verdict rather than replacing it: the mark and the comment go and
+     the work returns to the queue. Nobody is mailed - a withdrawn result is not
+     news the student can act on, and the next real verdict will write. */
+  async function clearVerdict(id: number) {
+    if (!confirm("შეფასება და კომენტარი წაიშლება, დავალება შესამოწმებელში დაბრუნდება. გავაგრძელოთ?")) return;
+    setBusy(true);
+    const { error } = await supabase
+      .from("submissions")
+      .update({ status: "sent", grade: null, feedback: null })
+      .eq("id", id);
+    setBusy(false);
+    setMsg(
+      error
+        ? { text: "ვერ მოხერხდა: " + error.message, kind: "bad" }
+        : { text: "შეფასება წაიშალა, დავალება შესამოწმებელშია.", kind: "ok" }
+    );
+    if (!error) {
+      setHwPile("sent");
+      router.refresh();
+    }
+  }
+
   /* Announcing a course. The server decides who is eligible and records what it
      sent, so pressing this twice for the same course mails nobody a second time. */
   async function notifyCourse(courseId: string) {
@@ -424,6 +446,11 @@ export default function AdminPanel({
                               <span className="hw-meta">
                                 {titleOf(a.course_id)} · {left.text}
                               </span>
+                              {/* Tina's own comment, on the card she tracks from.
+                                  It used to live only inside the grading form. */}
+                              {sub?.feedback ? (
+                                <span className="hw-said">{sub.feedback}</span>
+                              ) : null}
                             </div>
                             <div className="hw-state">
                               {sub ? (
@@ -621,7 +648,19 @@ export default function AdminPanel({
                 style={{ maxWidth: 240, borderRadius: 12, margin: "10px 0" }}
               />
             ) : null}
+            {/* What it was given, as text. The form underneath can rewrite or clear
+                it, but reading the verdict should not mean reading a form field. */}
+            {s.grade || s.feedback ? (
+              <div className="hw-verdict">
+                {s.grade ? <span className="hw-grade">{asMark(s.grade)}</span> : null}
+                {s.feedback ? <p>{s.feedback}</p> : null}
+              </div>
+            ) : null}
+            {/* Keyed on the stored verdict so the fields below reload when it
+                changes - an uncontrolled default is otherwise set once only, and
+                a cleared mark would stay on screen. */}
             <form
+              key={`${s.status}:${s.grade ?? ""}:${s.feedback ?? ""}`}
               onSubmit={(e) => {
                 e.preventDefault();
                 const f = new FormData(e.currentTarget);
@@ -653,9 +692,21 @@ export default function AdminPanel({
                 <label>კომენტარი სტუდენტს</label>
                 <textarea name="feedback" rows={2} defaultValue={s.feedback ?? ""} />
               </div>
-              <button className="btn btn-plum" type="submit" disabled={busy}>
-                შენახვა
-              </button>
+              <div className="hw-acts">
+                <button className="btn btn-plum" type="submit" disabled={busy}>
+                  შენახვა
+                </button>
+                {s.grade || s.feedback || s.status !== "sent" ? (
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    disabled={busy}
+                    onClick={() => clearVerdict(s.id)}
+                  >
+                    შეფასების წაშლა
+                  </button>
+                ) : null}
+              </div>
             </form>
           </div>
         ))

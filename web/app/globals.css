@@ -1568,9 +1568,11 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 .hw-row.late{border-color:#F2B8C6; background:#FFF4F6}
 .hw-main{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:3px}
 .hw-main b{font-size:1rem; color:var(--ink); line-height:1.35}
+/* Full text, not two lines of it. This is the assignment as it was written, and
+   the cut-off tail was the part that said what to actually do. */
 .hw-task{
   font-size:.88rem; color:var(--ink-soft); line-height:1.5;
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  overflow-wrap:anywhere;
 }
 .hw-meta{font-size:.82rem; color:var(--ink-soft)}
 .hw-row.late .hw-meta{color:#B5474A; font-weight:500}
@@ -1595,4 +1597,21 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   display:inline-block;margin-left:8px;white-space:nowrap;
   font-size:.82rem;font-weight:700;padding:5px 10px;border-radius:999px;
   background:var(--plum);color:#fff;
+}
+
+/* The verdict on a submission: the mark and the comment, readable without
+   opening a form field, plus the buttons that rewrite or withdraw it. */
+.hw-verdict{
+  display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;
+  background:var(--blush-soft);border-radius:12px;padding:12px 14px;margin:10px 0 14px;
+}
+.hw-verdict p{margin:0;flex:1 1 220px;min-width:0;font-size:.92rem;color:var(--plum-deep);overflow-wrap:anywhere}
+.hw-verdict .hw-grade{margin-left:0}
+.hw-acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* What Tina told the student, shown on the card she tracks from. */
+.hw-said{
+  font-size:.85rem;color:var(--plum-deep);line-height:1.5;
+  border-left:3px solid var(--plum);padding-left:9px;margin-top:4px;
+  overflow-wrap:anywhere;
 }
