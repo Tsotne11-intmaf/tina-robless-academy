@@ -21,35 +21,73 @@ export function layout(opts: {
   ctaLabel: string;
   ctaHref: string;
   note?: string;
+  preview?: string;
   unsubToken?: string;
 }) {
+  /* The line the inbox shows next to the subject before anything is opened.
+     Left to itself a client grabs whatever text comes first, which here is the
+     wordmark, so every message would preview as "Tina Robless Nail Academy". */
+  const preview = esc(opts.preview ?? stripTags(opts.lead)).slice(0, 140);
+
   const unsub = opts.unsubToken
-    ? `<p style="margin:14px 0 0;font-size:11px;line-height:1.7;color:#B9A7B0;">აღარ გსურთ ასეთი წერილები? <a href="${SITE}/unsubscribe?t=${opts.unsubToken}" style="color:#B9A7B0;">გამოწერის გაუქმება</a></p>`
-    : "";
-  const note = opts.note
-    ? `<tr><td style="padding:20px 32px 0;"><p style="margin:0;padding:14px 16px;background:#FFF6F9;border-radius:10px;font-size:13px;line-height:1.7;color:#7A4A5F;">${opts.note}</p></td></tr>`
+    ? `<p style="margin:10px 0 0;font-size:11px;line-height:1.7;color:#BCA8B2;">აღარ გსურთ ასეთი წერილები? <a href="${SITE}/unsubscribe?t=${opts.unsubToken}" style="color:#BCA8B2;text-decoration:underline;">გამოწერის გაუქმება</a></p>`
     : "";
 
-  return `<div style="background:#FFF6F9;padding:32px 16px;font-family:'Noto Sans Georgian',Arial,Helvetica,sans-serif;">
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:520px;margin:0 auto;background:#FFFFFF;border-radius:16px;">
-<tr><td style="padding:30px 32px 0;text-align:center;">
-<div style="font-size:21px;font-weight:600;color:#2B0F1F;">Tina <span style="color:#E5177A;">Robless</span></div>
-<div style="font-size:12px;color:#7A4A5F;margin-top:4px;letter-spacing:.14em;text-transform:uppercase;">Nail Academy</div>
+  const note = opts.note
+    ? `<tr><td style="padding:22px 36px 0;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#FFF6F9;border-radius:12px;">
+<tr><td style="padding:15px 18px;font-size:13.5px;line-height:1.75;color:#7A4A5F;">${opts.note}</td></tr>
+</table></td></tr>`
+    : "";
+
+  return `<div style="margin:0;padding:0;background:#FBEFF4;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${preview}</div>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#FBEFF4;">
+<tr><td align="center" style="padding:34px 14px;font-family:'Noto Sans Georgian','Segoe UI',Arial,Helvetica,sans-serif;">
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:540px;background:#FFFFFF;border-radius:20px;border:1px solid #F4DDE7;">
+
+<tr><td style="padding:34px 36px 0;text-align:center;">
+<div style="font-size:23px;font-weight:600;letter-spacing:.01em;color:#2B0F1F;">Tina <span style="color:#E5177A;">Robless</span></div>
+<div style="font-size:11px;color:#A07E8E;margin-top:5px;letter-spacing:.2em;text-transform:uppercase;">Nail Academy</div>
+<div style="width:46px;height:3px;background:#E5177A;border-radius:3px;margin:18px auto 0;"></div>
 </td></tr>
-<tr><td style="padding:26px 32px 0;">
-<h1 style="margin:0 0 12px;font-size:22px;line-height:1.4;color:#2B0F1F;font-weight:600;">${opts.heading}</h1>
-<p style="margin:0;font-size:15px;line-height:1.75;color:#5E5259;">${opts.lead}</p>
+
+<tr><td style="padding:24px 36px 0;">
+<h1 style="margin:0 0 14px;font-size:23px;line-height:1.4;color:#2B0F1F;font-weight:600;">${opts.heading}</h1>
+<p style="margin:0;font-size:15.5px;line-height:1.8;color:#5E5259;">${opts.lead}</p>
 </td></tr>
-<tr><td style="padding:24px 32px 0;text-align:center;">
-<a href="${opts.ctaHref}" style="display:inline-block;background:#E5177A;color:#FFFFFF;text-decoration:none;font-size:15px;font-weight:600;padding:14px 34px;border-radius:999px;">${opts.ctaLabel}</a>
+
+<tr><td style="padding:26px 36px 0;text-align:center;">
+<a href="${opts.ctaHref}" style="display:inline-block;background:#E5177A;color:#FFFFFF;text-decoration:none;font-size:15.5px;font-weight:600;padding:15px 40px;border-radius:999px;">${opts.ctaLabel}</a>
 </td></tr>
 ${note}
-<tr><td style="padding:24px 32px 30px;">
-<p style="margin:0;padding-top:16px;border-top:1px solid #F3E3EB;font-size:12px;line-height:1.7;color:#9B8791;">Tina Robless Nail Academy · <a href="${SITE}" style="color:#9B8791;">tinarobless.com</a></p>
+<tr><td style="padding:28px 36px 32px;">
+<div style="height:1px;background:#F4DDE7;margin-bottom:16px;"></div>
+<p style="margin:0;font-size:12px;line-height:1.8;color:#A07E8E;">
+Tina Robless Nail Academy · თბილისი<br>
+<a href="${SITE}" style="color:#A07E8E;text-decoration:underline;">tinarobless.com</a>
+</p>
 ${unsub}
+</td></tr>
+
+</table>
 </td></tr>
 </table>
 </div>`;
+}
+
+const ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+};
+function esc(text: string) {
+  return text.replace(/[&<>"]/g, (c) => ESCAPES[c]);
+}
+function stripTags(html: string) {
+  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
 /* Resend accepts up to 100 messages per batch call, so a send of any realistic
