@@ -1520,3 +1520,16 @@ body.editing .cards.home-slider{scroll-snap-type:none}
     flex:1 1 100%;line-height:1.45;
   }
 }
+
+/* Where a buyer lands while payment is still being built. The ways to reach
+   Tina stay on the screen as links; the alert they replaced closed again and
+   left nothing to press. */
+.buy-reach{
+  border:1px solid var(--blush); border-radius:var(--r-card);
+  background:#FFF6F9; padding:18px; text-align:center;
+}
+.buy-reach b{display:block;font-size:1.05rem;color:var(--ink);margin-bottom:6px}
+.buy-reach p{margin:0 0 14px;font-size:.92rem;line-height:1.6;color:var(--ink-soft)}
+.buy-reach-links{display:grid;gap:8px;margin-bottom:10px}
+.buy-reach-links .btn{width:100%;justify-content:center}
+.buy-reach .btn-ghost{width:100%;justify-content:center}
