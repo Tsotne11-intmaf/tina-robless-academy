@@ -48,6 +48,7 @@ export function layout(opts: {
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:540px;background:#FFFFFF;border-radius:20px;border:1px solid #F4DDE7;">
 
 <tr><td style="padding:34px 36px 0;text-align:center;">
+<img src="${SITE}/logo-r.png" width="56" height="56" alt="Tina Robless" style="display:block;margin:0 auto 12px;border-radius:14px;border:0;outline:none;text-decoration:none;">
 <div style="font-size:23px;font-weight:600;letter-spacing:.01em;color:#2B0F1F;">Tina <span style="color:#E5177A;">Robless</span></div>
 <div style="font-size:11px;color:#A07E8E;margin-top:5px;letter-spacing:.2em;text-transform:uppercase;">Nail Academy</div>
 <div style="width:46px;height:3px;background:#E5177A;border-radius:3px;margin:18px auto 0;"></div>
