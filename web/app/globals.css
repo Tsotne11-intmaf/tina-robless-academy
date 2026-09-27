@@ -1405,3 +1405,34 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   .stu-pill { flex-wrap: wrap; gap: 6px 10px; }
   .stu-pill-name { flex: 1 1 100%; }
 }
+
+/* ---------------------------------------------------------------------------
+   The on-page editor. Only an admin is ever served the bar that turns it on.
+   --------------------------------------------------------------------------- */
+.ed-bar{
+  position:fixed; right:16px; bottom:16px; z-index:60;
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+  max-width:calc(100vw - 32px);
+}
+.ed-bar .btn{box-shadow:0 10px 30px -10px rgba(184,15,95,.6)}
+.ed-count,.ed-msg{
+  background:#2B0F1F; color:#fff; border-radius:999px;
+  padding:8px 14px; font-size:.85rem;
+}
+/* A spot that can be edited shows where it is without shifting the layout,
+   which is why this is an inset shadow and not a border. */
+.ed-mode [data-edit].ed-on{
+  outline:0; box-shadow:inset 0 0 0 2px var(--blush); border-radius:6px;
+  cursor:text; transition:box-shadow .15s ease;
+}
+.ed-mode [data-edit].ed-on:hover{box-shadow:inset 0 0 0 2px var(--plum)}
+.ed-mode [data-edit].ed-on:focus{box-shadow:inset 0 0 0 2px var(--plum); background:#FFF6F9}
+.ed-mode [data-edit].ed-changed{box-shadow:inset 0 0 0 2px var(--plum); background:#FFEAF3}
+/* Links inside an editable area would navigate on the click meant to place the
+   cursor, so while editing they are inert. */
+.ed-mode [data-edit].ed-on a{pointer-events:none}
+
+@media (max-width:560px){
+  .ed-bar{left:12px; right:12px; bottom:12px; justify-content:center}
+  .ed-bar .btn{flex:1 1 auto; justify-content:center}
+}

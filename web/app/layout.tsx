@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SiteHeader from "@/components/legacy/SiteHeader";
 import SiteFooter from "@/components/legacy/SiteFooter";
+import EditBar from "@/components/EditBar";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Tina Robless Nail Academy — ფრჩხილების სწავლის ტექნიკა იწყება აქ",
@@ -17,7 +19,25 @@ export const viewport: Viewport = {
 /* Fonts stay as a stylesheet link rather than next/font: the legacy design depends on
    specific optical-size and weight axes of Fraunces plus the Noto Georgian families,
    and this is the exact request the current site is already proven to render with. */
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+/* The edit bar is rendered only for an admin, so it is not merely hidden from
+   everyone else - it is never sent. The API behind it checks again on every save,
+   because markup that is absent is not a permission. */
+async function isAdmin() {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return false;
+    const { data } = await supabase.rpc("is_admin");
+    return data === true;
+  } catch {
+    return false;
+  }
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const admin = await isAdmin();
   return (
     <html lang="ka">
       <head>
@@ -32,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteHeader />
         {children}
         <SiteFooter />
+        {admin ? <EditBar /> : null}
       </body>
     </html>
   );
