@@ -29,11 +29,16 @@ export default async function AdminPage() {
 
   const supabase = await createClient();
   // RLS returns every row here only because the caller is a listed admin.
-  const [profilesRes, enrollmentsRes, submissionsRes] = await Promise.all([
+  const [profilesRes, enrollmentsRes, submissionsRes, mailRes] = await Promise.all([
     supabase.from("profiles").select("*").order("created_at", { ascending: false }),
     supabase.from("enrollments").select("*"),
     supabase.from("submissions").select("*").order("created_at", { ascending: false }),
+    supabase.from("email_log").select("*").order("sent_at", { ascending: false }).limit(40),
   ]);
+
+  const profiles = profilesRes.data ?? [];
+  // Who a course announcement would actually reach, shown before it is sent.
+  const subscriberCount = profiles.filter((p) => p.marketing_ok).length;
 
   return (
     <section className="lms">
@@ -43,10 +48,12 @@ export default async function AdminPage() {
           შესული ხართ როგორც {student.email}
         </p>
         <AdminPanel
-          profiles={profilesRes.data ?? []}
+          profiles={profiles}
           enrollments={enrollmentsRes.data ?? []}
           submissions={submissionsRes.data ?? []}
           courses={CATALOG.map((c) => ({ id: c.id, title: c.title }))}
+          emailLog={mailRes.data ?? []}
+          subscriberCount={subscriberCount}
         />
       </div>
     </section>

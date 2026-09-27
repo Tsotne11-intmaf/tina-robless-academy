@@ -32,18 +32,23 @@ type Submission = {
 };
 type CourseRef = { id: string; title: string };
 
-type Tab = "students" | "homework";
+type Tab = "students" | "homework" | "mail";
+type EmailLogRow = { id: number; user_id: string; kind: string; ref: string; sent_at: string };
 
 export default function AdminPanel({
   profiles,
   enrollments,
   submissions,
   courses,
+  emailLog,
+  subscriberCount,
 }: {
   profiles: Profile[];
   enrollments: Enrollment[];
   submissions: Submission[];
   courses: CourseRef[];
+  emailLog: EmailLogRow[];
+  subscriberCount: number;
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -111,6 +116,30 @@ export default function AdminPanel({
     if (!error) router.refresh();
   }
 
+  /* Announcing a course. The server decides who is eligible and records what it
+     sent, so pressing this twice for the same course mails nobody a second time. */
+  async function notifyCourse(courseId: string) {
+    if (!courseId) return;
+    setBusy(true);
+    setMsg({ text: "იგზავნება…" });
+    const r = await fetch("/api/admin/notify-course", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ courseId }),
+    });
+    const body = await r.json().catch(() => ({}));
+    setBusy(false);
+    if (!r.ok) {
+      setMsg({ text: "ვერ გაიგზავნა: " + (body.error ?? r.status), kind: "bad" });
+      return;
+    }
+    setMsg({
+      text: body.sent ? `გაიგზავნა ${body.sent} მისამართზე.` : (body.note ?? "ახალი მიმღები არ იყო."),
+      kind: "ok",
+    });
+    router.refresh();
+  }
+
   return (
     <>
       <div className="filters" style={{ marginBottom: 22 }}>
@@ -119,6 +148,9 @@ export default function AdminPanel({
         </a>
         <a className="chip" aria-pressed={tab === "homework"} onClick={() => setTab("homework")}>
           დავალებები ({submissions.filter((s) => s.status === "sent").length} ახალი)
+        </a>
+        <a className="chip" aria-pressed={tab === "mail"} onClick={() => setTab("mail")}>
+          შეტყობინებები
         </a>
       </div>
 
@@ -269,6 +301,81 @@ export default function AdminPanel({
           </div>
         ))
       )}
+    
+      {tab === "mail" ? (
+        <>
+          <div className="adm-form">
+            <h2>ახალი კურსის შეტყობინება</h2>
+            <p className="lead" style={{ margin: "0 0 14px" }}>
+              იგზავნება მხოლოდ იმ {subscriberCount} ანგარიშზე, რომელმაც სიახლეების მიღებაზე
+              თანხმობა განაცხადა. ერთი კურსი ორჯერ არ გაიგზავნება.
+            </p>
+            <div className="adm-2">
+              <div className="field">
+                <label htmlFor="nc-course">კურსი</label>
+                <select id="nc-course" defaultValue="">
+                  <option value="" disabled>
+                    აირჩიეთ კურსი
+                  </option>
+                  {courses.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="field" style={{ alignSelf: "end" }}>
+                <button
+                  className="btn btn-plum"
+                  disabled={busy || subscriberCount === 0}
+                  onClick={() => {
+                    const el = document.getElementById("nc-course") as HTMLSelectElement | null;
+                    notifyCourse(el?.value ?? "");
+                  }}
+                >
+                  შეატყობინე სტუდენტებს
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="adm-form">
+            <h2>უმოქმედობის შეხსენება</h2>
+            <p className="lead" style={{ margin: 0 }}>
+              ავტომატურია. დღეში ერთხელ მოწმდება ვინ იყიდა კურსი და 6 დღეა არ შემოსულა —
+              თითოეული ასეთი პერიოდისთვის იგზავნება ერთი შეხსენება, არა ყოველდღე.
+              ხელით ჩარევა არ სჭირდება.
+            </p>
+          </div>
+
+          <div className="adm-form">
+            <h2>ბოლოს გაგზავნილი</h2>
+            {emailLog.length === 0 ? (
+              <p className="lead" style={{ margin: 0 }}>ჯერ არაფერი გაგზავნილა.</p>
+            ) : (
+              <div className="adm-list">
+                {emailLog.map((row) => (
+                  <div className="adm-row" key={row.id}>
+                    <div className="adm-main">
+                      <strong>{nameOf(row.user_id)}</strong>
+                      <span className="mail">
+                        {row.kind === "inactive"
+                          ? "უმოქმედობის შეხსენება"
+                          : "ახალი კურსი: " + titleOf(row.ref)}
+                      </span>
+                    </div>
+                    <div className="adm-btns">
+                      <span className="hint">
+                        {new Date(row.sent_at).toLocaleDateString("ka-GE")}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      ) : null}
     </>
   );
 }

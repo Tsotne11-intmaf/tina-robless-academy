@@ -51,6 +51,17 @@ export async function getStudent(): Promise<Student | null> {
 
   const profile = profileRes.data ?? null;
 
+  /* Record that they were here, at most once an hour.
+
+     This is what the reminder job reads, and it has to be a visit rather than a
+     sign-in: sessions last for weeks, so someone who bought a course, signed in
+     once and never returned would otherwise look recently active forever. The
+     hourly throttle keeps it from becoming a database write on every page. */
+  const lastSeen = profile?.last_seen_at as string | null | undefined;
+  if (!lastSeen || Date.now() - new Date(lastSeen).getTime() > 3600_000) {
+    await supabase.rpc("touch_last_seen");
+  }
+
   return {
     userId: user.id,
     email: user.email ?? "",
