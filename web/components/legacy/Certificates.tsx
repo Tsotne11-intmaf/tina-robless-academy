@@ -3,11 +3,14 @@
    wired here: the legacy inline handlers called globals that do not exist in this
    app (1 dropped), so they are reconnected deliberately rather than guessed at. */
 import { getT } from "@/lib/i18n";
-import { getContent, editable } from "@/lib/content";
+import { getContent, editable, listOf } from "@/lib/content";
 
 export default async function CertificatesPage() {
   const t = await getT();
-  const ed = editable(await getContent(), t);
+  const content = await getContent();
+  const ed = editable(content, t);
+  // Entries Tina has added herself, shown after the ones that shipped.
+  const extraAwards = listOf(content, "list.awards");
   return (
     <>
       
@@ -69,15 +72,15 @@ export default async function CertificatesPage() {
             </div>
           </div>
           <div className="cert-slots">
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.8"><a href="/kurs/master-1">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 1")}</a></h3><p data-edit="t.certificates.9">{ed("t.certificates.9", "40 საათი · შემოწმებული საბოლოო ნამუშევარი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.10"><a href="/kurs/master-2">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 2")}</a></h3><p data-edit="t.certificates.11">{ed("t.certificates.11", "8 კვირა · შემოწმებული სალონური ნამუშევრები")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.12"><a href="/kurs/bundle">{t("მასტერ-პროგრამა — სრული პაკეტი")}</a></h3><p data-edit="t.certificates.13">{ed("t.certificates.13", "მასტერ-სერტიფიკატი, ორივე ნაწილი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.14"><a href="/kurs/american">{t("ამერიკული ფრჩხილები ფორმებზე")}</a></h3><p data-edit="t.certificates.15">{ed("t.certificates.15", "8 საათი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.16"><a href="/kurs/french">{t("იდეალური ფრენჩი")}</a></h3><p data-edit="t.certificates.17">{ed("t.certificates.17", "5 საათი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.18"><a href="/kurs/extreme">{t("ექსტრემალური სიგრძე: არქიტექტურა და დაჭერა")}</a></h3><p data-edit="t.certificates.19">{ed("t.certificates.19", "6 საათი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.20"><a href="/kurs/correction">{t("კორექცია გრძელ ფრჩხილებზე")}</a></h3><p data-edit="t.certificates.21">{ed("t.certificates.21", "4 საათი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.22"><a href="/kurs/crystals">{t("კრისტალები, ჩარმები და 3D")}</a></h3><p data-edit="t.certificates.23">{ed("t.certificates.23", "3 საათი")}</p></div></article>
-            <article className="cert-slot"><div className="preview">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.24"><a href="/kurs/chrome">{t("ქრომი და კატის თვალი")}</a></h3><p data-edit="t.certificates.25">{ed("t.certificates.25", "2 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview" data-img="cert.1">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.8"><a href="/kurs/master-1">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 1")}</a></h3><p data-edit="t.certificates.9">{ed("t.certificates.9", "40 საათი · შემოწმებული საბოლოო ნამუშევარი")}</p></div></article>
+            <article className="cert-slot"><div className="preview" data-img="cert.2">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.10"><a href="/kurs/master-2">{t("გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 2")}</a></h3><p data-edit="t.certificates.11">{ed("t.certificates.11", "8 კვირა · შემოწმებული სალონური ნამუშევრები")}</p></div></article>
+            <article className="cert-slot"><div className="preview" data-img="cert.3">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.12"><a href="/kurs/bundle">{t("მასტერ-პროგრამა — სრული პაკეტი")}</a></h3><p data-edit="t.certificates.13">{ed("t.certificates.13", "მასტერ-სერტიფიკატი, ორივე ნაწილი")}</p></div></article>
+            <article className="cert-slot"><div className="preview" data-img="cert.4">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.14"><a href="/kurs/american">{t("ამერიკული ფრჩხილები ფორმებზე")}</a></h3><p data-edit="t.certificates.15">{ed("t.certificates.15", "8 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview" data-img="cert.5">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.16"><a href="/kurs/french">{t("იდეალური ფრენჩი")}</a></h3><p data-edit="t.certificates.17">{ed("t.certificates.17", "5 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview" data-img="cert.6">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.18"><a href="/kurs/extreme">{t("ექსტრემალური სიგრძე: არქიტექტურა და დაჭერა")}</a></h3><p data-edit="t.certificates.19">{ed("t.certificates.19", "6 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview" data-img="cert.7">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.20"><a href="/kurs/correction">{t("კორექცია გრძელ ფრჩხილებზე")}</a></h3><p data-edit="t.certificates.21">{ed("t.certificates.21", "4 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview" data-img="cert.8">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.22"><a href="/kurs/crystals">{t("კრისტალები, ჩარმები და 3D")}</a></h3><p data-edit="t.certificates.23">{ed("t.certificates.23", "3 საათი")}</p></div></article>
+            <article className="cert-slot"><div className="preview" data-img="cert.9">{t("სერტიფიკატის სურათი")}</div><div className="body"><h3 data-edit="t.certificates.24"><a href="/kurs/chrome">{t("ქრომი და კატის თვალი")}</a></h3><p data-edit="t.certificates.25">{ed("t.certificates.25", "2 საათი")}</p></div></article>
           </div>
         </div>
       </section>
@@ -91,7 +94,7 @@ export default async function CertificatesPage() {
               <p data-edit="t.certificates.27">{ed("t.certificates.27", "თინას საკუთარი კვალიფიკაციები, კონკურსების შედეგები და ბრენდების სერტიფიკატები. თითოეულ ჩანაწერს დიპლომის ან ფოტოს ადგილი აქვს.")}</p>
             </div>
           </div>
-          <div className="awards">
+          <div className="awards" data-list="list.awards">
             <div className="award">
               <div className="year">2026</div>
               <div><h3 data-edit="t.certificates.28">{ed("t.certificates.28", "CMC მსოფლიო ჩემპიონი — 38-ე მსოფლიო ჩემპიონატი")}</h3><p data-edit="t.certificates.29">{ed("t.certificates.29", "World Confederation of Coiffure and Aesthetics (CMC) და CAT (იტალია). Centro Congressi Ariston, პაესტუმი, იტალია, 25–26 ოქტომბერი 2026. საქართველოს წარმომადგენელი — Georgia Nails-ის პრეზიდენტი.")}</p></div>
@@ -100,18 +103,36 @@ export default async function CertificatesPage() {
             <div className="award">
               <div className="year">—</div>
               <div><h3 data-edit="t.certificates.30">{ed("t.certificates.30", "Georgia Nails-ის პრეზიდენტი")}</h3><p data-edit="t.certificates.31">{ed("t.certificates.31", "საქართველოს ფრჩხილების ინდუსტრიის წარმომადგენელი CMC-ის საერთაშორისო ჩემპიონატებზე. დაამატეთ წელი და დეტალები.")}</p></div>
-              <div className="proof">{t("დიპლომი / ფოტო")}</div>
+              <div className="proof" data-img="award.1">{t("დიპლომი / ფოტო")}</div>
             </div>
             <div className="award">
               <div className="year">{t("წელი")}</div>
               <div><h3 data-edit="t.certificates.32">{ed("t.certificates.32", "სხვა კონკურსები და ნომინაციები")}</h3><p data-edit="t.certificates.33">{ed("t.certificates.33", "ღონისძიება, ქვეყანა, ადგილი და კატეგორია.")}</p></div>
-              <div className="proof">{t("დიპლომი / ფოტო")}</div>
+              <div className="proof" data-img="award.2">{t("დიპლომი / ფოტო")}</div>
             </div>
             <div className="award">
               <div className="year">{t("წელი")}</div>
               <div><h3 data-edit="t.certificates.34">{ed("t.certificates.34", "პედაგოგის / ტრენერის სტატუსი")}</h3><p data-edit="t.certificates.35">{ed("t.certificates.35", "ბრენდი ან აკადემია, რომელმაც თინას თავისი პროგრამების სწავლების უფლება მისცა.")}</p></div>
-              <div className="proof">{t("დიპლომი / ფოტო")}</div>
-            </div></div>
+              <div className="proof" data-img="award.3">{t("დიპლომი / ფოტო")}</div>
+            </div>
+            {extraAwards.map((id) => (
+              <div className="award" key={id} data-list-item={id}>
+                <div className="year" data-edit={`list.awards.${id}.year`}>
+                  {ed(`list.awards.${id}.year`, "წელი")}
+                </div>
+                <div>
+                  <h3 data-edit={`list.awards.${id}.title`}>
+                    {ed(`list.awards.${id}.title`, "ახალი ჩანაწერი")}
+                  </h3>
+                  <p data-edit={`list.awards.${id}.text`}>
+                    {ed(`list.awards.${id}.text`, "აღწერა")}
+                  </p>
+                </div>
+                <div className="proof" data-img={`list.awards.${id}`}>
+                  {t("დიპლომი / ფოტო")}
+                </div>
+              </div>
+            ))}</div>
           </div>
       </section>
       

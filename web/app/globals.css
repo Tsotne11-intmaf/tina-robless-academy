@@ -1456,3 +1456,38 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 @media (max-width:560px){
   .crs-thumb{width:84px;height:58px;flex-basis:84px}
 }
+
+/* Picture slots while editing: the outline shows where a picture can be
+   replaced, and the button sits on top of it rather than next to it, so the
+   thing you press is the thing you are changing. */
+.ed-mode [data-img].ed-pic{
+  position:relative; cursor:pointer;
+  box-shadow:inset 0 0 0 2px var(--plum);
+}
+.ed-pic-btn{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  z-index:5; border:0; border-radius:999px; cursor:pointer;
+  background:#2B0F1F; color:#fff; font-size:.82rem; font-weight:600;
+  padding:9px 16px; white-space:nowrap;
+  font-family:inherit;
+  box-shadow:0 8px 24px -8px rgba(0,0,0,.6);
+}
+.ed-pic-btn:hover{background:var(--plum)}
+
+/* Growing a list from the page. The add button sits inside the list it grows,
+   so there is never a question of which list it belongs to. */
+.ed-add-btn{
+  display:block; width:100%; margin-top:14px;
+  border:2px dashed var(--plum); border-radius:14px; background:none;
+  color:var(--plum); font-family:inherit; font-size:1rem; font-weight:600;
+  padding:16px; cursor:pointer;
+}
+.ed-add-btn:hover{background:#FFEAF3}
+[data-list-item]{position:relative}
+.ed-del-btn{
+  position:absolute; top:8px; right:8px; z-index:6;
+  width:32px; height:32px; border:0; border-radius:50%;
+  background:#2B0F1F; color:#fff; font-size:.95rem; cursor:pointer;
+  font-family:inherit;
+}
+.ed-del-btn:hover{background:#B80F5F}

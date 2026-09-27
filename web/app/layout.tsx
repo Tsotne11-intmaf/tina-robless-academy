@@ -4,6 +4,7 @@ import SiteHeader from "@/components/legacy/SiteHeader";
 import SiteFooter from "@/components/legacy/SiteFooter";
 import EditBar from "@/components/EditBar";
 import { createClient } from "@/lib/supabase/server";
+import { getContent, imageCss } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Tina Robless Nail Academy — ფრჩხილების სწავლის ტექნიკა იწყება აქ",
@@ -38,6 +39,8 @@ async function isAdmin() {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const admin = await isAdmin();
+  // One rule per replaced picture, so no component had to be rewritten to accept one.
+  const pictures = imageCss(await getContent());
   return (
     <html lang="ka">
       <head>
@@ -49,6 +52,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body>
+        {pictures ? <style dangerouslySetInnerHTML={{ __html: pictures }} /> : null}
         <SiteHeader />
         {children}
         <SiteFooter />

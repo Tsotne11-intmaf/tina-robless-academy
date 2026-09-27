@@ -34,3 +34,43 @@ export const getContent = cache(async (): Promise<Content> => {
 export function editable(content: Content, t: (s: string) => string) {
   return (key: string, fallback: string) => t(content[key] ?? fallback);
 }
+
+/* Pictures are applied as one stylesheet rather than per element.
+
+   Every picture slot on the site is already marked with its key, so a single
+   rule per replaced image does the whole job - no component has to be rewritten
+   to accept a background, and a slot that has never been replaced keeps exactly
+   the styling it shipped with. Keys are stored as img.<slot>. */
+export function imageCss(content: Content): string {
+  const rules: string[] = [];
+  for (const [key, url] of Object.entries(content)) {
+    if (!key.startsWith("img.")) continue;
+    const slot = key.slice(4);
+    // The slot name comes from our own markup, but the value is a stored string:
+    // anything that could close the declaration or start a new one is refused.
+    if (!/^[\w.-]+$/.test(slot)) continue;
+    if (!/^https:\/\/[^"'()\s;{}]+$/.test(url)) continue;
+    rules.push(
+      `[data-img="${slot}"]{background:url("${url}") center/cover !important;color:transparent !important}`
+    );
+  }
+  return rules.join("");
+}
+
+/* A list the owner can grow: the timeline of awards, and anything like it.
+
+   The list row itself holds only ids, in order. Each entry's wording lives in
+   ordinary content keys - list.awards.a3.title and so on - so a new entry is
+   edited, translated and saved by exactly the same machinery as text that
+   shipped in the code. Adding an entry is appending an id; removing one is
+   dropping it. Nothing has to know the shape of an award. */
+export function listOf(content: Content, key: string): string[] {
+  const raw = content[key];
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((x) => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
