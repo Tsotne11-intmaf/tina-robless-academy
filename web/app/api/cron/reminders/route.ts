@@ -36,14 +36,14 @@ export async function GET(request: Request) {
   // otherwise, and nudging someone who never bought a course is just spam.
   const { data: enrolments, error: enrErr } = await supabase
     .from("enrollments")
-    .select("user_id,course_id,expires_at");
+    .select("profile_id,course_id,expires_at");
   if (enrErr) return NextResponse.json({ error: enrErr.message }, { status: 500 });
 
   const now = Date.now();
   const owned = new Map<string, string[]>();
   for (const e of enrolments ?? []) {
     if (e.expires_at && new Date(e.expires_at).getTime() < now) continue;
-    owned.set(e.user_id, [...(owned.get(e.user_id) ?? []), e.course_id]);
+    owned.set(e.profile_id, [...(owned.get(e.profile_id) ?? []), e.course_id]);
   }
   if (!owned.size) return NextResponse.json({ ok: true, sent: 0, reason: "no enrolments" });
 
