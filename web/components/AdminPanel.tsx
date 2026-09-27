@@ -121,6 +121,16 @@ export default function AdminPanel({
 
   const ownerTotal = profiles.filter((p) => ownedCount(p.id) > 0).length;
 
+  /* A bare number reads as an ordinal - "2" beside a task looks like the second
+     one, not two out of ten. Anything that is already a fraction, or is words
+     rather than a number, is shown exactly as it was typed. */
+  const asMark = (grade: string) => {
+    const v = grade.trim();
+    return /^\d{1,2}([.,]\d)?$/.test(v) && parseFloat(v.replace(",", ".")) <= 10
+      ? `${v}/10`
+      : v;
+  };
+
   /* Every submission is in exactly one of these three states, so the three
      piles together are the whole list - nothing is hidden by filtering. */
   const hwCount = (k: string) => submissions.filter((s) => s.status === k).length;
@@ -428,7 +438,7 @@ export default function AdminPanel({
                                   {/* The mark itself, where the state is. Knowing a
                                       task was checked without knowing what it got
                                       meant opening the homework tab to find out. */}
-                                  {sub.grade ? <span className="hw-grade">{sub.grade}</span> : null}
+                                  {sub.grade ? <span className="hw-grade">{asMark(sub.grade)}</span> : null}
                                 </>
                               ) : (
                                 <span className="hw-badge waiting">ჯერ არ ჩაუბარებია</span>
