@@ -1533,3 +1533,26 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 .buy-reach-links{display:grid;gap:8px;margin-bottom:10px}
 .buy-reach-links .btn{width:100%;justify-content:center}
 .buy-reach .btn-ghost{width:100%;justify-content:center}
+
+/* Checkboxes are not text fields.
+
+   .field input sets width:100% with padding and a border, which is right for a
+   name or a price and wrong for a tick: inside a .field the box stretched the
+   full width of the form with the tick marooned in the middle, and the label
+   was squeezed into a narrow column beside it. There was no exception for
+   checkboxes anywhere in the stylesheet, so this applied to any that were ever
+   placed in a field. */
+.field input[type="checkbox"],
+.field input[type="radio"],
+.auth-check input[type="checkbox"],
+.auth-check input[type="radio"]{
+  width:18px;min-width:18px;height:18px;
+  padding:0;border-radius:4px;flex:none;
+  accent-color:var(--plum);cursor:pointer;
+}
+.field input[type="radio"],.auth-check input[type="radio"]{border-radius:50%}
+/* A tick and its words belong on one line, reading left to right. */
+.field .auth-check,.field label.auth-check{
+  display:flex;align-items:center;gap:10px;margin:0;
+  font-size:.95rem;color:var(--ink);line-height:1.4;
+}
