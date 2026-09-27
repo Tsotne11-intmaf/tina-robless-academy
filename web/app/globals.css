@@ -1589,3 +1589,10 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   .hw-row{flex-wrap:wrap}
   .hw-state{flex:1 1 100%}
 }
+
+/* The mark, beside the state it was given in. */
+.hw-grade{
+  display:inline-block;margin-left:8px;white-space:nowrap;
+  font-size:.82rem;font-weight:700;padding:5px 10px;border-radius:999px;
+  background:var(--plum);color:#fff;
+}

@@ -75,6 +75,9 @@ export default function AdminPanel({
   const [openFor, setOpenFor] = useState<string | null>(null);
   const [assignFor, setAssignFor] = useState<string | null>(null);
   const [only, setOnly] = useState<"all" | "owners">("all");
+  /* Which pile of homework is on screen. It opens on the one that needs Tina:
+     work that has been handed in and not yet looked at. */
+  const [hwPile, setHwPile] = useState<"sent" | "redo" | "done">("sent");
 
   const nameOf = (id: string) => {
     const p = profiles.find((x) => x.id === id);
@@ -117,6 +120,11 @@ export default function AdminPanel({
     .sort((a, b) => ownedCount(b.id) - ownedCount(a.id));
 
   const ownerTotal = profiles.filter((p) => ownedCount(p.id) > 0).length;
+
+  /* Every submission is in exactly one of these three states, so the three
+     piles together are the whole list - nothing is hidden by filtering. */
+  const hwCount = (k: string) => submissions.filter((s) => s.status === k).length;
+  const hwShown = submissions.filter((s) => s.status === hwPile);
 
   /* Granting access is an admin-only write: the enrollments policy refuses an insert
      from anyone not in the admins table, so a student cannot enrol themselves even
@@ -249,6 +257,9 @@ export default function AdminPanel({
     }
     setBusy(false);
     setMsg({ text: "შეფასება შენახულია" + mail, kind: "ok" });
+    /* Follow the work into the pile it just moved to. Grading something out of
+       the list it is being read from would otherwise make it vanish. */
+    if (status === "done" || status === "redo") setHwPile(status);
     router.refresh();
   }
 
@@ -406,13 +417,19 @@ export default function AdminPanel({
                             </div>
                             <div className="hw-state">
                               {sub ? (
-                                <span className={"hw-badge " + sub.status}>
-                                  {sub.status === "done"
-                                    ? "შემოწმებული"
-                                    : sub.status === "redo"
-                                      ? "გადასაკეთებელი"
-                                      : "ჩაბარებულია"}
-                                </span>
+                                <>
+                                  <span className={"hw-badge " + sub.status}>
+                                    {sub.status === "done"
+                                      ? "შემოწმებული"
+                                      : sub.status === "redo"
+                                        ? "გადასაკეთებელი"
+                                        : "ჩაბარებულია"}
+                                  </span>
+                                  {/* The mark itself, where the state is. Knowing a
+                                      task was checked without knowing what it got
+                                      meant opening the homework tab to find out. */}
+                                  {sub.grade ? <span className="hw-grade">{sub.grade}</span> : null}
+                                </>
                               ) : (
                                 <span className="hw-badge waiting">ჯერ არ ჩაუბარებია</span>
                               )}
@@ -557,10 +574,28 @@ export default function AdminPanel({
       ) : null}
 
       {tab === "homework" ? (
-        submissions.length === 0 ? (
-        <p className="lead">ჯერ არავის ჩაუბარებია დავალება.</p>
+        <>
+          <div className="filters" style={{ marginBottom: 18 }}>
+            <a className="chip" aria-pressed={hwPile === "sent"} onClick={() => setHwPile("sent")}>
+              შესამოწმებელი ({hwCount("sent")})
+            </a>
+            <a className="chip" aria-pressed={hwPile === "redo"} onClick={() => setHwPile("redo")}>
+              გადასაკეთებელი ({hwCount("redo")})
+            </a>
+            <a className="chip" aria-pressed={hwPile === "done"} onClick={() => setHwPile("done")}>
+              შემოწმებული ({hwCount("done")})
+            </a>
+          </div>
+          {hwShown.length === 0 ? (
+        <p className="lead">
+          {hwPile === "sent"
+            ? "შესამოწმებელი არაფერია."
+            : hwPile === "redo"
+              ? "გადასაკეთებელი არაფერია."
+              : "შემოწმებული ჯერ არაფერია."}
+        </p>
       ) : (
-        submissions.map((s) => (
+        hwShown.map((s) => (
           <div className="adm-form" key={s.id}>
             <b>{nameOf(s.profile_id)}</b>
             <div className="mail">
@@ -614,7 +649,8 @@ export default function AdminPanel({
             </form>
           </div>
         ))
-        )
+          )}
+        </>
       ) : null}
     
       {tab === "courses" ? <CoursesTab courses={catalog} /> : null}
