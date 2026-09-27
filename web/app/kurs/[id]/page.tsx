@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { CATALOG, CATS } from "@/lib/catalog";
 import { Badge, Price } from "@/components/CourseCard";
 import BuyButton from "@/components/BuyButton";
+import { getT } from "@/lib/i18n";
 
 /* Replaces SHOP.course(). Each course is now a real URL that Google can index,
    with its own title and description - the legacy hash router exposed a single
@@ -29,19 +30,21 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
   const c = CATALOG.find((x) => x.id === id);
   if (!c) notFound();
 
+  const t = await getT();
+
   return (
     <section className="lms">
       <div className="wrap">
         <div className="crumbs">
-          <Link href="/">მთავარი</Link> / <Link href="/catalog">ყველა კურსი</Link> /{" "}
-          <Link href={"/catalog?cat=" + c.cat}>{CATS[c.cat] ?? c.cat}</Link>
+          <Link href="/">{t("მთავარი")}</Link> / <Link href="/catalog">{t("ყველა კურსი")}</Link> /{" "}
+          <Link href={"/catalog?cat=" + c.cat}>{t(CATS[c.cat] ?? c.cat)}</Link>
         </div>
 
         <div className="kurs-grid">
           <div>
-            <h1 style={{ marginBottom: 12 }}>{c.title}</h1>
+            <h1 style={{ marginBottom: 12 }}>{t(c.title)}</h1>
             <p className="lead" style={{ fontSize: "1.1rem", marginBottom: 26 }}>
-              {c.desc}
+              {t(c.desc)}
             </p>
 
             <div
@@ -56,25 +59,24 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
 
             {c.learn?.length ? (
               <>
-                <h2 style={{ fontSize: "1.7rem", marginBottom: 14 }}>რას ისწავლით</h2>
+                <h2 style={{ fontSize: "1.7rem", marginBottom: 14 }}>{t("რას ისწავლით")}</h2>
                 <ul className="learn">
                   {c.learn.map((l, i) => (
-                    <li key={i}>{l}</li>
+                    <li key={i}>{t(l)}</li>
                   ))}
                 </ul>
               </>
             ) : null}
 
             <h2 style={{ fontSize: "1.7rem", margin: "34px 0 14px" }}>
-              სტუდენტების ნიმუშები
+              {t("სტუდენტების ნიმუშები")}
             </h2>
             <p className="lead">
-              ჯერ არავის აუტვირთავს. ნიმუშების ატვირთვა ჩაირთვება ბექენდის
-              დასრულების შემდეგ.
+              {t("ჯერ არავის აუტვირთავს.")}
             </p>
 
-            <h2 style={{ fontSize: "1.7rem", margin: "40px 0 14px" }}>კომენტარები</h2>
-            <p className="lead">კომენტარები ჩაირთვება ბექენდის დასრულების შემდეგ.</p>
+            <h2 style={{ fontSize: "1.7rem", margin: "40px 0 14px" }}>{t("კომენტარები")}</h2>
+            <p className="lead">{t("კომენტარები ჯერ არ არის.")}</p>
           </div>
 
           <aside className={"buy" + (c.badge === "premium" ? " is-premium" : "")}>
@@ -86,7 +88,7 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
             <div className={"buy-price" + (c.badge === "premium" ? " gold" : "")}>
               <Price c={c} />
             </div>
-            <div className="buy-dur">{c.dur}</div>
+            <div className="buy-dur">{t(c.dur)}</div>
 
             <BuyButton courseId={c.id} />
 
@@ -95,28 +97,28 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
               style={{ justifyContent: "center", width: "100%", marginTop: 10 }}
               href="/login"
             >
-              უკვე გაქვთ? შესვლა
+              {t("უკვე გაქვთ? შესვლა")}
             </Link>
 
             {c.incl?.length ? (
               <>
-                <h4>რა შედის</h4>
+                <h4>{t("რა შედის")}</h4>
                 <ul>
                   {c.incl.map((i, k) => (
-                    <li key={k}>{i}</li>
+                    <li key={k}>{t(i)}</li>
                   ))}
                 </ul>
               </>
             ) : null}
 
             <p className="small">
-              ერთჯერადი გადახდა ·{" "}
+              {t("ერთჯერადი გადახდა")} ·{" "}
               {c.access === "days" && c.accessDays
-                ? `წვდომა ${c.accessDays} დღე`
-                : "უვადო წვდომა"}{" "}
-              · სერტიფიკატი ·{" "}
+                ? `${t("წვდომა")} ${c.accessDays} ${t("დღე")}`
+                : t("უვადო წვდომა")}{" "}
+              · {t("სერტიფიკატი")} ·{" "}
               <Link href="/refund" style={{ borderBottom: "1px solid var(--blush)" }}>
-                14 დღე თანხის დაბრუნება
+                {t("14 დღე თანხის დაბრუნება")}
               </Link>
             </p>
           </aside>

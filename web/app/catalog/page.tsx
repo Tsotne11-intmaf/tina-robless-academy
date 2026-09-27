@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CATALOG, CATS } from "@/lib/catalog";
 import CourseCard from "@/components/CourseCard";
+import { getT } from "@/lib/i18n";
 
 export const metadata = {
   title: "კურსები — Tina Robless Nail Academy",
@@ -16,18 +17,21 @@ export default async function CatalogPage({
   searchParams: Promise<{ cat?: string }>;
 }) {
   const { cat = "all" } = await searchParams;
+  const t = await getT();
   const list = cat === "all" ? CATALOG : CATALOG.filter((c) => c.cat === cat);
 
   return (
     <section className="lms">
       <div className="wrap">
         <div className="crumbs">
-          <Link href="/">მთავარი</Link> / ყველა კურსი
+          <Link href="/">{t("მთავარი")}</Link> / {t("ყველა კურსი")}
         </div>
-        <h1 style={{ marginBottom: 10 }}>ყველა კურსი</h1>
+        <h1 style={{ marginBottom: 10 }}>{t("ყველა კურსი")}</h1>
         <p className="lead" style={{ marginBottom: 26 }}>
-          {CATALOG.length} კურსი. გახსენით ნებისმიერი — ნახეთ პროგრამა, სხვების
-          კომენტარები და ატვირთეთ თქვენი ნიმუში.
+          {CATALOG.length}{" "}
+          {t(
+            "კურსი. გახსენით ნებისმიერი — ნახეთ პროგრამა, სხვების კომენტარები და ატვირთეთ თქვენი ნიმუში."
+          )}
         </p>
 
         <div className="filters">
@@ -38,13 +42,13 @@ export default async function CatalogPage({
               href={k === "all" ? "/catalog" : "/catalog?cat=" + k}
               aria-pressed={k === cat}
             >
-              {CATS[k]}
+              {t(CATS[k])}
             </Link>
           ))}
         </div>
 
         {list.length === 0 ? (
-          <p className="lead">ამ კატეგორიაში კურსი ჯერ არ არის.</p>
+          <p className="lead">{t("ამ კატეგორიაში კურსი ჯერ არ არის.")}</p>
         ) : (
           <div className="cards">
             {list.map((c) => (
