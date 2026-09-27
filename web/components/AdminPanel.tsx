@@ -35,6 +35,15 @@ type CourseRef = { id: string; title: string };
 
 type Tab = "students" | "homework" | "mail" | "courses";
 type EmailLogRow = { id: number; user_id: string; kind: string; ref: string; sent_at: string };
+type Assignment = {
+  id: number;
+  profile_id: string;
+  course_id: string;
+  title: string;
+  task: string;
+  due_at: string | null;
+  created_at: string;
+};
 
 export default function AdminPanel({
   profiles,
@@ -44,6 +53,7 @@ export default function AdminPanel({
   emailLog,
   subscriberCount,
   catalog,
+  assignments,
 }: {
   profiles: Profile[];
   enrollments: Enrollment[];
@@ -52,6 +62,7 @@ export default function AdminPanel({
   emailLog: EmailLogRow[];
   subscriberCount: number;
   catalog: AdminCourse[];
+  assignments: Assignment[];
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -70,6 +81,23 @@ export default function AdminPanel({
     return p ? p.full_name || p.email : id.slice(0, 8);
   };
   const titleOf = (id: string) => courses.find((c) => c.id === id)?.title ?? id;
+
+  /* How long the student has, in the words someone would use out loud. A
+     deadline that has passed is the thing Tina needs to see first, so it says
+     so rather than counting negative days. */
+  const timeLeft = (due: string | null) => {
+    if (!due) return { text: "ვადის გარეშე", late: false };
+    const ms = new Date(due).getTime() - Date.now();
+    const days = Math.ceil(ms / 86400000);
+    if (ms < 0) return { text: `ვადა გავიდა (${Math.abs(days)} დღის წინ)`, late: true };
+    if (days <= 1) return { text: "დარჩა ბოლო დღე", late: false };
+    return { text: `დარჩა ${days} დღე`, late: false };
+  };
+
+  /* A personal assignment appears in the student's cabinet with its row id
+     prefixed, and that is the id their submission carries back. */
+  const handedIn = (a: Assignment) =>
+    submissions.find((s) => s.profile_id === a.profile_id && s.task_id === "a" + a.id);
 
   const ownedCount = (id: string) => enrollments.filter((e) => e.profile_id === id).length;
 
@@ -301,6 +329,7 @@ export default function AdminPanel({
           ) : (
             shown.map((p) => {
               const mine = enrollments.filter((e) => e.profile_id === p.id);
+              const mineTasks = assignments.filter((a) => a.profile_id === p.id);
               const open = openFor === p.id;
               return (
                 <div className="stu-card" key={p.id}>
@@ -356,6 +385,43 @@ export default function AdminPanel({
                       <p className="stu-none">ჯერ არცერთი კურსი არ აქვს</p>
                     )}
                   </div>
+
+                  {/* What Tina set this student, and whether it has come back.
+                      Without this the panel could hand out homework and then
+                      show no trace that it had. */}
+                  {mineTasks.length ? (
+                    <div className="stu-courses">
+                      <div className="stu-label">დავალებები ({mineTasks.length})</div>
+                      {mineTasks.map((a) => {
+                        const left = timeLeft(a.due_at);
+                        const sub = handedIn(a);
+                        return (
+                          <div className={"hw-row" + (left.late && !sub ? " late" : "")} key={a.id}>
+                            <div className="hw-main">
+                              <b>{a.title}</b>
+                              <span className="hw-task">{a.task}</span>
+                              <span className="hw-meta">
+                                {titleOf(a.course_id)} · {left.text}
+                              </span>
+                            </div>
+                            <div className="hw-state">
+                              {sub ? (
+                                <span className={"hw-badge " + sub.status}>
+                                  {sub.status === "done"
+                                    ? "შემოწმებული"
+                                    : sub.status === "redo"
+                                      ? "გადასაკეთებელი"
+                                      : "ჩაბარებულია"}
+                                </span>
+                              ) : (
+                                <span className="hw-badge waiting">ჯერ არ ჩაუბარებია</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
 
                   {open ? (
                     <form

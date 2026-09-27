@@ -30,11 +30,18 @@ export default async function AdminPage() {
 
   const supabase = await createClient();
   // RLS returns every row here only because the caller is a listed admin.
-  const [profilesRes, enrollmentsRes, submissionsRes, mailRes] = await Promise.all([
+  const [profilesRes, enrollmentsRes, submissionsRes, mailRes, assignRes] = await Promise.all([
     supabase.from("profiles").select("*").order("created_at", { ascending: false }),
     supabase.from("enrollments").select("*"),
     supabase.from("submissions").select("*").order("created_at", { ascending: false }),
     supabase.from("email_log").select("*").order("sent_at", { ascending: false }).limit(40),
+    /* Assignments Tina has set. The table is created from the dashboard, so a
+       project where that has not happened yet still renders the rest of the
+       panel rather than failing whole. */
+    supabase
+      .from("assignments")
+      .select("id,profile_id,course_id,title,task,due_at,created_at")
+      .order("created_at", { ascending: false }),
   ]);
 
   const profiles = profilesRes.data ?? [];
@@ -65,6 +72,7 @@ export default async function AdminPage() {
           courses={catalog.map((c) => ({ id: c.id, title: c.title }))}
           catalog={catalog}
           emailLog={mailRes.data ?? []}
+          assignments={assignRes.data ?? []}
           subscriberCount={subscriberCount}
         />
       </div>
