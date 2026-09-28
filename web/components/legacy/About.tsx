@@ -24,9 +24,11 @@ export default async function AboutPage() {
   const content = await getContent();
   const ed = editable(content, t);
 
-  /* Her order once she has touched the list, the shipped order until then. */
-  const saved = listOf(content, STORY_LIST);
-  const story = saved.length ? saved : STORY_IDS;
+  /* Her order once she has touched the list, the shipped order until then.
+     Read by whether the row exists rather than by whether it has entries: an
+     emptied list is a decision, and treating it as untouched brought all six
+     built-in entries back the moment she deleted the last one. */
+  const story = content[STORY_LIST] === undefined ? STORY_IDS : listOf(content, STORY_LIST);
   const builtIn = new Map(STORY.map((e) => [e.id, e]));
   return (
     <>

@@ -62,7 +62,9 @@ export async function POST(request: Request) {
   } catch {
     ids = [];
   }
-  if (!ids.length) ids = [...(BUILT_IN[list] ?? [])];
+  // Only before the list has ever been written: an emptied list is not an
+  // untouched one, and refilling it here would undo the last deletion.
+  if (!row) ids = [...(BUILT_IN[list] ?? [])];
 
   if (b.action === "add") {
     if (ids.length >= 60) {

@@ -20,6 +20,10 @@ export default function EditBar() {
   const [dirty, setDirty] = useState(0);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  /* Bumped after a list changes. Adding an entry re-renders the page, but the
+     effect below runs off state - so a new entry arrived with no buttons and
+     nothing to type into until editing was closed and opened again. */
+  const [rebuilt, setRebuilt] = useState(0);
 
   // What each spot said when editing started, so "changed" means changed.
   const before = useRef(new Map<string, string>());
@@ -95,6 +99,7 @@ export default function EditBar() {
         return;
       }
       setMsg(action === "add" ? "ჩანაწერი დაემატა." : "ჩანაწერი წაიშალა.");
+      setRebuilt((n) => n + 1);
       router.refresh();
       setTimeout(() => setMsg(null), 3000);
     },
@@ -237,7 +242,7 @@ export default function EditBar() {
       lists.forEach((el) => el.querySelector(".ed-add-btn")?.remove());
       items.forEach((el) => el.querySelector(".ed-item-bar")?.remove());
     };
-  }, [on, listAction]);
+  }, [on, listAction, rebuilt]);
 
   async function saveText() {
     const edits = Array.from(document.querySelectorAll<HTMLElement>(".ed-changed")).map(

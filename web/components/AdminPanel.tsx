@@ -251,7 +251,10 @@ export default function AdminPanel({
         kind: "graded",
         userId: profileId,
         courseId,
-        ref: `${id}:${status}`,
+        /* The verdict is the status and the mark together. Keyed on status
+           alone, correcting a 2 to an 8 counted as the same result and the
+           student was never told their mark had changed. */
+        ref: `${id}:${status}:${gradeText.trim()}`,
         // Tina's comment travels with the notice, so the student reads it in
         // the email rather than having to come and look for it.
         note: feedback,

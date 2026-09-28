@@ -38,7 +38,8 @@ export default function CompleteLessonButton({
       setErr("ავტორიზაცია საჭიროა");
       return;
     }
-    // Never move progress backwards if a student revisits an earlier lesson.
+    /* Kept inside the course. Revisiting an earlier lesson cannot move progress
+       backwards because the button is a link by then, not this write. */
     const newCount = Math.min(Math.max(lessonIndex + 1, 0), totalLessons);
     const { error } = await supabase.from("progress").upsert(
       {
