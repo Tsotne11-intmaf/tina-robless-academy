@@ -6,10 +6,29 @@ import EditBar from "@/components/EditBar";
 import { createClient } from "@/lib/supabase/server";
 import { getContent, imageCss } from "@/lib/content";
 
+const SITE = "https://www.tinarobless.com";
+const TITLE = "Tina Robless Nail Academy — ფრჩხილების სწავლის ტექნიკა იწყება აქ";
+const DESCRIPTION =
+  "თინა რობლესის (თინა კუჭუხიზე) ონლაინ კურსები გრძელ ნაშენზე, ფრენჩსა და დიზაინზე, თბილისი.";
+
+/* What a pasted link becomes in a chat.
+ *
+ * metadataBase is what makes the card work at all: the picture has to be given
+ * as a full address, and without a base every page offered a relative one that
+ * no messenger could fetch. The picture itself is drawn in opengraph-image. */
 export const metadata: Metadata = {
-  title: "Tina Robless Nail Academy — ფრჩხილების სწავლის ტექნიკა იწყება აქ",
-  description:
-    "თინა რობლესის (თინა კუჭუხიზე) ონლაინ კურსები გრძელ ნაშენზე, ფრენჩსა და დიზაინზე, თბილისი.",
+  metadataBase: new URL(SITE),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: "Tina Robless Nail Academy",
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE,
+    locale: "ka_GE",
+  },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
 
 export const viewport: Viewport = {

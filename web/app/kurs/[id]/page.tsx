@@ -23,7 +23,17 @@ export async function generateMetadata({
   const { id } = await params;
   const c = await courseById(id);
   if (!c) return { title: "კურსი ვერ მოიძებნა" };
-  return { title: c.title + " — Tina Robless Nail Academy", description: c.desc };
+  const title = c.title + " — Tina Robless Nail Academy";
+  /* A shared course shows its own photo. Only an uploaded one is a picture a
+     messenger can fetch - the launch courses carry a CSS class, not a file, and
+     those fall back to the site's own card. */
+  const images = c.photo ? [{ url: c.photo, alt: c.title }] : undefined;
+  return {
+    title,
+    description: c.desc,
+    openGraph: { type: "article", title, description: c.desc, url: `/kurs/${c.id}`, images },
+    twitter: { card: "summary_large_image", title, description: c.desc },
+  };
 }
 
 export default async function KursPage({ params }: { params: Promise<{ id: string }> }) {
