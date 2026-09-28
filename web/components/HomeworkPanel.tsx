@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { UploadButton } from "@/lib/uploadthing";
+import { markBand, markText } from "@/lib/mark";
 
 export type Task = {
   id: string;
@@ -99,9 +100,15 @@ export default function HomeworkPanel({
 
             {sub ? (
               <>
-                <p className="auth-msg ok" style={{ marginTop: 0 }}>
+                {/* The box takes the mark's colour, so how it went is read before
+                    the number is. Without a mark it stays the neutral green of a
+                    task that has simply been looked at. */}
+                <p
+                  className={"auth-msg " + (sub.grade ? (markBand(sub.grade) ?? "ok") : "ok")}
+                  style={{ marginTop: 0 }}
+                >
                   {STATUS[sub.status] ?? sub.status}
-                  {sub.grade ? " · შეფასება: " + sub.grade : ""}
+                  {sub.grade ? " · შეფასება: " + markText(sub.grade) : ""}
                 </p>
                 {sub.feedback ? <p className="lead">თინას კომენტარი: {sub.feedback}</p> : null}
                 {sub.photo_url ? (

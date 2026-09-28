@@ -1615,3 +1615,12 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   border-left:3px solid var(--plum);padding-left:9px;margin-top:4px;
   overflow-wrap:anywhere;
 }
+
+/* A mark's colour, so the verdict lands before the number is read: 5 and below
+   went wrong, through 7 passed with work left, above that is good. */
+.auth-msg.mark-low{background:#FDE7EA;color:#A32020}
+.auth-msg.mark-mid{background:#FFF3D6;color:#8A5B00}
+.auth-msg.mark-high{background:#E7F6EC;color:#1B5E36}
+.hw-grade.mark-low{background:#C22B3A}
+.hw-grade.mark-mid{background:#B57A00}
+.hw-grade.mark-high{background:#1F8A4C}
