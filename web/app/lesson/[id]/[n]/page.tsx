@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { getStudent, ownedCourses, courseById, flatLessons } from "@/lib/student";
+import { createClient } from "@/lib/supabase/server";
+import { playerFor } from "@/lib/video";
 import StudentSidebar from "@/components/StudentSidebar";
 import CompleteLessonButton from "@/components/CompleteLessonButton";
 
@@ -34,6 +36,18 @@ export default async function LessonPage({
   if (idx > doneCount) redirect(`/course/${id}`);
 
   const lesson = lessons[idx];
+
+  /* Read after the ownership check above, never before. The select policy says
+     the same thing again in the database, so a reference cannot be fetched by
+     someone who has not bought the course even if this page were wrong. */
+  const supabase = await createClient();
+  const { data: vid } = await supabase
+    .from("lesson_videos")
+    .select("url")
+    .eq("course_id", id)
+    .eq("lesson_index", idx)
+    .maybeSingle();
+  const player = playerFor(vid?.url);
   const prev = idx > 0 ? idx - 1 : null;
   const next = idx + 1 < lessons.length ? idx + 1 : null;
   const alreadyDone = idx < doneCount;
@@ -53,20 +67,23 @@ export default async function LessonPage({
             {idx + 1}. {lesson.t}
           </h1>
 
-          {/* Video goes to a dedicated host rather than Supabase; this is the slot. */}
-          <div
-            className="video"
-            style={{
-              aspectRatio: "16/9",
-              background: "var(--ink)",
-              borderRadius: "var(--r-card)",
-              display: "grid",
-              placeItems: "center",
-              color: "rgba(255,255,255,.65)",
-              marginBottom: 22,
-            }}
-          >
-            ვიდეო ჩაირთვება ვიდეო-ჰოსტინგის მიერთების შემდეგ
+          {/* The file lives with a video host, not in the database. What is kept
+              here is the reference, resolved into a player above. */}
+          <div className="video">
+            {player === null ? (
+              <div className="video-empty">ამ გაკვეთილს ვიდეო ჯერ არ აქვს</div>
+            ) : player.kind === "iframe" ? (
+              <iframe
+                src={player.src}
+                title={lesson.t}
+                loading="lazy"
+                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+              />
+            ) : (
+              // eslint-disable-next-line jsx-a11y/media-has-caption
+              <video src={player.src} controls controlsList="nodownload" playsInline />
+            )}
           </div>
 
           {lesson.d ? <p className="lead">{lesson.d}</p> : null}

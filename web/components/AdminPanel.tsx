@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import CoursesTab, { type AdminCourse } from "@/components/CoursesTab";
 import { markBand, markText } from "@/lib/mark";
+import VideosTab from "@/components/VideosTab";
 
 type Profile = {
   id: string;
@@ -34,7 +35,7 @@ type Submission = {
 };
 type CourseRef = { id: string; title: string };
 
-type Tab = "students" | "homework" | "mail" | "courses";
+type Tab = "students" | "homework" | "mail" | "courses" | "videos";
 type EmailLogRow = { id: number; user_id: string; kind: string; ref: string; sent_at: string };
 type Assignment = {
   id: number;
@@ -321,6 +322,9 @@ export default function AdminPanel({
         </a>
         <a className="chip" aria-pressed={tab === "courses"} onClick={() => setTab("courses")}>
           კურსები ({catalog.length})
+        </a>
+        <a className="chip" aria-pressed={tab === "videos"} onClick={() => setTab("videos")}>
+          ვიდეოები
         </a>
         <a className="chip" aria-pressed={tab === "mail"} onClick={() => setTab("mail")}>
           შეტყობინებები
@@ -712,6 +716,8 @@ export default function AdminPanel({
       ) : null}
     
       {tab === "courses" ? <CoursesTab courses={catalog} /> : null}
+
+      {tab === "videos" ? <VideosTab /> : null}
 
       {tab === "mail" ? (
         <>
