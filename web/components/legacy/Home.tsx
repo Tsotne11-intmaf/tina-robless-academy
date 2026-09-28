@@ -166,8 +166,22 @@ export default async function HomePage() {
         <div className="wrap about-grid">
           <div className="portrait" data-img="about.portrait" style={{background: "url(/img/img-cb3a67f067.jpg) center/cover", borderColor: "var(--line)"}}></div>
           <div>
-            <p className="ka" data-edit="t.home.61">{ed("t.home.61", "თინა კუჭუხიზე · Tina Robless")}</p>
-            <h2 data-edit="t.home.62">{ed("t.home.62", "ჩემ შესახებ")}</h2>
+            {/* On a phone the tall portrait sat above the section and pushed the
+                whole of it down before a word could be read. A small one beside
+                the heading says the same thing in a tenth of the height. It
+                carries the same picture slot, so replacing the photo replaces
+                both. */}
+            <div className="about-lead">
+              <div
+                className="portrait-mini"
+                data-img="about.portrait"
+                style={{background: "url(/img/img-cb3a67f067.jpg) center/cover"}}
+              />
+              <div>
+                <p className="ka" data-edit="t.home.61">{ed("t.home.61", "თინა კუჭუხიზე · Tina Robless")}</p>
+                <h2 data-edit="t.home.62">{ed("t.home.62", "ჩემ შესახებ")}</h2>
+              </div>
+            </div>
             <p data-edit="t.home.63">{ed("t.home.63", "თინა კუჭუხიზე, ონლაინ ცნობილი როგორც Tina Robless, ფრჩხილების მასტერი და პედაგოგია თბილისიდან. ცნობილია გრძელი ამერიკული ნაშენით, ზუსტი ფრენჩითა და ვარდისფერი ნამუშევრებით, რომლებიც საქართველოს საზღვრებს სცილდება.")}</p>
             <p data-edit="t.home.64">{ed("t.home.64", "მისი სალონიდან გადაღებული ვიდეოები აღწევს აუდიტორიას საქართველოში, ევროპასა და აშშ-ში — 19 000-ზე მეტი გამომწერი TikTok-ზე, ცალკეულ ნამუშევრებს კი 200 000-ზე მეტი ნახვა აქვს. წლების განმავლობაში სტუდენტები სტუდიაში ინდივიდუალურად სწავლობდნენ; ეს აკადემია იმავე გაკვეთილებს ონლაინ გთავაზობთ, ქართულად, ინგლისური და რუსული სუბტიტრებით.")}</p>
             <div className="creds">

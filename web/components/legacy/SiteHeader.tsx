@@ -1,6 +1,7 @@
 /* Generated from the legacy <header>. Interactive bits reconnected separately. */
 import { getT, getLang } from "@/lib/i18n";
 import LangSwitcher from "@/components/LangSwitcher";
+import MenuButton from "@/components/MenuButton";
 
 export default async function SiteHeader() {
   const t = await getT();
@@ -25,7 +26,7 @@ export default async function SiteHeader() {
             <LangSwitcher current={lang} />
             <a href="/dashboard" style={{fontWeight: "500"}}>{t("ჩემი კაბინეტი")}</a>
             <a className="btn btn-plum" href="/catalog">{t("კურსების ნახვა")}</a>
-            <button className="menu-btn" aria-label={t("მენიუს გახსნა")}>☰</button>
+            <MenuButton label={t("მენიუს გახსნა")} />
           </div>
         </div>
       

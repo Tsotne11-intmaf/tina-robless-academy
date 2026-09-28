@@ -590,7 +590,15 @@ a.thumb{text-decoration:none}
   .menu-open .nav ul li{padding:11px 0;border-top:1px solid var(--blush-soft)}
   .menu-open .nav ul a{font-size:1.05rem}
   .nav ul a[aria-current="page"]{border:0;color:var(--plum)}
-  .nav-right > a[href="#login"]{display:none}
+  /* Only the ☰ stays out here. The account link and the language chips are both
+     in the menu already, and side by side with the logo they pushed the row
+     wider than the screen - the right-hand end simply ran off it. The rule that
+     was meant to hide the account link still named the address it had before
+     the site had accounts, so it matched nothing. */
+  .nav-right > a{display:none}
+  .nav-right > .lang{display:none}
+  .nav-right{gap:0}
+  .nav{gap:12px}
 }
 @media (max-width:640px){
   body{font-size:16px}
@@ -1674,3 +1682,33 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 .crs-off{opacity:.62}
 .crs-off:hover{opacity:1}
 .crs-off .crs-thumb{filter:grayscale(1)}
+
+/* The home page's "about" heading, with a small portrait beside it on phones.
+   The full one stays for wider screens, where there is room for it. */
+.about-lead{display:flex;align-items:center;gap:16px}
+.portrait-mini{
+  display:none;flex:none;width:84px;height:106px;
+  border-radius:58px 58px 10px 10px;background-size:cover;background-position:center;
+  border:1px solid rgba(255,255,255,.18);box-shadow:0 14px 30px -18px rgba(0,0,0,.7);
+}
+@media (max-width:860px){
+  section.about .about-grid > .portrait{display:none}
+  .portrait-mini{display:block}
+  .about-lead{margin-bottom:18px}
+  .about-lead .ka{margin-bottom:4px}
+  .about-lead h2{margin-bottom:0}
+}
+@media (max-width:360px){
+  .portrait-mini{width:70px;height:90px}
+  .about-lead{gap:12px}
+}
+
+/* Card titles get a third line on phones.
+   Two lines is enough at full width, but a Georgian title wraps further as the
+   screen narrows and the clamp cut the end off - which is where "ნაწილი 1" and
+   "ნაწილი 2" are, the one thing telling two courses apart. */
+@media (max-width:560px){
+  .cards:not(.home-slider) .card h3{-webkit-line-clamp:3;min-height:0}
+  .cards.home-slider .card h3{-webkit-line-clamp:3;min-height:0}
+  .cards .card p{min-height:0}
+}
