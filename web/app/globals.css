@@ -1665,3 +1665,12 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 .vid-set{display:flex;gap:8px;flex:2 1 320px;min-width:0}
 .vid-set input{flex:1 1 auto;min-width:0}
 @media (max-width:560px){.vid-set{flex:1 1 100%}}
+
+/* A course that is put away. Said in words on the card and shown by weight, so
+   the list reads at a glance rather than one card at a time. */
+.crs-state{font-size:.82rem;font-weight:600}
+.crs-state.on{color:#1F6B3A}
+.crs-state.off{color:#A32020}
+.crs-off{opacity:.62}
+.crs-off:hover{opacity:1}
+.crs-off .crs-thumb{filter:grayscale(1)}

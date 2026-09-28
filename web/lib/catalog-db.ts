@@ -2,7 +2,7 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { CATALOG, type CourseItem } from "@/lib/catalog";
 
-export type Course = CourseItem & { video?: string | null; featured?: boolean };
+export type Course = CourseItem & { video?: string | null; featured?: boolean; hidden?: boolean };
 
 type Row = {
   id: string;
@@ -32,30 +32,33 @@ type Row = {
 
    Null in a column means "leave what the code says", which is what lets her
    change a price without restating the title. */
-export const getCatalog = cache(async (): Promise<Course[]> => {
-  let rows: Row[] = [];
+const rowsOf = cache(async (): Promise<Row[]> => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase.from("courses").select("*");
-    if (!error && data) rows = data as Row[];
+    return !error && data ? (data as Row[]) : [];
   } catch {
-    rows = [];
+    return [];
   }
+});
 
+function build(rows: Row[], keepHidden: boolean): Course[] {
   const byId = new Map<string, Row>(rows.map((r) => [r.id, r]));
   const out: Course[] = [];
 
   for (const base of CATALOG as Course[]) {
     const r = byId.get(base.id);
     byId.delete(base.id);
-    if (r?.hidden) continue;
-    out.push(r ? merge(base, r) : base);
+    if (r?.hidden && !keepHidden) continue;
+    const c = r ? merge(base, r) : base;
+    out.push(keepHidden ? { ...c, hidden: !!r?.hidden } : c);
   }
 
   // Whatever is left was added by the owner and has no counterpart in the code.
   for (const r of byId.values()) {
-    if (r.hidden) continue;
-    out.push(merge(blank(r.id), r));
+    if (r.hidden && !keepHidden) continue;
+    const c = merge(blank(r.id), r);
+    out.push(keepHidden ? { ...c, hidden: r.hidden } : c);
   }
 
   /* sort when she has set one, otherwise the order the code lists them in, which
@@ -71,7 +74,14 @@ export const getCatalog = cache(async (): Promise<Course[]> => {
       return a.i - b.i;
     })
     .map((x) => x.c);
-});
+}
+
+export const getCatalog = cache(async (): Promise<Course[]> => build(await rowsOf(), false));
+
+/* The same catalogue with the hidden courses left in, for the admin list. A
+   course she cannot see is a course she cannot bring back, so hiding one was a
+   one-way door. */
+export const getCatalogAll = cache(async (): Promise<Course[]> => build(await rowsOf(), true));
 
 /* The front-page top row. Courses she has marked, or - until she marks any -
    the six the site launched with, so the row is never empty. */

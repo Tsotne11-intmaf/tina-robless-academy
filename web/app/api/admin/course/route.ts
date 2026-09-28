@@ -55,10 +55,16 @@ export async function POST(request: Request) {
     );
   }
 
-  const isNew = !CATALOG.some((c) => c.id === id);
+  const { data: existing } = await supabase
+    .from("courses")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+
+  const creating = !CATALOG.some((c) => c.id === id) && !existing;
   // A brand-new course has nothing in the code to fall back on, so it has to
   // arrive complete enough to render a card.
-  if (isNew && (!b.title?.trim() || !b.price?.trim())) {
+  if (creating && (!b.title?.trim() || !b.price?.trim())) {
     return NextResponse.json({ error: "ახალ კურსს სჭირდება სახელი და ფასი" }, { status: 400 });
   }
 
@@ -67,26 +73,27 @@ export async function POST(request: Request) {
     return s === "" ? null : s.slice(0, 4000);
   };
 
-  const { error } = await supabase.from("courses").upsert(
-    {
-      id,
-      cat: text(b.cat),
-      title: text(b.title),
-      dur: text(b.dur),
-      price: text(b.price),
-      was: text(b.was),
-      descr: text(b.descr),
-      photo: text(b.photo),
-      video: text(b.video),
-      badge: text(b.badge),
-      featured: b.featured ?? null,
-      hidden: b.hidden ?? false,
-      sort: typeof b.sort === "number" ? b.sort : null,
-      updated_at: new Date().toISOString(),
-      updated_by: user.id,
-    },
-    { onConflict: "id" }
-  );
+  /* Only what was actually sent is written.
+   *
+   * Hiding a course posts nothing but its id and the flag, and every column
+   * missing from the payload used to be overwritten with null - so putting a
+   * course away quietly erased the title, price and description it was put away
+   * with, and a course added from the panel came back empty. A field absent from
+   * the request now means "leave it", the same thing an empty column already
+   * means to the catalogue. */
+  const has = (k: keyof Body) => Object.prototype.hasOwnProperty.call(b, k);
+  const row: Record<string, unknown> = {
+    id,
+    updated_at: new Date().toISOString(),
+    updated_by: user.id,
+  };
+  const TEXT = ["cat", "title", "dur", "price", "was", "descr", "photo", "video", "badge"] as const;
+  for (const k of TEXT) if (has(k)) row[k] = text(b[k]);
+  if (has("featured")) row.featured = b.featured ?? null;
+  if (has("hidden")) row.hidden = b.hidden === true;
+  if (has("sort")) row.sort = typeof b.sort === "number" ? b.sort : null;
+
+  const { error } = await supabase.from("courses").upsert(row, { onConflict: "id" });
 
   if (error) {
     const missing = error.code === "42P01" || /courses/.test(error.message);
@@ -99,5 +106,5 @@ export async function POST(request: Request) {
   // The catalogue is server-rendered on the home page, the list and each course.
   revalidatePath("/", "layout");
 
-  return NextResponse.json({ ok: true, id, created: isNew });
+  return NextResponse.json({ ok: true, id, created: creating });
 }

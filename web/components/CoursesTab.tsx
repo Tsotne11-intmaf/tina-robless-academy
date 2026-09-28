@@ -19,6 +19,7 @@ export type AdminCourse = {
   featured?: boolean;
   order?: number;
   inCode: boolean;
+  hidden: boolean;
 };
 
 const CATS: Record<string, string> = {
@@ -48,6 +49,7 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; kind?: "ok" | "bad" } | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
+  const [only, setOnly] = useState<"all" | "live" | "hidden">("all");
 
   async function save(body: Record<string, unknown>) {
     setBusy(true);
@@ -63,7 +65,16 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
       setMsg({ text: "ვერ შეინახა: " + (out.error ?? r.status), kind: "bad" });
       return;
     }
-    setMsg({ text: out.created ? "კურსი დაემატა." : "შენახულია.", kind: "ok" });
+    setMsg({
+      text: out.created
+        ? "კურსი დაემატა."
+        : body.hidden === true
+          ? "კურსი დამალულია."
+          : body.hidden === false
+            ? "კურსი დაბრუნდა საიტზე."
+            : "შენახულია.",
+      kind: "ok",
+    });
     setEditing(null);
     setAdding(false);
     setPhoto(null);
@@ -230,6 +241,11 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
     );
   }
 
+  const liveCount = courses.filter((c) => !c.hidden).length;
+  const shown = courses.filter((c) =>
+    only === "all" ? true : only === "live" ? !c.hidden : c.hidden
+  );
+
   return (
     <>
       {msg ? <p className={"auth-msg" + (msg.kind ? " " + msg.kind : "")}>{msg.text}</p> : null}
@@ -250,11 +266,32 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
         </button>
       )}
 
-      {courses.map((c) =>
+      {/* Which courses are on the site and which are put away. Hiding one used
+          to take it out of this list as well, so it could never be brought
+          back - the list showed only what was already visible. */}
+      <div className="chips" style={{ marginBottom: 14 }}>
+        <a className="chip" aria-pressed={only === "all"} onClick={() => setOnly("all")}>
+          ყველა ({courses.length})
+        </a>
+        <a className="chip" aria-pressed={only === "live"} onClick={() => setOnly("live")}>
+          საიტზე ({liveCount})
+        </a>
+        <a className="chip" aria-pressed={only === "hidden"} onClick={() => setOnly("hidden")}>
+          დამალული ({courses.length - liveCount})
+        </a>
+      </div>
+
+      {shown.length === 0 ? (
+        <p className="lead">
+          {only === "hidden" ? "დამალული კურსი არ არის." : "კურსი არ არის."}
+        </p>
+      ) : null}
+
+      {shown.map((c) =>
         editing === c.id ? (
           <div key={c.id}>{form(c)}</div>
         ) : (
-          <div className="stu-card" key={c.id}>
+          <div className={"stu-card" + (c.hidden ? " crs-off" : "")} key={c.id}>
             <div className="stu-head">
               {/* Its own picture, whether that is an uploaded file or the class
                   the launch courses carry. A letter in a circle told her nothing
@@ -276,11 +313,15 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
                   {c.video ? " · ვიდეო მიბმულია" : ""}
                   {c.inCode ? "" : " · დამატებულია პანელიდან"}
                 </span>
+                {/* Said outright rather than left to be inferred from a button. */}
+                <span className={"crs-state " + (c.hidden ? "off" : "on")}>
+                  {c.hidden ? "დამალულია — საიტზე არ ჩანს" : "საიტზე ჩანს"}
+                </span>
               </div>
             </div>
             <div className="stu-give-btns" style={{ marginTop: 14 }}>
               <button
-                className="btn btn-plum stu-add"
+                className="btn btn-plum"
                 onClick={() => {
                   setEditing(c.id);
                   setAdding(false);
@@ -290,16 +331,26 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
               >
                 რედაქტირება
               </button>
-              <button
-                className="btn btn-ghost stu-add"
-                disabled={busy}
-                onClick={() => {
-                  if (!confirm(`დავმალოთ „${c.title}"? საიტზე აღარ გამოჩნდება.`)) return;
-                  save({ id: c.id, hidden: true });
-                }}
-              >
-                დამალვა
-              </button>
+              {c.hidden ? (
+                <button
+                  className="btn btn-ghost"
+                  disabled={busy}
+                  onClick={() => save({ id: c.id, hidden: false })}
+                >
+                  საიტზე დაბრუნება
+                </button>
+              ) : (
+                <button
+                  className="btn btn-ghost"
+                  disabled={busy}
+                  onClick={() => {
+                    if (!confirm(`დავმალოთ „${c.title}"? საიტზე აღარ გამოჩნდება, მაგრამ აქ დარჩება და ნებისმიერ დროს დააბრუნებ.`)) return;
+                    save({ id: c.id, hidden: true });
+                  }}
+                >
+                  დამალვა
+                </button>
+              )}
             </div>
           </div>
         )
