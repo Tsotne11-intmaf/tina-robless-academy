@@ -3,11 +3,31 @@
    wired here: the legacy inline handlers called globals that do not exist in this
    app, so they are reconnected deliberately rather than guessed at. */
 import { getT } from "@/lib/i18n";
-import { getContent, editable } from "@/lib/content";
+import { getContent, editable, listOf, type Content } from "@/lib/content";
+import { STORY, STORY_IDS, STORY_LIST } from "@/lib/story";
+
+/* An entry used to be one editable block per row. Whatever was typed then was
+   saved under the row's old key and never shown again; it is read back here as
+   the first line being the heading and the rest the description, which is how it
+   was typed. */
+function carried(content: Content, was?: string) {
+  const raw = was ? content[was] : undefined;
+  if (!raw) return null;
+  const nl = raw.indexOf("\n");
+  return nl === -1
+    ? { title: raw.trim(), text: null as string | null }
+    : { title: raw.slice(0, nl).trim(), text: raw.slice(nl + 1).trim() };
+}
 
 export default async function AboutPage() {
   const t = await getT();
-  const ed = editable(await getContent(), t);
+  const content = await getContent();
+  const ed = editable(content, t);
+
+  /* Her order once she has touched the list, the shipped order until then. */
+  const saved = listOf(content, STORY_LIST);
+  const story = saved.length ? saved : STORY_IDS;
+  const builtIn = new Map(STORY.map((e) => [e.id, e]));
   return (
     <>
       
@@ -40,14 +60,26 @@ export default async function AboutPage() {
             <p style={{marginBottom: "16px"}} data-edit="t.about.7">{ed("t.about.7", "წლების განმავლობაში ჩემს სტუდიაში ინდივიდუალურად ვასწავლიდი. ეს აკადემია იგივე გაკვეთილებია, კარგად ჩაწერილი ზემოდან, ქართულად ინგლისური და რუსული სუბტიტრებით — რომ სტუდენტმა ბათუმში ან ბერლინში ზუსტად ის მიიღოს, რასაც ჩემ გვერდით მჯდომი იღებს.")}</p>
             <p style={{color: "var(--ink-soft)", fontSize: ".92rem"}} data-edit="t.about.8">{ed("t.about.8", "თბილისი · ონლაინ სწავლება მთელ საქართველოსა და მის ფარგლებს გარეთ.")}</p>
       
-            <ul className="timeline">
-              <li data-edit="t.about.9"><b>{t("წელი — დაიწყო ფრჩხილების კეთება")}</b><span>{t("სად და ვისთან ისწავლა.")}</span></li>
-              <li data-edit="t.about.10"><b>{t("წელი — გახსნა სტუდია თბილისში")}</b><span>{t("უბანი, ფოკუსი გრძელ ნაშენზე.")}</span></li>
-              <li data-edit="t.about.11"><b>{t("2026 — CMC მსოფლიო ჩემპიონატი, პაესტუმი")}</b><span>{t("38-ე მსოფლიო ჩემპიონატი, საქართველოს წარმომადგენელი და Georgia Nails-ის პრეზიდენტი.")}</span></li>
-              <li data-edit="t.about.12"><b>{t("წელი — პირველი სტუდენტები")}</b><span>{t("სტუდიაში ინდივიდუალური სწავლება იწყება.")}</span></li>
-              <li data-edit="t.about.13"><b>{t("წელი — Tina Robless TikTok-სა და Instagram-ზე")}</b><span>{t("ნამუშევრები 200K+ ნახვას აღწევს; უცხოეთიდან სტუდენტები ონლაინ გაკვეთილებს ითხოვენ.")}</span></li>
-              <li data-edit="t.about.14"><b>2026 — Tina Robless Nail Academy</b><span>{t("კურსები ონლაინ გამოდის სერტიფიკატებით.")}</span></li>
-            </ul>
+            {/* The list wrapper sits outside the <ul> so the "add" button lands
+                after the last row rather than inside the list itself. */}
+            <div data-list={STORY_LIST}>
+              <ul className="timeline">
+                {story.map((id) => {
+                  const def = builtIn.get(id);
+                  const old = carried(content, def?.was);
+                  return (
+                    <li key={id} data-list-item={id}>
+                      <b data-edit={`${STORY_LIST}.${id}.title`}>
+                        {ed(`${STORY_LIST}.${id}.title`, old?.title ?? def?.title ?? "წელი — ახალი ჩანაწერი")}
+                      </b>
+                      <span data-edit={`${STORY_LIST}.${id}.text`}>
+                        {ed(`${STORY_LIST}.${id}.text`, old?.text ?? def?.text ?? "აღწერა — დააჭირეთ და შეცვალეთ.")}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </div>
         </div>
       </section>

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { STORY_IDS, STORY_LIST } from "@/lib/story";
 
 export const maxDuration = 30;
 
-type Body = { list?: string; action?: string; id?: string };
+type Body = { list?: string; action?: string; id?: string; at?: string };
 
 const LIST = /^list\.[a-z][a-z0-9.]{1,40}$/;
 
@@ -14,7 +15,16 @@ const SEEDS: Record<string, Record<string, string>> = {
     title: "ახალი ჩანაწერი",
     text: "აღწერა — დააჭირეთ და შეცვალეთ.",
   },
+  [STORY_LIST]: {
+    title: "წელი — ახალი ჩანაწერი",
+    text: "აღწერა — დააჭირეთ და შეცვალეთ.",
+  },
 };
+
+/* Lists that already have entries in the code. Until one is touched there is no
+   row to read, so the order has to start from what the page is showing - opening
+   with just the new entry would wipe six built-in ones off the timeline. */
+const BUILT_IN: Record<string, string[]> = { [STORY_LIST]: STORY_IDS };
 
 /* Growing or shortening one of the repeating lists.
  *
@@ -52,6 +62,7 @@ export async function POST(request: Request) {
   } catch {
     ids = [];
   }
+  if (!ids.length) ids = [...(BUILT_IN[list] ?? [])];
 
   if (b.action === "add") {
     if (ids.length >= 60) {
@@ -59,7 +70,15 @@ export async function POST(request: Request) {
     }
     // Time-based so ids never repeat and the order of creation is readable.
     const id = "e" + Date.now().toString(36);
-    ids.push(id);
+
+    /* Where it goes. A story is not written in the order it happened, so an
+       entry has to be able to land between two that are already there - above
+       one, below one, or at the end when nothing was pointed at. */
+    const anchor = String(b.id ?? "");
+    const at = b.at === "before" || b.at === "after" ? b.at : "end";
+    const where = at === "end" ? -1 : ids.indexOf(anchor);
+    if (where === -1) ids.push(id);
+    else ids.splice(at === "before" ? where : where + 1, 0, id);
 
     const seed = SEEDS[list] ?? { title: "ახალი ჩანაწერი" };
     const rows = Object.entries(seed).map(([field, value]) => ({

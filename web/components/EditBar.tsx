@@ -80,13 +80,13 @@ export default function EditBar() {
   );
 
   const listAction = useCallback(
-    async (list: string, action: "add" | "remove", id?: string) => {
+    async (list: string, action: "add" | "remove", id?: string, at?: "before" | "after") => {
       setBusy(true);
       setMsg(action === "add" ? "ემატება…" : "იშლება…");
       const r = await fetch("/api/admin/list", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ list, action, id }),
+        body: JSON.stringify({ list, action, id, at }),
       });
       const body = await r.json().catch(() => ({}));
       setBusy(false);
@@ -119,7 +119,7 @@ export default function EditBar() {
         el.querySelector(".ed-pic-btn")?.remove();
       });
       lists.forEach((el) => el.querySelector(".ed-add-btn")?.remove());
-      items.forEach((el) => el.querySelector(".ed-del-btn")?.remove());
+      items.forEach((el) => el.querySelector(".ed-item-bar")?.remove());
       document.body.classList.remove("ed-mode");
       return;
     }
@@ -174,6 +174,14 @@ export default function EditBar() {
       if (!confirm("წავშალოთ ეს ჩანაწერი?")) return;
       listAction(btn.dataset.list!, "remove", btn.dataset.id!);
     };
+    /* A story is not written in the order it happened. Appending to the end was
+       the only way to grow a list, so remembering something from ten years ago
+       meant retyping every entry below it. */
+    const onIns = (e: Event) => {
+      e.preventDefault();
+      const btn = e.currentTarget as HTMLElement;
+      listAction(btn.dataset.list!, "add", btn.dataset.id!, btn.dataset.at as "before" | "after");
+    };
 
     lists.forEach((el) => {
       if (el.querySelector(".ed-add-btn")) return;
@@ -187,25 +195,47 @@ export default function EditBar() {
     });
 
     items.forEach((el) => {
-      if (el.querySelector(".ed-del-btn")) return;
+      if (el.querySelector(".ed-item-bar")) return;
       const list = el.closest<HTMLElement>("[data-list]")?.dataset.list;
       if (!list) return;
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "ed-del-btn";
-      btn.textContent = "✕";
-      btn.title = "ჩანაწერის წაშლა";
-      btn.dataset.list = list;
-      btn.dataset.id = el.dataset.listItem!;
-      btn.addEventListener("click", onDel);
-      el.appendChild(btn);
+      const id = el.dataset.listItem!;
+      const bar = document.createElement("div");
+      bar.className = "ed-item-bar";
+
+      ([
+        ["before", "＋ ზემოთ", "ჩანაწერის ჩამატება ზემოთ"],
+        ["after", "＋ ქვემოთ", "ჩანაწერის ჩამატება ქვემოთ"],
+      ] as const).forEach(([at, label, title]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "ed-ins-btn";
+        b.textContent = label;
+        b.title = title;
+        b.dataset.list = list;
+        b.dataset.id = id;
+        b.dataset.at = at;
+        b.addEventListener("click", onIns);
+        bar.appendChild(b);
+      });
+
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "ed-del-btn";
+      del.textContent = "✕";
+      del.title = "ჩანაწერის წაშლა";
+      del.dataset.list = list;
+      del.dataset.id = id;
+      del.addEventListener("click", onDel);
+      bar.appendChild(del);
+
+      el.appendChild(bar);
     });
 
     return () => {
       texts.forEach((el) => el.removeEventListener("input", onInput));
       pictures.forEach((el) => el.querySelector(".ed-pic-btn")?.remove());
       lists.forEach((el) => el.querySelector(".ed-add-btn")?.remove());
-      items.forEach((el) => el.querySelector(".ed-del-btn")?.remove());
+      items.forEach((el) => el.querySelector(".ed-item-bar")?.remove());
     };
   }, [on, listAction]);
 

@@ -1484,11 +1484,21 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 }
 .ed-add-btn:hover{background:#FFEAF3}
 [data-list-item]{position:relative}
+/* An entry's own controls: put one above it, put one below it, take it away.
+   They sit in the flow under the entry rather than floating over its corner,
+   because two of the three say where the new entry goes and a corner says
+   nothing about that. */
+.ed-item-bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.ed-ins-btn{
+  border:1px dashed var(--plum); border-radius:999px; background:#fff;
+  color:var(--plum); font-family:inherit; font-size:.8rem; font-weight:600;
+  padding:5px 12px; cursor:pointer; white-space:nowrap;
+}
+.ed-ins-btn:hover{background:#FFEAF3}
 .ed-del-btn{
-  position:absolute; top:8px; right:8px; z-index:6;
-  width:32px; height:32px; border:0; border-radius:50%;
-  background:#2B0F1F; color:#fff; font-size:.95rem; cursor:pointer;
-  font-family:inherit;
+  width:28px; height:28px; border:0; border-radius:50%;
+  background:#2B0F1F; color:#fff; font-size:.85rem; cursor:pointer;
+  font-family:inherit; flex:none;
 }
 .ed-del-btn:hover{background:#B80F5F}
 
