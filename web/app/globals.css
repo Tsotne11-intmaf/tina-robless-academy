@@ -1767,6 +1767,11 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 }
 .ut-inline [data-ut-element="button"]:hover{background:#FFEAF3;color:var(--plum-deep)}
 .ut-inline [data-ut-element="button"]::before{content:"＋";font-size:1rem;line-height:1}
+/* "Image (2MB)" under the button. The component keeps its default when the text
+   is overridden with an empty string, so it is hidden here instead - the limit
+   belongs in the error if a file is too big, not beside every comment box. */
+.ut-inline [data-ut-element="allowed-content"]{display:none}
+.ut-inline [data-ut-element="container"]{gap:0}
 
 /* ===== The comment box ===== */
 .rev-form{margin-top:34px;background:var(--blush-soft);border-radius:var(--r-card);padding:22px}
