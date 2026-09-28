@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CATALOG, CATS } from "@/lib/catalog";
 import { courseById } from "@/lib/catalog-db";
+import { getStudent } from "@/lib/student";
+import { createClient } from "@/lib/supabase/server";
+import CourseReview, { type Review } from "@/components/CourseReview";
+import ReviewList from "@/components/ReviewList";
 import { Badge, Price } from "@/components/CourseCard";
 import BuyButton from "@/components/BuyButton";
 import { getT } from "@/lib/i18n";
@@ -43,6 +47,24 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
 
   const t = await getT();
 
+  /* Who is looking, and what they may do about it. A visitor gets the reviews
+     and nothing else; someone who holds the course gets the form as well. */
+  const student = await getStudent();
+  const owned = !!student?.owned.includes(id);
+
+  const supabase = await createClient();
+  // Tina browses the site signed in, so moderating is done where the comment is.
+  const { data: isAdmin } = student ? await supabase.rpc("is_admin") : { data: false };
+  const { data: reviewRows } = await supabase
+    .from("course_reviews")
+    .select("id,profile_id,author_name,body,photo_url,created_at")
+    .eq("course_id", id)
+    .order("created_at", { ascending: false });
+  const reviews = (reviewRows ?? []) as Review[];
+  const mine = student ? reviews.find((r) => r.profile_id === student.userId) ?? null : null;
+  const samples = reviews.filter((r) => r.photo_url);
+  const said = reviews.filter((r) => r.body);
+
   return (
     <section className="lms">
       <div className="wrap">
@@ -82,12 +104,31 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
             <h2 style={{ fontSize: "1.7rem", margin: "34px 0 14px" }}>
               {t("სტუდენტების ნიმუშები")}
             </h2>
-            <p className="lead">
-              {t("ჯერ არავის აუტვირთავს.")}
-            </p>
+            {samples.length ? (
+              <div className="rev-gallery">
+                {samples.map((r) => (
+                  /* plain img: the file is on UploadThing's CDN, outside next/image config */
+                  <img key={r.id} src={r.photo_url!} alt={r.author_name} loading="lazy" />
+                ))}
+              </div>
+            ) : (
+              <p className="lead">{t("ჯერ არავის აუტვირთავს.")}</p>
+            )}
 
             <h2 style={{ fontSize: "1.7rem", margin: "40px 0 14px" }}>{t("კომენტარები")}</h2>
-            <p className="lead">{t("კომენტარები ჯერ არ არის.")}</p>
+            {said.length ? (
+              <ReviewList reviews={said} viewerId={student?.userId ?? null} canModerate={isAdmin === true} />
+            ) : (
+              <p className="lead">{t("კომენტარები ჯერ არ არის.")}</p>
+            )}
+
+            {owned ? (
+              <CourseReview
+                courseId={c.id}
+                authorName={student!.name || student!.email.split("@")[0]}
+                mine={mine}
+              />
+            ) : null}
           </div>
 
           <aside className={"buy" + (c.badge === "premium" ? " is-premium" : "")}>
@@ -101,15 +142,31 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
             </div>
             <div className="buy-dur">{t(c.dur)}</div>
 
-            <BuyButton courseId={c.id} />
-
-            <Link
-              className="btn btn-ghost"
-              style={{ justifyContent: "center", width: "100%", marginTop: 10 }}
-              href="/login"
-            >
-              {t("უკვე გაქვთ? შესვლა")}
-            </Link>
+            {/* Offering to sell a course someone has already bought reads as though
+                the site has forgotten them. */}
+            {owned ? (
+              <>
+                <p className="buy-owned">✓ {t("კურსი შეძენილია")}</p>
+                <Link
+                  className="btn btn-plum"
+                  style={{ justifyContent: "center", width: "100%" }}
+                  href={`/course/${c.id}`}
+                >
+                  {t("სწავლის გაგრძელება")}
+                </Link>
+              </>
+            ) : (
+              <>
+                <BuyButton courseId={c.id} />
+                <Link
+                  className="btn btn-ghost"
+                  style={{ justifyContent: "center", width: "100%", marginTop: 10 }}
+                  href="/login"
+                >
+                  {t("უკვე გაქვთ? შესვლა")}
+                </Link>
+              </>
+            )}
 
             {c.incl?.length ? (
               <>

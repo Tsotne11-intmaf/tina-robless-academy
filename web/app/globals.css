@@ -1712,3 +1712,32 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   .cards.home-slider .card h3{-webkit-line-clamp:3;min-height:0}
   .cards .card p{min-height:0}
 }
+
+/* ===== Course reviews: what students said, and the work they showed ===== */
+.buy-owned{
+  margin:0 0 10px;padding:11px 14px;border-radius:12px;text-align:center;
+  background:#E3F5E8;color:#1F6B3A;font-weight:600;font-size:.95rem;
+}
+.rev-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.rev-gallery img{
+  width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px;display:block;
+  box-shadow:0 20px 40px -26px rgba(184,15,95,.5);
+}
+.rev-list{display:grid;gap:14px}
+.rev{background:#fff;border-radius:var(--r-card);padding:16px 18px;box-shadow:0 20px 50px -32px rgba(184,15,95,.3)}
+.rev-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.rev-top b{font-weight:600}
+.rev-top span{color:var(--ink-soft);font-size:.82rem}
+.rev-del{margin-left:auto;border:0;background:none;color:var(--ink-soft);cursor:pointer;font-size:.9rem;padding:2px 6px}
+.rev-del:hover{color:var(--plum)}
+.rev p{margin:0;color:var(--ink);line-height:1.6;overflow-wrap:anywhere}
+.rev-form{margin-top:34px;background:var(--blush-soft);border-radius:var(--r-card);padding:22px}
+.rev-form h3{font-size:1.25rem;margin-bottom:4px}
+.rev-form .lead{margin-bottom:14px;font-size:.95rem}
+.rev-form textarea{width:100%}
+.rev-pic{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.rev-pic img{width:130px;aspect-ratio:4/5;object-fit:cover;border-radius:12px;display:block}
+@media (max-width:560px){
+  .rev-gallery{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+  .rev-form{padding:16px}
+}
