@@ -1805,3 +1805,12 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   .rev-form{padding:16px}
   .rev-acts .btn{flex:1 1 100%;justify-content:center}
 }
+
+/* A course the reader already holds, said on the card itself. */
+.owned-tag{
+  position:absolute;right:10px;bottom:10px;z-index:2;
+  background:#1F8A4C;color:#fff;border-radius:var(--r-pill);
+  padding:5px 12px;font-size:.78rem;font-weight:600;white-space:nowrap;
+  box-shadow:0 10px 22px -12px rgba(0,0,0,.6);
+}
+.card.is-owned{border-color:#BFE6CC}

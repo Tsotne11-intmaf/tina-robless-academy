@@ -3,6 +3,7 @@
    wired here: the legacy inline handlers called globals that do not exist in this
    app, so they are reconnected deliberately rather than guessed at. */
 import CourseCard from "@/components/CourseCard";
+import { getStudent } from "@/lib/student";
 import { getCatalog, featured } from "@/lib/catalog-db";
 import CardSlider from "@/components/CardSlider";
 import { getT } from "@/lib/i18n";
@@ -10,6 +11,8 @@ import { getContent, editable } from "@/lib/content";
 
 export default async function HomePage() {
   const t = await getT();
+  /* Empty for a visitor who is not signed in, which is every card's default. */
+  const owned = (await getStudent())?.owned ?? [];
   const ed = editable(await getContent(), t);
   const catalog = await getCatalog();
   return (
@@ -62,7 +65,7 @@ export default async function HomePage() {
           <CardSlider>
             <div className="cards home-slider">
               {featured(catalog).map((c) => (
-                <CourseCard key={c.id} c={c} />
+                <CourseCard key={c.id} c={c} owned={owned.includes(c.id)} />
               ))}
             </div>
           </CardSlider>
@@ -137,7 +140,7 @@ export default async function HomePage() {
           <CardSlider>
             <div className="cards home-slider">
               {catalog.filter((c) => c.cat === "technique").map((c) => (
-                <CourseCard key={c.id} c={c} />
+                <CourseCard key={c.id} c={c} owned={owned.includes(c.id)} />
               ))}
             </div>
           </CardSlider>
@@ -154,7 +157,7 @@ export default async function HomePage() {
           <CardSlider>
             <div className="cards home-slider">
               {catalog.filter((c) => c.cat === "art").map((c) => (
-                <CourseCard key={c.id} c={c} />
+                <CourseCard key={c.id} c={c} owned={owned.includes(c.id)} />
               ))}
             </div>
           </CardSlider>

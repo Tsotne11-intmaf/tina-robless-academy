@@ -51,16 +51,22 @@ export function Price({ c }: { c: CourseItem }) {
   );
 }
 
-export default async function CourseCard({ c }: { c: CourseItem }) {
+/* A course the reader already holds says so on the card, and sends them to the
+   lessons rather than back to the page that sells it. Without this the catalogue
+   looks the same whether or not she has bought anything. */
+export default async function CourseCard({ c, owned }: { c: CourseItem; owned?: boolean }) {
   const t = await getT();
   return (
-    <article className={"card" + (c.badge === "premium" ? " is-premium" : "")}>
+    <article
+      className={"card" + (c.badge === "premium" ? " is-premium" : "") + (owned ? " is-owned" : "")}
+    >
       <Link
         className={"thumb " + (c.photo ? "" : c.img || "")}
-        href={`/kurs/${c.id}`}
+        href={owned ? `/course/${c.id}` : `/kurs/${c.id}`}
         style={c.photo ? { background: `url(${c.photo}) center/cover` } : undefined}
       >
         <Badge c={c} />
+        {owned ? <span className="owned-tag">✓ {t("შეძენილია")}</span> : null}
       </Link>
       <div className="card-body">
         <h3>
@@ -74,11 +80,11 @@ export default async function CourseCard({ c }: { c: CourseItem }) {
           </span>
         </div>
         <Link
-          className="btn btn-ghost"
+          className={"btn " + (owned ? "btn-plum" : "btn-ghost")}
           style={{ marginTop: 14, justifyContent: "center" }}
-          href={`/kurs/${c.id}`}
+          href={owned ? `/course/${c.id}` : `/kurs/${c.id}`}
         >
-          {t("კურსის გახსნა")}
+          {owned ? t("სწავლის გაგრძელება") : t("კურსის გახსნა")}
         </Link>
       </div>
     </article>

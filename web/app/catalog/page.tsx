@@ -3,6 +3,7 @@ import { CATS } from "@/lib/catalog";
 import { getCatalog } from "@/lib/catalog-db";
 import CourseCard from "@/components/CourseCard";
 import { getT } from "@/lib/i18n";
+import { getStudent } from "@/lib/student";
 
 export async function generateMetadata() {
   const t = await getT();
@@ -22,6 +23,8 @@ export default async function CatalogPage({
 }) {
   const { cat = "all" } = await searchParams;
   const t = await getT();
+  /* Empty for a visitor who is not signed in, which is every card's default. */
+  const owned = (await getStudent())?.owned ?? [];
   const CATALOG = await getCatalog();
   const list = cat === "all" ? CATALOG : CATALOG.filter((c) => c.cat === cat);
 
@@ -57,7 +60,7 @@ export default async function CatalogPage({
         ) : (
           <div className="cards">
             {list.map((c) => (
-              <CourseCard key={c.id} c={c} />
+              <CourseCard key={c.id} c={c} owned={owned.includes(c.id)} />
             ))}
           </div>
         )}
