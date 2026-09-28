@@ -1731,13 +1731,72 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 .rev-del{margin-left:auto;border:0;background:none;color:var(--ink-soft);cursor:pointer;font-size:.9rem;padding:2px 6px}
 .rev-del:hover{color:var(--plum)}
 .rev p{margin:0;color:var(--ink);line-height:1.6;overflow-wrap:anywhere}
-.rev-form{margin-top:34px;background:var(--blush-soft);border-radius:var(--r-card);padding:22px}
-.rev-form h3{font-size:1.25rem;margin-bottom:4px}
-.rev-form .lead{margin-bottom:14px;font-size:.95rem}
-.rev-form textarea{width:100%}
-.rev-pic{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.rev-pic img{width:130px;aspect-ratio:4/5;object-fit:cover;border-radius:12px;display:block}
 @media (max-width:560px){
   .rev-gallery{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+}
+
+/* ===== Upload buttons, everywhere =====
+   UploadThing ships a stylesheet that was never imported, so every upload on the
+   site - the profile photo, a homework submission, a course picture, a work
+   sample - rendered as the browser's raw "Choose File / No file chosen". These
+   rules dress the component's own elements in the site's colours instead, which
+   is why they are attribute selectors rather than classes of ours. */
+[data-ut-element="container"]{display:flex;flex-direction:column;align-items:flex-start;gap:6px;width:auto}
+[data-ut-element="button"]{
+  position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:8px;
+  border:0;border-radius:var(--r-pill);background:var(--plum);color:#fff;
+  font-family:var(--sans);font-size:.94rem;font-weight:600;padding:11px 22px;
+  cursor:pointer;line-height:1;box-shadow:0 14px 28px -14px rgba(229,23,122,.7);
+  transition:background-color .2s ease,transform .2s ease;
+}
+[data-ut-element="button"]:hover{background:var(--plum-deep);transform:translateY(-1px)}
+[data-ut-element="button"][data-state="uploading"],
+[data-ut-element="button"][data-state="disabled"]{opacity:.65;cursor:default;transform:none}
+/* The native input has to stay operable - it is what opens the file picker -
+   so it is made invisible rather than hidden. */
+[data-ut-element="button"] input{
+  position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;
+  font-size:0;padding:0;border:0;background:none;
+}
+[data-ut-element="allowed-content"]{font-size:.78rem;color:var(--ink-soft)}
+[data-ut-element="allowed-content"]:empty{display:none}
+/* A quieter one, for sitting inside a box that already has its own buttons. */
+.ut-inline [data-ut-element="button"]{
+  background:#fff;color:var(--plum);border:1px solid var(--plum);
+  font-size:.86rem;padding:8px 16px;box-shadow:none;
+}
+.ut-inline [data-ut-element="button"]:hover{background:#FFEAF3;color:var(--plum-deep)}
+.ut-inline [data-ut-element="button"]::before{content:"＋";font-size:1rem;line-height:1}
+
+/* ===== The comment box ===== */
+.rev-form{margin-top:34px;background:var(--blush-soft);border-radius:var(--r-card);padding:22px}
+.rev-form h3{font-size:1.25rem;margin-bottom:4px}
+.rev-hint{color:var(--ink-soft);font-size:.92rem;line-height:1.5;margin:0 0 14px}
+.rev-box{
+  background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  transition:border-color .2s ease,box-shadow .2s ease;
+}
+.rev-box:focus-within{border-color:var(--plum);box-shadow:0 0 0 3px rgba(229,23,122,.12)}
+.rev-box textarea{
+  width:100%;border:0;background:none;resize:vertical;display:block;
+  padding:14px 16px 10px;font-family:inherit;font-size:.97rem;line-height:1.6;color:var(--ink);
+}
+.rev-box textarea:focus{outline:none}
+.rev-box-foot{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:10px 14px;border-top:1px solid var(--blush-soft);background:#FFFCFD;
+}
+.rev-count{margin-left:auto;font-size:.78rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+/* The attached picture, small, with the way to take it off on the picture. */
+.rev-chip{position:relative;width:64px;height:80px;flex:none}
+.rev-chip img{width:100%;height:100%;object-fit:cover;border-radius:10px;display:block}
+.rev-chip-x{
+  position:absolute;top:-7px;right:-7px;width:22px;height:22px;border:0;border-radius:50%;
+  background:#2B0F1F;color:#fff;font-size:.7rem;line-height:1;cursor:pointer;padding:0;
+}
+.rev-chip-x:hover{background:var(--plum)}
+.rev-acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+@media (max-width:560px){
   .rev-form{padding:16px}
+  .rev-acts .btn{flex:1 1 100%;justify-content:center}
 }

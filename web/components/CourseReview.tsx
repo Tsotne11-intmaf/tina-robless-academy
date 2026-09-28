@@ -82,11 +82,14 @@ export default function CourseReview({
   return (
     <div className="rev-form">
       <h3>{mine ? "თქვენი კომენტარი" : "დატოვეთ კომენტარი"}</h3>
-      <p className="lead">
-        დაწერეთ, როგორ წაგადგათ კურსი, და ატვირთეთ ნამუშევარი — სხვა სტუდენტები ამას ხედავენ.
+      <p className="rev-hint">
+        დაწერეთ, როგორ წაგადგათ კურსი, და მიამაგრეთ ნამუშევარი — სხვა სტუდენტები ამას ხედავენ.
       </p>
 
-      <div className="field">
+      {/* The picture is attached from inside the box the comment is written in,
+          the way a message carries one, rather than from a separate field below
+          that read as a second, unrelated task. */}
+      <div className="rev-box">
         <textarea
           rows={4}
           value={body}
@@ -94,41 +97,48 @@ export default function CourseReview({
           onChange={(e) => setBody(e.target.value)}
           placeholder="რა ისწავლეთ, რა შეიცვალა თქვენს ნამუშევრებში…"
         />
-      </div>
 
-      {photo ? (
-        <div className="rev-pic">
-          {/* plain img: the file is on UploadThing's CDN, outside next/image config */}
-          <img src={photo} alt="ჩემი ნამუშევარი" />
-          <button type="button" className="btn btn-ghost" onClick={() => setPhoto(null)}>
-            ფოტოს მოხსნა
-          </button>
+        <div className="rev-box-foot">
+          {photo ? (
+            <div className="rev-chip">
+              {/* plain img: the file is on UploadThing's CDN, outside next/image config */}
+              <img src={photo} alt="მიმაგრებული ნიმუში" />
+              <button
+                type="button"
+                className="rev-chip-x"
+                title="ფოტოს მოხსნა"
+                onClick={() => setPhoto(null)}
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
+            <UploadButton
+              className="ut-inline"
+              endpoint="avatar"
+              content={{ button: "ნიმუშის მიმაგრება", allowedContent: "" }}
+              onClientUploadComplete={(res) => {
+                const url = res?.[0]?.ufsUrl;
+                if (url) setPhoto(url);
+              }}
+              onUploadError={(e: Error) =>
+                setMsg({ text: "ფოტო ვერ აიტვირთა: " + e.message, kind: "bad" })
+              }
+            />
+          )}
+          <span className="rev-count">{body.length}/1200</span>
         </div>
-      ) : (
-        <div className="field">
-          <label>ნიმუშის ფოტო (სურვილისამებრ)</label>
-          <UploadButton
-            endpoint="avatar"
-            onClientUploadComplete={(res) => {
-              const url = res?.[0]?.ufsUrl;
-              if (url) setPhoto(url);
-            }}
-            onUploadError={(e: Error) =>
-              setMsg({ text: "ფოტო ვერ აიტვირთა: " + e.message, kind: "bad" })
-            }
-          />
-        </div>
-      )}
+      </div>
 
       {msg ? <p className={"auth-msg " + msg.kind}>{msg.text}</p> : null}
 
-      <div className="stu-give-btns">
+      <div className="rev-acts">
         <button className="btn btn-plum" type="button" onClick={save} disabled={busy}>
           {mine ? "შენახვა" : "გამოქვეყნება"}
         </button>
         {mine ? (
           <button className="btn btn-ghost" type="button" onClick={remove} disabled={busy}>
-            წაშლა
+            კომენტარის წაშლა
           </button>
         ) : null}
       </div>
