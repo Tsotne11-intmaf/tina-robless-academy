@@ -4,6 +4,7 @@
    app, so they are reconnected deliberately rather than guessed at. */
 import { getT } from "@/lib/i18n";
 import { getContent, editable } from "@/lib/content";
+import StudentFilters from "@/components/StudentFilters";
 
 export default async function StudentsPage() {
   const t = await getT();
@@ -22,25 +23,17 @@ export default async function StudentsPage() {
       
       <section>
         <div className="wrap">
-          <div className="filters" aria-label={t("კურსდამთავრებულების ფილტრი")}>
-            <button aria-pressed="true">{t("ყველა")}</button>
-            <button aria-pressed="false">{t("მასტერ-პროგრამა")}</button>
-            <button aria-pressed="false">{t("ექსტრემალური სიგრძე")}</button>
-            <button aria-pressed="false">{t("ფრენჩი")}</button>
-            <button aria-pressed="false">{t("დიზაინი")}</button>
-            <button aria-pressed="false">{t("ისწავლა ონლაინ")}</button>
-            <button aria-pressed="false">{t("ისწავლა თბილისში")}</button>
-          </div>
+          <StudentFilters allLabel={t("ყველა")} />
       
           <div className="students-grid">
-            <article className="student"><div className="work ph9"></div><div className="student-body"><h3 data-edit="t.students.4">{ed("t.students.4", "სტუდენტის სახელი")}</h3><div className="where">{t("თბილისი · საკუთარი სტუდია")}</div><p data-edit="t.students.5">{ed("t.students.5", "სად არის ახლა — მაგ. გახსნა სტუდია ვაკეში, ჩანაწერი ორი კვირით წინ ივსება.")}</p><span className="course">{t("მასტერ-პროგრამა, ნაწილი 1 და 2")}</span></div></article>
-            <article className="student"><div className="work ph2"></div><div className="student-body"><h3 data-edit="t.students.6">{ed("t.students.6", "სტუდენტის სახელი")}</h3><div className="where">{t("ბათუმი · სალონის მასტერი")}</div><p data-edit="t.students.7">{ed("t.students.7", "შედეგი — მაგ. მოკლე გელიდან XXL ნამუშევრებზე გადავიდა, ფასი გააორმაგა.")}</p><span className="course">{t("ექსტრემალური სიგრძე")}</span></div></article>
-            <article className="student"><div className="work ph6"></div><div className="student-body"><h3 data-edit="t.students.8">{ed("t.students.8", "სტუდენტის სახელი")}</h3><div className="where">{t("ბერლინი · სახლის სტუდია")}</div><p data-edit="t.students.9">{ed("t.students.9", "ონლაინ ისწავლა ქართულად სუბტიტრებით, ახლა გერმანელ კლიენტებთან მუშაობს.")}</p><span className="course">{t("იდეალური ფრენჩი")}</span></div></article>
-            <article className="student"><div className="work ph8"></div><div className="student-body"><h3 data-edit="t.students.10">{ed("t.students.10", "სტუდენტის სახელი")}</h3><div className="where">{t("ქუთაისი · სალონის მასტერი")}</div><p data-edit="t.students.11">{ed("t.students.11", "პირველი კურსი გრძელ ფრჩხილებზე, საბოლოო ნამუშევარი სამ კვირაში ჩააბარა.")}</p><span className="course">{t("ამერიკული ფრჩხილები ფორმებზე")}</span></div></article>
-            <article className="student"><div className="work">{t("სტუდენტის ნამუშევრის ფოტო")}</div><div className="student-body"><h3 data-edit="t.students.12">{ed("t.students.12", "სტუდენტის სახელი")}</h3><div className="where">{t("ქალაქი · პოზიცია")}</div><p data-edit="t.students.13">{ed("t.students.13", "ერთი წინადადება შედეგზე.")}</p><span className="course">{t("კურსის სახელი")}</span></div></article>
-            <article className="student"><div className="work">{t("სტუდენტის ნამუშევრის ფოტო")}</div><div className="student-body"><h3 data-edit="t.students.14">{ed("t.students.14", "სტუდენტის სახელი")}</h3><div className="where">{t("ქალაქი · პოზიცია")}</div><p data-edit="t.students.15">{ed("t.students.15", "ერთი წინადადება შედეგზე.")}</p><span className="course">{t("კურსის სახელი")}</span></div></article>
-            <article className="student"><div className="work">{t("სტუდენტის ნამუშევრის ფოტო")}</div><div className="student-body"><h3 data-edit="t.students.16">{ed("t.students.16", "სტუდენტის სახელი")}</h3><div className="where">{t("ქალაქი · პოზიცია")}</div><p data-edit="t.students.17">{ed("t.students.17", "ერთი წინადადება შედეგზე.")}</p><span className="course">{t("კურსის სახელი")}</span></div></article>
-            <article className="student"><div className="work">{t("სტუდენტის ნამუშევრის ფოტო")}</div><div className="student-body"><h3 data-edit="t.students.18">{ed("t.students.18", "სტუდენტის სახელი")}</h3><div className="where">{t("ქალაქი · პოზიცია")}</div><p data-edit="t.students.19">{ed("t.students.19", "ერთი წინადადება შედეგზე.")}</p><span className="course">{t("კურსის სახელი")}</span></div></article>
+            <article className="student"><div className="work ph9"></div><div className="student-body"><h3 data-edit="t.students.4">{ed("t.students.4", "სტუდენტის სახელი")}</h3><div className="where">{t("თბილისი · საკუთარი სტუდია")}</div><p data-edit="t.students.5">{ed("t.students.5", "სად არის ახლა — მაგ. გახსნა სტუდია ვაკეში, ჩანაწერი ორი კვირით წინ ივსება.")}</p><span className="course" data-edit="t.students.course.1">{ed("t.students.course.1", "მასტერ-პროგრამა, ნაწილი 1 და 2")}</span></div></article>
+            <article className="student"><div className="work ph2"></div><div className="student-body"><h3 data-edit="t.students.6">{ed("t.students.6", "სტუდენტის სახელი")}</h3><div className="where">{t("ბათუმი · სალონის მასტერი")}</div><p data-edit="t.students.7">{ed("t.students.7", "შედეგი — მაგ. მოკლე გელიდან XXL ნამუშევრებზე გადავიდა, ფასი გააორმაგა.")}</p><span className="course" data-edit="t.students.course.2">{ed("t.students.course.2", "ექსტრემალური სიგრძე")}</span></div></article>
+            <article className="student"><div className="work ph6"></div><div className="student-body"><h3 data-edit="t.students.8">{ed("t.students.8", "სტუდენტის სახელი")}</h3><div className="where">{t("ბერლინი · სახლის სტუდია")}</div><p data-edit="t.students.9">{ed("t.students.9", "ონლაინ ისწავლა ქართულად სუბტიტრებით, ახლა გერმანელ კლიენტებთან მუშაობს.")}</p><span className="course" data-edit="t.students.course.3">{ed("t.students.course.3", "იდეალური ფრენჩი")}</span></div></article>
+            <article className="student"><div className="work ph8"></div><div className="student-body"><h3 data-edit="t.students.10">{ed("t.students.10", "სტუდენტის სახელი")}</h3><div className="where">{t("ქუთაისი · სალონის მასტერი")}</div><p data-edit="t.students.11">{ed("t.students.11", "პირველი კურსი გრძელ ფრჩხილებზე, საბოლოო ნამუშევარი სამ კვირაში ჩააბარა.")}</p><span className="course" data-edit="t.students.course.4">{ed("t.students.course.4", "ამერიკული ფრჩხილები ფორმებზე")}</span></div></article>
+            <article className="student"><div className="work">{t("სტუდენტის ნამუშევრის ფოტო")}</div><div className="student-body"><h3 data-edit="t.students.12">{ed("t.students.12", "სტუდენტის სახელი")}</h3><div className="where">{t("ქალაქი · პოზიცია")}</div><p data-edit="t.students.13">{ed("t.students.13", "ერთი წინადადება შედეგზე.")}</p><span className="course" data-edit="t.students.course.5">{ed("t.students.course.5", "კურსის სახელი")}</span></div></article>
+            <article className="student"><div className="work">{t("სტუდენტის ნამუშევრის ფოტო")}</div><div className="student-body"><h3 data-edit="t.students.14">{ed("t.students.14", "სტუდენტის სახელი")}</h3><div className="where">{t("ქალაქი · პოზიცია")}</div><p data-edit="t.students.15">{ed("t.students.15", "ერთი წინადადება შედეგზე.")}</p><span className="course" data-edit="t.students.course.6">{ed("t.students.course.6", "კურსის სახელი")}</span></div></article>
+            <article className="student"><div className="work">{t("სტუდენტის ნამუშევრის ფოტო")}</div><div className="student-body"><h3 data-edit="t.students.16">{ed("t.students.16", "სტუდენტის სახელი")}</h3><div className="where">{t("ქალაქი · პოზიცია")}</div><p data-edit="t.students.17">{ed("t.students.17", "ერთი წინადადება შედეგზე.")}</p><span className="course" data-edit="t.students.course.7">{ed("t.students.course.7", "კურსის სახელი")}</span></div></article>
+            <article className="student"><div className="work">{t("სტუდენტის ნამუშევრის ფოტო")}</div><div className="student-body"><h3 data-edit="t.students.18">{ed("t.students.18", "სტუდენტის სახელი")}</h3><div className="where">{t("ქალაქი · პოზიცია")}</div><p data-edit="t.students.19">{ed("t.students.19", "ერთი წინადადება შედეგზე.")}</p><span className="course" data-edit="t.students.course.8">{ed("t.students.course.8", "კურსის სახელი")}</span></div></article>
           </div>
       
           <div className="student-stats">
