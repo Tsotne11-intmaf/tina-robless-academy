@@ -1624,3 +1624,15 @@ body.editing .cards.home-slider{scroll-snap-type:none}
 .hw-grade.mark-low{background:#C22B3A}
 .hw-grade.mark-mid{background:#B57A00}
 .hw-grade.mark-high{background:#1F8A4C}
+
+/* The student's verdict block: state and mark on one line, the reason under it. */
+.auth-msg .hw-verdict-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:500}
+.auth-msg .hw-verdict-top b{
+  font-family:var(--sans);font-variant-numeric:tabular-nums;font-weight:700;
+  font-size:1.02rem;padding:3px 11px;border-radius:999px;background:rgba(255,255,255,.7);
+}
+.hw-said-s{
+  margin:9px 0 0;padding-top:9px;border-top:1px solid rgba(0,0,0,.09);
+  font-size:.9rem;line-height:1.55;overflow-wrap:anywhere;
+}
+.hw-said-s span{font-weight:600;opacity:.82}

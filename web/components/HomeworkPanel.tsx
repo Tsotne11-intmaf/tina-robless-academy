@@ -100,17 +100,26 @@ export default function HomeworkPanel({
 
             {sub ? (
               <>
-                {/* The box takes the mark's colour, so how it went is read before
-                    the number is. Without a mark it stays the neutral green of a
-                    task that has simply been looked at. */}
-                <p
+                {/* The whole verdict in one block: the state, the mark, and the
+                    reason for it. The mark's colour says how it went before the
+                    number is read; without a mark the box keeps the neutral green
+                    of work that has simply been looked at. Tina's words sat in a
+                    separate line below and were easy to miss - a student losing
+                    marks should not have to hunt for why. */}
+                <div
                   className={"auth-msg " + (sub.grade ? (markBand(sub.grade) ?? "ok") : "ok")}
                   style={{ marginTop: 0 }}
                 >
-                  {STATUS[sub.status] ?? sub.status}
-                  {sub.grade ? " · შეფასება: " + markText(sub.grade) : ""}
-                </p>
-                {sub.feedback ? <p className="lead">თინას კომენტარი: {sub.feedback}</p> : null}
+                  <div className="hw-verdict-top">
+                    <span>{STATUS[sub.status] ?? sub.status}</span>
+                    {sub.grade ? <b>{markText(sub.grade)}</b> : null}
+                  </div>
+                  {sub.feedback ? (
+                    <p className="hw-said-s">
+                      <span>თინას შეფასება:</span> {sub.feedback}
+                    </p>
+                  ) : null}
+                </div>
                 {sub.photo_url ? (
                   /* plain img: the file is on UploadThing's CDN, outside next/image config */
                   <img
