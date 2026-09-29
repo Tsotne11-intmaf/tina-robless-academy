@@ -1848,3 +1848,12 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   .thumb .locked b{font-size:.95rem}
   .locked-note{font-size:.78rem}
 }
+
+/* A finished course, and the wording under its video. */
+.course-desc{white-space:pre-line;max-width:70ch}
+.done-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.done-tag{
+  background:#E3F5E8;color:#1F6B3A;border-radius:var(--r-pill);
+  padding:10px 18px;font-weight:600;font-size:.95rem;
+}
+.hint.warn{color:#8A5B00}

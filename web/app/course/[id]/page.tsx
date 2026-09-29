@@ -1,8 +1,18 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { getStudent, ownedCourses, courseById, flatLessons, percent } from "@/lib/student";
+import { getStudent, ownedCourses, courseById, flatLessons } from "@/lib/student";
+import { courseById as catalogueCourse } from "@/lib/catalog-db";
+import { playerFor } from "@/lib/video";
 import StudentSidebar from "@/components/StudentSidebar";
+import CompleteCourseButton from "@/components/CompleteCourseButton";
 
+/* A course, as one recording.
+
+   It used to be a list of twenty lessons that unlocked one after another, each
+   waiting for a video of its own. The lessons were fixed in the code, so Tina
+   could neither retitle them nor change how the course was divided - and one
+   recording is how she actually teaches. The stages now live in the course
+   description, which she can edit, and the whole video plays here. */
 export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const student = await getStudent();
@@ -12,70 +22,76 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
   if (!course) notFound();
 
   /* Ownership decided on the server. A student who types a course URL they have not
-     bought is sent back to the dashboard before any lesson title is rendered. */
+     bought is sent back to the dashboard before any of it is rendered. */
   if (!student.owned.includes(id)) redirect("/dashboard");
 
-  const lessons = flatLessons(course);
-  const doneCount = student.done[id] ?? 0;
-  const p = percent(course, student.done);
+  const total = flatLessons(course).length;
+  const done = total > 0 && (student.done[id] ?? 0) >= total;
+
+  // The video and the wording come from the catalogue, where Tina edits them.
+  const listed = await catalogueCourse(id);
+  const player = playerFor(listed?.video);
 
   return (
     <section className="lms">
       <div className="wrap lms-grid">
         <StudentSidebar student={student} courses={ownedCourses(student)} active={id} />
         <div>
-          <h1 style={{ fontSize: "2rem", marginBottom: 6 }}>{course.title}</h1>
-          <p className="lead" style={{ marginBottom: 18 }}>
-            {lessons.length} გაკვეთილი · დასრულებული {doneCount} ({p}%)
-          </p>
-          <div className="progress" style={{ marginBottom: 30 }}>
-            <i style={{ width: p + "%" }} />
+          <h1 style={{ fontSize: "2rem", marginBottom: 6 }}>{listed?.title ?? course.title}</h1>
+          {listed?.dur ? (
+            <p className="lead" style={{ marginBottom: 18 }}>
+              {listed.dur}
+            </p>
+          ) : null}
+
+          <div className="video">
+            {player === null ? (
+              <div className="video-empty">ვიდეო მალე დაემატება</div>
+            ) : player.kind === "iframe" ? (
+              <iframe
+                src={player.src}
+                title={listed?.title ?? course.title}
+                loading="lazy"
+                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+              />
+            ) : (
+              // eslint-disable-next-line jsx-a11y/media-has-caption
+              <video
+                src={player.src}
+                poster={listed?.photo ?? undefined}
+                controls
+                controlsList="nodownload"
+                playsInline
+                preload="metadata"
+              />
+            )}
           </div>
 
-          {course.modules.map((m, mi) => {
-            // running index of the first lesson in this module
-            const before = course.modules
-              .slice(0, mi)
-              .reduce((n, x) => n + x.lessons.length, 0);
-            return (
-              <div key={mi} style={{ marginBottom: 26 }}>
-                <h2 style={{ fontSize: "1.3rem", marginBottom: 10 }}>{m.title}</h2>
-                <div className="adm-list">
-                  {m.lessons.map((l, li) => {
-                    const idx = before + li;
-                    // Sequential unlocking, as in the legacy LMS: the next lesson
-                    // opens only once the previous one is marked done.
-                    const unlocked = idx <= doneCount;
-                    const complete = idx < doneCount;
-                    return (
-                      <div className="adm-row" key={li}>
-                        <div className="adm-main">
-                          <b>
-                            {idx + 1}. {l.t}
-                          </b>
-                          {l.d ? <span>{l.d}</span> : null}
-                        </div>
-                        <div className="adm-btns">
-                          {complete ? (
-                            <span style={{ color: "var(--plum)", fontSize: ".85rem" }}>✓ დასრულებული</span>
-                          ) : null}
-                          {unlocked ? (
-                            <Link className="btn btn-ghost" href={`/lesson/${id}/${idx}`}>
-                              {complete ? "გადახედვა" : "გახსნა"}
-                            </Link>
-                          ) : (
-                            <span style={{ color: "var(--ink-soft)", fontSize: ".85rem" }}>
-                              🔒 დაბლოკილია
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+          {listed?.desc ? (
+            <>
+              <h2 style={{ fontSize: "1.3rem", margin: "6px 0 10px" }}>კურსის შესახებ</h2>
+              <p className="lead course-desc">{listed.desc}</p>
+            </>
+          ) : null}
+
+          {listed?.learn?.length ? (
+            <>
+              <h2 style={{ fontSize: "1.3rem", margin: "26px 0 10px" }}>რას ისწავლით</h2>
+              <ul className="learn">
+                {listed.learn.map((l, i) => (
+                  <li key={i}>{l}</li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+
+          <div style={{ marginTop: 30, display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <CompleteCourseButton courseId={id} totalLessons={total || 1} done={done} />
+            <Link className="btn btn-ghost" href="/hw">
+              დავალებები
+            </Link>
+          </div>
         </div>
       </div>
     </section>

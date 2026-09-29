@@ -192,6 +192,13 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
           <p className="hint" style={{ textAlign: "left", marginTop: 4 }}>
             ატვირთე ფაილი ან ჩასვი ბმული. შენახვისთვის დააჭირე „{isNew ? "დამატება" : "შენახვა"}“.
           </p>
+          {/* The upload works, but the store behind it is a file host on a free
+              plan with 2 GB in total - a single 20-minute lesson fills most of
+              it. Said here rather than left to fail at the end of a long upload. */}
+          <p className="hint warn" style={{ textAlign: "left", marginTop: 6 }}>
+            ⚠ გრძელი ვიდეო (10 წუთზე მეტი) აქ არ აიტვირთება — საცავი მცირეა. ატვირთე
+            Bunny-ზე ან Vimeo-ზე და ბმული ჩასვი ამ ველში.
+          </p>
         </div>
 
         <div className="field">
