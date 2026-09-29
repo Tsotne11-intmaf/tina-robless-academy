@@ -5,6 +5,7 @@ import { CATALOG, CATS } from "@/lib/catalog";
 import { courseById } from "@/lib/catalog-db";
 import { getStudent } from "@/lib/student";
 import { createClient } from "@/lib/supabase/server";
+import { playerFor } from "@/lib/video";
 import CourseReview, { type Review } from "@/components/CourseReview";
 import ReviewList from "@/components/ReviewList";
 import { Badge, Price } from "@/components/CourseCard";
@@ -65,6 +66,11 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
   const samples = reviews.filter((r) => r.photo_url);
   const said = reviews.filter((r) => r.body);
 
+  /* The course video takes the photo's place, but only for someone who has paid
+     for it (or Tina, checking her upload). Decided here on the server, so the
+     address is never in the page anyone else receives. */
+  const player = owned || isAdmin === true ? playerFor(c.video) : null;
+
   return (
     <section className="lms">
       <div className="wrap">
@@ -80,15 +86,38 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
               {t(c.desc)}
             </p>
 
-            <div
-              className={"thumb " + (c.photo ? "" : c.img || "")}
-              style={{
-                aspectRatio: "16/9",
-                borderRadius: "var(--r-card)",
-                marginBottom: 34,
-                ...(c.photo ? { background: `url(${c.photo}) center/cover` } : {}),
-              }}
-            />
+            {player ? (
+              <div className="video" style={{ marginBottom: 34 }}>
+                {player.kind === "iframe" ? (
+                  <iframe
+                    src={player.src}
+                    title={c.title}
+                    loading="lazy"
+                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    src={player.src}
+                    poster={c.photo ?? undefined}
+                    controls
+                    controlsList="nodownload"
+                    playsInline
+                    preload="metadata"
+                  />
+                )}
+              </div>
+            ) : (
+              <div
+                className={"thumb " + (c.photo ? "" : c.img || "")}
+                style={{
+                  aspectRatio: "16/9",
+                  borderRadius: "var(--r-card)",
+                  marginBottom: 34,
+                  ...(c.photo ? { background: `url(${c.photo}) center/cover` } : {}),
+                }}
+              />
+            )}
 
             {c.learn?.length ? (
               <>

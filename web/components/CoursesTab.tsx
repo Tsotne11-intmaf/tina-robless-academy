@@ -49,6 +49,7 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; kind?: "ok" | "bad" } | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
+  const [video, setVideo] = useState<string | null>(null);
   const [only, setOnly] = useState<"all" | "live" | "hidden">("all");
 
   async function save(body: Record<string, unknown>) {
@@ -78,6 +79,7 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
     setEditing(null);
     setAdding(false);
     setPhoto(null);
+    setVideo(null);
     router.refresh();
   }
 
@@ -167,14 +169,28 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
         </div>
 
         <div className="field">
-          <label>ვიდეოს ბმული</label>
+          <label>ვიდეო</label>
+          {/* Uploading fills the same field a pasted link would, so both end up
+              as one address in courses.video and nothing downstream can tell. */}
           <input
             name="video"
-            defaultValue={c?.video ?? ""}
+            value={video ?? c?.video ?? ""}
+            onChange={(e) => setVideo(e.target.value)}
             placeholder="https://… (YouTube, Vimeo ან სხვა)"
           />
+          <UploadButton
+            endpoint="courseVideo"
+            content={{ button: "ვიდეოს ატვირთვა", allowedContent: "ვიდეო, 1 GB-მდე" }}
+            onClientUploadComplete={(res) => {
+              const url = res?.[0]?.ufsUrl;
+              if (url) setVideo(url);
+            }}
+            onUploadError={(e: Error) =>
+              setMsg({ text: "ვიდეო ვერ აიტვირთა: " + e.message, kind: "bad" })
+            }
+          />
           <p className="hint" style={{ textAlign: "left", marginTop: 4 }}>
-            ვიდეო ინახება იმ სერვისზე, საიდანაც ბმულია. აქ მხოლოდ მისამართი ეწერება.
+            ატვირთე ფაილი ან ჩასვი ბმული. შენახვისთვის დააჭირე „{isNew ? "დამატება" : "შენახვა"}“.
           </p>
         </div>
 
@@ -232,6 +248,7 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
               setEditing(null);
               setAdding(false);
               setPhoto(null);
+              setVideo(null);
             }}
           >
             გაუქმება
@@ -260,6 +277,7 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
             setAdding(true);
             setEditing(null);
             setPhoto(null);
+            setVideo(null);
           }}
         >
           + ახალი კურსის დამატება
@@ -326,6 +344,7 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
                   setEditing(c.id);
                   setAdding(false);
                   setPhoto(null);
+                  setVideo(null);
                 }}
                 disabled={busy}
               >

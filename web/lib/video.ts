@@ -75,6 +75,12 @@ export function playerFor(raw: string | null | undefined): Player | null {
     return id ? { kind: "iframe", src: `https://www.youtube.com/embed/${id}` } : null;
   }
 
+  /* Uploaded from the admin panel. UploadThing addresses a file by key alone,
+     /f/<key>, with no extension to recognise it by - only the host says what it is. */
+  if (/(^|\.)(ufs\.sh|utfs\.io)$/.test(host) && path.startsWith("/f/")) {
+    return { kind: "file", src: u.toString() };
+  }
+
   // A file served straight from storage, including an HLS playlist.
   if (/\.(mp4|webm|m3u8)$/i.test(path)) return { kind: "file", src: u.toString() };
 

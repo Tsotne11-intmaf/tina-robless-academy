@@ -24,6 +24,18 @@ async function requireUser() {
   return { userId: user.id };
 }
 
+/* Course videos are big and go straight to the paid storage, so being signed in
+   is not enough - any student is signed in. Only the owner may send one. */
+async function requireAdmin() {
+  const { userId } = await requireUser();
+  const supabase = await createClient();
+  const { data: isAdmin } = await supabase.rpc("is_admin");
+  if (isAdmin !== true) {
+    throw new UploadThingError({ code: "FORBIDDEN", message: "წვდომა აკრძალულია" });
+  }
+  return { userId };
+}
+
 export const ourFileRouter = {
   avatar: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
     .middleware(requireUser)
@@ -41,6 +53,14 @@ export const ourFileRouter = {
 
   homework: f({ image: { maxFileSize: "8MB", maxFileCount: 5 } })
     .middleware(requireUser)
+    .onUploadComplete(async ({ metadata, file }) => {
+      return { uploadedBy: metadata.userId, url: file.ufsUrl };
+    }),
+
+  // Saved the same way as the course photo: the URL goes back into the course
+  // form and is written with the rest of it, from the admin's own browser.
+  courseVideo: f({ video: { maxFileSize: "1GB", maxFileCount: 1 } })
+    .middleware(requireAdmin)
     .onUploadComplete(async ({ metadata, file }) => {
       return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
