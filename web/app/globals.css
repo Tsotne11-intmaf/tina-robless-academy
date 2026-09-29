@@ -1814,3 +1814,21 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   box-shadow:0 10px 22px -12px rgba(0,0,0,.6);
 }
 .card.is-owned{border-color:#BFE6CC}
+
+/* ===== Wide screens =====
+   The content has always been capped at 1180px. That reads well on a laptop, but
+   on a wider monitor it leaves a broad empty margin down both sides and the page
+   looks shrunken inside its own window. The cap and the type grow together, so
+   the proportions stay as designed - only the scale changes. Nothing below
+   1400px moves, phones included. */
+@media (min-width:1400px){
+  :root{--max:1300px}
+  html{font-size:17px}
+  body{font-size:18px}
+  section{padding:96px 0}
+}
+@media (min-width:1700px){
+  :root{--max:1400px}
+  html{font-size:17.5px}
+  body{font-size:18.5px}
+}
