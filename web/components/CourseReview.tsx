@@ -11,15 +11,17 @@ export type Review = {
   author_name: string;
   body: string | null;
   photo_url: string | null;
+  verified: boolean;
   created_at: string;
 };
 
-/* A student's say on a course she has taken, with the work to go with it.
+/* Anyone with an account may say what they think of a course, on any course.
 
-   Only shown to someone who holds the course - the row policy says the same
-   thing again, so the form being on the page is not what grants the right. One
-   review per student per course, rewritten rather than added to, which is why
-   this saves by upsert. */
+   What used to be guaranteed by who could write is now recorded on the comment
+   itself: one from someone who holds the course is marked as such, by the
+   database rather than by the browser, so the mark cannot be claimed by asking
+   for it. One review per person per course, rewritten rather than added to,
+   which is why this saves by upsert. */
 export default function CourseReview({
   courseId,
   authorName,

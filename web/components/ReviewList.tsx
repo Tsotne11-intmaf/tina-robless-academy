@@ -36,6 +36,8 @@ export default function ReviewList({
         <div className="rev" key={r.id}>
           <div className="rev-top">
             <b>{r.author_name || "სტუდენტი"}</b>
+            {/* Set by the database from the enrolments, so it means what it says. */}
+            {r.verified ? <span className="rev-ok">✓ კურსი გავლილი აქვს</span> : null}
             <span>{new Date(r.created_at).toLocaleDateString("ka-GE")}</span>
             {canModerate || viewerId === r.profile_id ? (
               <button

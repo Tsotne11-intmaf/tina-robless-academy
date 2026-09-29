@@ -1814,3 +1814,11 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   box-shadow:0 10px 22px -12px rgba(0,0,0,.6);
 }
 .card.is-owned{border-color:#BFE6CC}
+
+/* A comment from someone who actually holds the course. */
+.rev-ok{
+  background:#E3F5E8;color:#1F6B3A;border-radius:var(--r-pill);
+  padding:3px 9px;font-size:.74rem;font-weight:600;white-space:nowrap;
+}
+.rev-signin{text-align:left}
+.rev-signin .btn{margin-top:4px}

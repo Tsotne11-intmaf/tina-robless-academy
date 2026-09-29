@@ -58,7 +58,7 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
   const { data: isAdmin } = student ? await supabase.rpc("is_admin") : { data: false };
   const { data: reviewRows } = await supabase
     .from("course_reviews")
-    .select("id,profile_id,author_name,body,photo_url,created_at")
+    .select("id,profile_id,author_name,body,photo_url,verified,created_at")
     .eq("course_id", id)
     .order("created_at", { ascending: false });
   const reviews = (reviewRows ?? []) as Review[];
@@ -151,13 +151,24 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
               <p className="lead">{t("კომენტარები ჯერ არ არის.")}</p>
             )}
 
-            {owned ? (
+            {/* Everyone with an account may leave a comment, on any course. A
+                visitor is asked to sign in rather than shown a form that would
+                refuse them. */}
+            {student ? (
               <CourseReview
                 courseId={c.id}
-                authorName={student!.name || student!.email.split("@")[0]}
+                authorName={student.name || student.email.split("@")[0]}
                 mine={mine}
               />
-            ) : null}
+            ) : (
+              <div className="rev-form rev-signin">
+                <h3>{t("დატოვეთ კომენტარი")}</h3>
+                <p className="rev-hint">{t("კომენტარის დასაწერად საჭიროა ანგარიში.")}</p>
+                <Link className="btn btn-plum" href={`/login?next=/kurs/${c.id}`}>
+                  {t("შესვლა")}
+                </Link>
+              </div>
+            )}
           </div>
 
           <aside className={"buy" + (c.badge === "premium" ? " is-premium" : "")}>
