@@ -68,8 +68,13 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
 
   /* The course video takes the photo's place, but only for someone who has paid
      for it (or Tina, checking her upload). Decided here on the server, so the
-     address is never in the page anyone else receives. */
-  const player = owned || isAdmin === true ? playerFor(c.video) : null;
+     address is never in the page anyone else receives.
+
+     Whether a video exists is not a secret, though - it is a reason to buy. The
+     poster says so and stays locked; only the address is withheld. */
+  const canWatch = owned || isAdmin === true;
+  const player = canWatch ? playerFor(c.video) : null;
+  const hasVideo = playerFor(c.video) !== null;
 
   return (
     <section className="lms">
@@ -116,7 +121,15 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
                   marginBottom: 34,
                   ...(c.photo ? { background: `url(${c.photo}) center/cover` } : {}),
                 }}
-              />
+              >
+                {hasVideo ? (
+                  <div className="locked">
+                    <span className="locked-play">▶</span>
+                    <b>{t("ამ კურსს ვიდეო აქვს")}</b>
+                    <span className="locked-note">🔒 {t("ნახვა კურსის შეძენის შემდეგ")}</span>
+                  </div>
+                ) : null}
+              </div>
             )}
 
             {c.learn?.length ? (
