@@ -1857,3 +1857,17 @@ body.editing .cards.home-slider{scroll-snap-type:none}
   padding:10px 18px;font-weight:600;font-size:.95rem;
 }
 .hint.warn{color:#8A5B00}
+
+/* How far an upload has got. */
+.up-bar{
+  position:relative;height:26px;margin-top:8px;border-radius:var(--r-pill);
+  background:var(--blush-soft);overflow:hidden;
+}
+.up-bar i{
+  position:absolute;inset:0 auto 0 0;background:var(--plum);
+  transition:width .25s ease;border-radius:var(--r-pill);
+}
+.up-bar b{
+  position:absolute;inset:0;display:grid;place-items:center;
+  font-size:.78rem;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;
+}

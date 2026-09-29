@@ -50,6 +50,10 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
   const [msg, setMsg] = useState<{ text: string; kind?: "ok" | "bad" } | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const [video, setVideo] = useState<string | null>(null);
+  /* Null when nothing is uploading. A video is hundreds of megabytes and takes
+     minutes to send; with no sign of movement the page looks frozen, which is
+     exactly what it was reported as. */
+  const [pct, setPct] = useState<number | null>(null);
   const [only, setOnly] = useState<"all" | "live" | "hidden">("all");
 
   async function save(body: Record<string, unknown>) {
@@ -180,24 +184,46 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
           />
           <UploadButton
             endpoint="courseVideo"
-            content={{ button: "ვიდეოს ატვირთვა", allowedContent: "ვიდეო, 1 GB-მდე" }}
-            onClientUploadComplete={(res) => {
-              const url = res?.[0]?.ufsUrl;
-              if (url) setVideo(url);
+            /* A fixed label was the bug: it overrode the component's own progress
+               text, so a ten-minute upload showed the same words from beginning
+               to end and looked like nothing was happening. */
+            content={{
+              button: ({ isUploading, uploadProgress }) =>
+                isUploading ? `იტვირთება… ${uploadProgress ?? 0}%` : "ვიდეოს ატვირთვა",
+              allowedContent: "ვიდეო, 1 GB-მდე",
             }}
-            onUploadError={(e: Error) =>
-              setMsg({ text: "ვიდეო ვერ აიტვირთა: " + e.message, kind: "bad" })
-            }
+            onUploadBegin={() => {
+              setPct(0);
+              setMsg({ text: "ვიდეო იტვირთება — არ დახუროთ გვერდი.", kind: "ok" });
+            }}
+            onUploadProgress={(p) => setPct(p)}
+            onClientUploadComplete={(res) => {
+              setPct(null);
+              const url = res?.[0]?.ufsUrl;
+              if (url) {
+                setVideo(url);
+                setMsg({ text: "ვიდეო აიტვირთა. დააჭირეთ შენახვას.", kind: "ok" });
+              }
+            }}
+            onUploadError={(e: Error) => {
+              setPct(null);
+              setMsg({ text: "ვიდეო ვერ აიტვირთა: " + e.message, kind: "bad" });
+            }}
           />
+          {pct !== null ? (
+            <div className="up-bar" aria-label="ატვირთვის მიმდინარეობა">
+              <i style={{ width: pct + "%" }} />
+              <b>{pct}%</b>
+            </div>
+          ) : null}
           <p className="hint" style={{ textAlign: "left", marginTop: 4 }}>
             ატვირთე ფაილი ან ჩასვი ბმული. შენახვისთვის დააჭირე „{isNew ? "დამატება" : "შენახვა"}“.
           </p>
-          {/* The upload works, but the store behind it is a file host on a free
-              plan with 2 GB in total - a single 20-minute lesson fills most of
-              it. Said here rather than left to fail at the end of a long upload. */}
+          {/* Up to 1 GB goes through; what is scarce is the 2 GB the whole
+              account has, so a handful of lessons fills it. */}
           <p className="hint warn" style={{ textAlign: "left", marginTop: 6 }}>
-            ⚠ გრძელი ვიდეო (10 წუთზე მეტი) აქ არ აიტვირთება — საცავი მცირეა. ატვირთე
-            Bunny-ზე ან Vimeo-ზე და ბმული ჩასვი ამ ველში.
+            ⚠ ატვირთვას რამდენიმე წუთი სჭირდება — გვერდი არ დახუროთ. მთელი საცავი 2 GB-ია,
+            ანუ 3-4 ვიდეო. მეტისთვის ატვირთე Bunny-ზე და ბმული ჩასვი ამ ველში.
           </p>
         </div>
 
