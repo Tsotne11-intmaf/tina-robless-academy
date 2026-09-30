@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { playerFor } from "@/lib/video";
 import StudentSidebar from "@/components/StudentSidebar";
 import CompleteLessonButton from "@/components/CompleteLessonButton";
+import { waitingHomework } from "@/lib/homework";
 
 /* The whole point of the migration lives in this file.
 
@@ -52,10 +53,12 @@ export default async function LessonPage({
   const next = idx + 1 < lessons.length ? idx + 1 : null;
   const alreadyDone = idx < doneCount;
 
+  const waiting = (await waitingHomework(student)).count;
+
   return (
     <section className="lms">
       <div className="wrap lms-grid">
-        <StudentSidebar student={student} courses={ownedCourses(student)} active={id} />
+        <StudentSidebar student={student} courses={ownedCourses(student)} active={id} waiting={waiting} />
         <div>
           <div className="crumbs">
             <Link href="/dashboard">ჩემი კურსები</Link> /{" "}

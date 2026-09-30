@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { HOMEWORK } from "@/lib/catalog";
 import StudentSidebar from "@/components/StudentSidebar";
 import HomeworkPanel, { type Task, type Submission } from "@/components/HomeworkPanel";
+import { waitingHomework } from "@/lib/homework";
 
 export const metadata = { title: "დავალებები — Tina Robless Nail Academy" };
 
@@ -38,10 +39,12 @@ export default async function HomeworkPage() {
     due: a.due_at ? new Date(a.due_at as string).getTime() : undefined,
   }));
 
+  const waiting = (await waitingHomework(student)).count;
+
   return (
     <section className="lms">
       <div className="wrap lms-grid">
-        <StudentSidebar student={student} courses={ownedCourses(student)} active="hw" />
+        <StudentSidebar student={student} courses={ownedCourses(student)} active="hw" waiting={waiting} />
         <div>
           <h1 style={{ fontSize: "2.2rem", marginBottom: 8 }}>დავალებები</h1>
           <p className="lead" style={{ marginBottom: 24 }}>

@@ -9,10 +9,15 @@ export default function StudentSidebar({
   student,
   courses,
   active,
+  waiting = 0,
 }: {
   student: Student;
   courses: StudentCourse[];
   active: string;
+  /* Homework not handed in, or handed back to redo. Shown as a count beside the
+     link, because a task set on Monday was otherwise only discovered by opening
+     the page on the off-chance. */
+  waiting?: number;
 }) {
   const avatar = student.profile?.avatar_url as string | undefined;
   return (
@@ -48,6 +53,11 @@ export default function StudentSidebar({
         ))}
         <Link href="/hw" aria-current={active === "hw" ? "page" : undefined}>
           დავალებები
+          {waiting > 0 ? (
+            <i className="hw-count hot" title={`${waiting} გასაკეთებელი დავალება`}>
+              {waiting}
+            </i>
+          ) : null}
         </Link>
         <Link href="/mycert" aria-current={active === "cert" ? "page" : undefined}>
           ჩემი სერტიფიკატები

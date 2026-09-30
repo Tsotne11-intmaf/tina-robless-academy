@@ -5,6 +5,7 @@ import { courseById as catalogueCourse } from "@/lib/catalog-db";
 import { playerFor } from "@/lib/video";
 import StudentSidebar from "@/components/StudentSidebar";
 import CompleteCourseButton from "@/components/CompleteCourseButton";
+import { waitingHomework } from "@/lib/homework";
 
 /* A course, as one recording.
 
@@ -32,10 +33,12 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
   const listed = await catalogueCourse(id);
   const player = playerFor(listed?.video);
 
+  const waiting = (await waitingHomework(student)).count;
+
   return (
     <section className="lms">
       <div className="wrap lms-grid">
-        <StudentSidebar student={student} courses={ownedCourses(student)} active={id} />
+        <StudentSidebar student={student} courses={ownedCourses(student)} active={id} waiting={waiting} />
         <div>
           <h1 style={{ fontSize: "2rem", marginBottom: 6 }}>{listed?.title ?? course.title}</h1>
           {listed?.dur ? (

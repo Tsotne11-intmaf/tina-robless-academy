@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getStudent, ownedCourses, percent, flatLessons } from "@/lib/student";
 import StudentSidebar from "@/components/StudentSidebar";
+import { waitingHomework } from "@/lib/homework";
 
 export const metadata = { title: "ჩემი სერტიფიკატები — Tina Robless Nail Academy" };
 
@@ -14,10 +15,12 @@ export default async function MyCertPage() {
   const earned = mine.filter((c) => percent(c, student.done) === 100);
   const inProgress = mine.filter((c) => percent(c, student.done) < 100);
 
+  const waiting = (await waitingHomework(student)).count;
+
   return (
     <section className="lms">
       <div className="wrap lms-grid">
-        <StudentSidebar student={student} courses={mine} active="cert" />
+        <StudentSidebar student={student} courses={mine} active="cert" waiting={waiting} />
         <div>
           <h1 style={{ fontSize: "2.2rem", marginBottom: 8 }}>ჩემი სერტიფიკატები</h1>
           <p className="lead" style={{ marginBottom: 24 }}>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { UploadButton } from "@/lib/uploadthing";
 import { markBand, markText } from "@/lib/mark";
+import { timeLeft, dueDate } from "@/lib/due";
 
 export type Task = {
   id: string;
@@ -96,6 +97,26 @@ export default function HomeworkPanel({
         return (
           <div className="adm-form" key={t.id}>
             <h2 style={{ fontSize: "1.25rem", marginBottom: 4 }}>{t.title}</h2>
+            {/* When it is due, said where the task is read. A deadline Tina set
+                was recorded but never shown to the person it applied to. */}
+            {t.due
+              ? (() => {
+                  const left = timeLeft(t.due);
+                  if (!left) return null;
+                  return (
+                    <div className="due-row">
+                      <span
+                        className={
+                          "hw-badge " + (left.late ? "over" : left.soon ? "soon" : "ok")
+                        }
+                      >
+                        {left.late ? "⏰" : "🕒"} {left.text}
+                      </span>
+                      <span className="due-when">ვადა: {dueDate(t.due)}</span>
+                    </div>
+                  );
+                })()
+              : null}
             <p className="lead" style={{ marginBottom: 10 }}>{t.task}</p>
 
             {sub ? (

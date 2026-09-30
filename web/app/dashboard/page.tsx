@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getStudent, ownedCourses, flatLessons, percent } from "@/lib/student";
 import StudentSidebar from "@/components/StudentSidebar";
+import { waitingHomework } from "@/lib/homework";
 
 export const metadata = { title: "ჩემი კურსები — Tina Robless Nail Academy" };
 
@@ -18,10 +19,12 @@ export default async function DashboardPage() {
   }
   const finished = mine.filter((c) => percent(c, student.done) === 100).length;
 
+  const waiting = (await waitingHomework(student)).count;
+
   return (
     <section className="lms">
       <div className="wrap lms-grid">
-        <StudentSidebar student={student} courses={mine} active="dash" />
+        <StudentSidebar student={student} courses={mine} active="dash" waiting={waiting} />
         <div>
           <h1 style={{ fontSize: "2.2rem", marginBottom: 8 }}>
             <span>გამარჯობა,</span> {student.name}
