@@ -1,5 +1,6 @@
 import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createPublicClient } from "@/lib/supabase/server";
 import { CATALOG, type CourseItem } from "@/lib/catalog";
 
 export type Course = CourseItem & { video?: string | null; featured?: boolean; hidden?: boolean };
@@ -32,15 +33,24 @@ type Row = {
 
    Null in a column means "leave what the code says", which is what lets her
    change a price without restating the title. */
-const rowsOf = cache(async (): Promise<Row[]> => {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase.from("courses").select("*");
-    return !error && data ? (data as Row[]) : [];
-  } catch {
-    return [];
-  }
-});
+/* The catalogue is public - the table's policy says so - so this needs no
+   cookies, which is what lets it be held between requests instead of fetched
+   again for every visitor. Saving a course clears the tag. */
+const fetchRows = unstable_cache(
+  async (): Promise<Row[]> => {
+    try {
+      const supabase = createPublicClient();
+      const { data, error } = await supabase.from("courses").select("*");
+      return !error && data ? (data as Row[]) : [];
+    } catch {
+      return [];
+    }
+  },
+  ["course-rows"],
+  { tags: ["catalog"], revalidate: 60 }
+);
+
+const rowsOf = cache(fetchRows);
 
 function build(rows: Row[], keepHidden: boolean): Course[] {
   const byId = new Map<string, Row>(rows.map((r) => [r.id, r]));

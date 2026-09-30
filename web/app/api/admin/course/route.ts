@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { CATALOG } from "@/lib/catalog";
 
@@ -104,6 +104,9 @@ export async function POST(request: Request) {
   }
 
   // The catalogue is server-rendered on the home page, the list and each course.
+  /* The pages are rebuilt, and the row cache behind them dropped -
+     otherwise the new wording would sit behind a stale copy. */
+  revalidateTag("catalog", "max");
   revalidatePath("/", "layout");
 
   return NextResponse.json({ ok: true, id, created: creating });

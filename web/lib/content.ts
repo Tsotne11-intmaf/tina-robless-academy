@@ -1,5 +1,6 @@
 import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createPublicClient } from "@/lib/supabase/server";
 
 export type Content = Record<string, string>;
 
@@ -12,18 +13,28 @@ export type Content = Record<string, string>;
    A failure here returns an empty map on purpose. The wording that ships in the
    code is a complete, correct copy of the site; if the database is unreachable
    the page should still render it rather than collapse. */
-export const getContent = cache(async (): Promise<Content> => {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase.from("content").select("key,value");
-    if (error || !data) return {};
-    const out: Content = {};
-    for (const row of data) out[row.key as string] = row.value as string;
-    return out;
-  } catch {
-    return {};
-  }
-});
+const readContent = unstable_cache(
+  async (): Promise<Content> => {
+    try {
+      const supabase = createPublicClient();
+      const { data, error } = await supabase.from("content").select("key,value");
+      if (error || !data) return {};
+      const out: Content = {};
+      for (const row of data) out[row.key as string] = row.value as string;
+      return out;
+    } catch {
+      return {};
+    }
+  },
+  ["site-content"],
+  { tags: ["content"], revalidate: 60 }
+);
+
+/* cache() keeps one request from fetching this three times - the header, the
+   body and the footer are separate components but one page. unstable_cache
+   keeps the next request from fetching it at all: the wording is the same for
+   every visitor and changes only when Tina saves, which clears the tag. */
+export const getContent = cache(readContent);
 
 /* Returns the reader used at every editable spot on the page.
 

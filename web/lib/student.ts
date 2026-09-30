@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { COURSES } from "@/lib/catalog";
 
@@ -28,7 +29,9 @@ export type Student = {
    student loses access without this file testing a date. In the single-file version
    that check ran on the student's own machine, where clearing storage or moving the
    clock defeated it. */
-export async function getStudent(): Promise<Student | null> {
+/* Wrapped so a page that asks twice - once for itself and once for the sidebar's
+   homework count - pays for one round trip rather than two. */
+export const getStudent = cache(async (): Promise<Student | null> => {
   const supabase = await createClient();
 
   /* The same distinction the proxy makes, applied where it actually matters.
@@ -92,7 +95,7 @@ export async function getStudent(): Promise<Student | null> {
        row policies use, so the badge and the actual permissions cannot disagree. */
     isAdmin: adminRes.data === true,
   };
-}
+});
 
 export function courseById(id: string): StudentCourse | undefined {
   return (COURSES as unknown as StudentCourse[]).find((c) => c.id === id);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 30;
@@ -60,6 +60,9 @@ export async function POST(request: Request) {
 
   // Pages are server-rendered and cached; without this the change would not show
   // until the cache happened to expire.
+  /* The pages are rebuilt, and the row cache behind them dropped -
+     otherwise the new wording would sit behind a stale copy. */
+  revalidateTag("content", "max");
   revalidatePath("/", "layout");
 
   return NextResponse.json({ ok: true, saved: clean.length });

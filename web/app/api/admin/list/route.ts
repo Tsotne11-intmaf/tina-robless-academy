@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { STORY_IDS, STORY_LIST } from "@/lib/story";
 
@@ -115,6 +115,9 @@ export async function POST(request: Request) {
   );
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
+  /* The pages are rebuilt, and the row cache behind them dropped -
+     otherwise the new wording would sit behind a stale copy. */
+  revalidateTag("content", "max");
   revalidatePath("/", "layout");
   return NextResponse.json({ ok: true, count: ids.length });
 }
