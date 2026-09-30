@@ -184,13 +184,13 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
             )}
           </div>
 
-          <aside className={"buy" + (c.badge === "premium" ? " is-premium" : "")}>
+          <aside className="buy">
             {c.badge ? (
               <div style={{ marginBottom: 12 }}>
                 <Badge c={c} />
               </div>
             ) : null}
-            <div className={"buy-price" + (c.badge === "premium" ? " gold" : "")}>
+            <div className="buy-price">
               <Price c={c} />
             </div>
             <div className="buy-dur">{t(c.dur)}</div>

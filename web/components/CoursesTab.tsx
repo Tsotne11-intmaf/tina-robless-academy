@@ -33,7 +33,6 @@ const CATS: Record<string, string> = {
 const BADGES: Record<string, string> = {
   "": "— არცერთი —",
   package: "პაკეტი",
-  premium: "პრემიუმ",
   sale: "ფასდაკლება",
 };
 

@@ -1092,29 +1092,13 @@ footer .foot-bottom a{border-bottom:1px solid rgba(255,140,187,.4)}
 /* ===== Premium (gold) & Sale badges ===== */
 .thumb{position:relative}
 .cbadge{position:absolute;top:12px;left:12px;z-index:2;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--r-pill);font-family:var(--sans);font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;line-height:1;box-shadow:0 8px 18px -8px rgba(0,0,0,.45)}
-.cbadge.premium{background:linear-gradient(135deg,#F7E7B4 0%,#E3B85C 35%,#B8862B 65%,#F2D68A 100%);color:#3E2A05;border:1px solid rgba(255,255,255,.55)}
-.cbadge.premium i{font-style:normal;font-size:.8rem}
 .cbadge.sale{background:linear-gradient(135deg,#FF3E97,#D9251C);color:#fff;border:1px solid rgba(255,255,255,.4)}
 @media (prefers-reduced-motion:no-preference){
   @keyframes shine{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-  .cbadge.premium{background-size:200% 100%;animation:shine 4s linear infinite}
 }
 .pw{display:inline-flex;align-items:center;gap:8px;flex-shrink:0}
 .pw .was{color:var(--ink-soft);font-size:.9rem;text-decoration:line-through;white-space:nowrap}
-.card-foot .price.gold,.buy-price.gold{background:linear-gradient(135deg,#F2D68A,#C99A3E 50%,#8F6516);color:#2B1A02;box-shadow:0 10px 22px -10px rgba(184,134,43,.8)}
-.card.is-premium{box-shadow:0 22px 50px -28px rgba(184,134,43,.6),0 0 0 1.5px #E3B85C}
-.card.is-premium:hover{box-shadow:0 34px 60px -28px rgba(184,134,43,.7),0 0 0 1.5px #E3B85C}
-.bundle.is-premium{background:linear-gradient(135deg,#3A2A0B 0%,#6E4E14 45%,#3A2A0B 100%);box-shadow:0 30px 60px -30px rgba(184,134,43,.7),0 0 0 1.5px #E3B85C}
-.bundle.is-premium .thumb{background:linear-gradient(160deg,#C99A3E,#5C3E0A)}
-.bundle.is-premium h3,.bundle.is-premium p,.bundle.is-premium li{color:#FFF6E0}
-.bundle.is-premium li::before{color:#F2D68A}
-.bundle.is-premium .bundle-price .now{background:linear-gradient(135deg,#F7E7B4,#E3B85C);color:#3E2A05}
-.bundle.is-premium .bundle-price .was{color:rgba(255,246,224,.6)}
-.bundle.is-premium .btn-plum{background:linear-gradient(135deg,#F7E7B4,#E3B85C);color:#3E2A05}
-.bundle.is-premium .btn-plum:hover{background:#F2D68A}
-.buy.is-premium{box-shadow:0 30px 70px -40px rgba(184,134,43,.7),0 0 0 1.5px #E3B85C}
 .buy-price s{margin-left:8px;font-size:1rem;color:rgba(255,255,255,.7)}
-.buy-price.gold s{color:rgba(43,26,2,.6)}
 
 /* ===== Packages: own pink category ===== */
 .cbadge.package{background:linear-gradient(135deg,#FF7FB6,#E5177A);color:#fff;border:1px solid rgba(255,255,255,.45)}

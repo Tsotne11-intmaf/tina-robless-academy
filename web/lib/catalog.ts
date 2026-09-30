@@ -47,7 +47,6 @@ export const CATALOG: CourseItem[] = [
     "id": "master-2",
     "img": "ph7",
     "cat": "program",
-    "badge": "premium",
     "title": "გრძელი ფრჩხილების მასტერ-პროგრამა — ნაწილი 2",
     "dur": "მინ. 8 კვირა · საშინაო დავალებებით",
     "price": "650 ₾",

@@ -22,12 +22,6 @@ export function discountPct(c: CourseItem): number {
 export async function Badge({ c }: { c: CourseItem }) {
   const t = await getT();
   if (c.badge === "package") return <span className="cbadge package">{t("პაკეტი")}</span>;
-  if (c.badge === "premium")
-    return (
-      <span className="cbadge premium">
-        <i>✦</i> {t("პრემიუმ")}
-      </span>
-    );
   if (c.badge === "sale") {
     const d = discountPct(c);
     return (
@@ -46,7 +40,7 @@ export function Price({ c }: { c: CourseItem }) {
   return (
     <>
       {c.badge === "sale" && c.was ? <s className="was">{c.was}</s> : null}
-      <span className={"price" + (c.badge === "premium" ? " gold" : "")}>{c.price}</span>
+      <span className="price">{c.price}</span>
     </>
   );
 }
@@ -58,7 +52,7 @@ export default async function CourseCard({ c, owned }: { c: CourseItem; owned?: 
   const t = await getT();
   return (
     <article
-      className={"card" + (c.badge === "premium" ? " is-premium" : "") + (owned ? " is-owned" : "")}
+      className={"card" + (owned ? " is-owned" : "")}
     >
       <Link
         className={"thumb " + (c.photo ? "" : c.img || "")}
