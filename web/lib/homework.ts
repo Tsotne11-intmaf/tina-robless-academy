@@ -1,6 +1,5 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { HOMEWORK } from "@/lib/catalog";
 import type { Student } from "@/lib/student";
 
 /* How much homework is still waiting, and when each piece is due.
@@ -29,17 +28,12 @@ export const waitingHomework = cache(async (student: Student): Promise<Waiting> 
       supabase.from("assignments").select("id,course_id,due_at"),
     ]);
 
-    /* The catalogue's own exercises, plus whatever Tina set for this student.
-       The prefix is the one the homework page uses, so the ids line up. */
-    const tasks: Due[] = [
-      ...(assignRes.data ?? []).map((a) => ({
-        id: "a" + a.id,
-        due: a.due_at ? new Date(a.due_at as string).getTime() : null,
-      })),
-      ...(HOMEWORK as unknown as { id: string; course: string }[])
-        .filter((t) => student.owned.includes(t.course))
-        .map((t) => ({ id: t.id, due: null })),
-    ];
+    /* Only what Tina has set. The prefix is the one the homework page uses, so
+       the count beside the link and the list on the page agree. */
+    const tasks: Due[] = (assignRes.data ?? []).map((a) => ({
+      id: "a" + a.id,
+      due: a.due_at ? new Date(a.due_at as string).getTime() : null,
+    }));
 
     const status = new Map<string, string>();
     for (const s of subRes.data ?? []) status.set(s.task_id as string, s.status as string);

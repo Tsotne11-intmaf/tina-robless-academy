@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { getStudent, ownedCourses } from "@/lib/student";
 import { createClient } from "@/lib/supabase/server";
-import { HOMEWORK } from "@/lib/catalog";
 import StudentSidebar from "@/components/StudentSidebar";
 import HomeworkPanel, { type Task, type Submission } from "@/components/HomeworkPanel";
 import { waitingHomework } from "@/lib/homework";
@@ -11,11 +10,6 @@ export const metadata = { title: "დავალებები — Tina Robles
 export default async function HomeworkPage() {
   const student = await getStudent();
   if (!student) redirect("/login?next=/hw");
-
-  // Only tasks for courses this student actually owns.
-  const tasks = (HOMEWORK as unknown as Task[]).filter((t) =>
-    student.owned.includes(t.course)
-  );
 
   const supabase = await createClient();
   // The select policy already limits both of these to the caller's own rows.
@@ -28,9 +22,12 @@ export default async function HomeworkPage() {
   ]);
   const data = subRes.data;
 
-  /* Tasks Tina set for this student personally, shown above the course's own
-     exercises because they were addressed to them. The id is prefixed so it can
-     never collide with a catalogue task id when a submission is matched up. */
+  /* Homework is what Tina has actually set, and nothing else.
+
+     The catalogue used to carry four exercises of its own, attached to a course
+     rather than to a person, so buying a course meant opening the cabinet to
+     three pieces of homework already overdue that nobody had asked for. The id
+     is prefixed so a submission can never be matched to the wrong task. */
   const personal: Task[] = (assignRes.data ?? []).map((a) => ({
     id: "a" + a.id,
     course: a.course_id as string,
@@ -50,7 +47,7 @@ export default async function HomeworkPage() {
           <p className="lead" style={{ marginBottom: 24 }}>
             ატვირთეთ ნამუშევარი — თინა შეამოწმებს და დაგიბრუნებთ კომენტარს.
           </p>
-          <HomeworkPanel tasks={[...personal, ...tasks]} submissions={(data ?? []) as Submission[]} />
+          <HomeworkPanel tasks={personal} submissions={(data ?? []) as Submission[]} />
         </div>
       </div>
     </section>

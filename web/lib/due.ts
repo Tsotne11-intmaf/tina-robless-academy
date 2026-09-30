@@ -2,14 +2,19 @@
 
    Past it, it says so rather than counting into the negative: "ვადა გასულია −3
    დღე" tells a student nothing they can act on. */
+/* Green with five days or more to go, amber under that, red once the time has
+   passed. The wording drops to hours inside the last day, where "დარჩა 0 დღე"
+   would be both true and useless. */
+const CALM_DAYS = 5;
+
 export function timeLeft(due: number | null | undefined) {
   if (!due) return null;
   const ms = due - Date.now();
   if (ms <= 0) return { text: "ვადა გასულია", late: true, soon: false };
   const hours = Math.floor(ms / 3600000);
   const days = Math.floor(ms / 86400000);
-  if (hours < 24) return { text: `დარჩა ${hours} საათი`, late: false, soon: true };
-  return { text: `დარჩა ${days} დღე`, late: false, soon: days <= 2 };
+  const text = hours < 24 ? `დარჩა ${hours} საათი` : `დარჩა ${days} დღე`;
+  return { text, late: false, soon: days < CALM_DAYS };
 }
 
 /* The deadline itself, spelled out.
