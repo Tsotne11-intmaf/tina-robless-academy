@@ -12,12 +12,19 @@ export function timeLeft(due: number | null | undefined) {
   return { text: `დარჩა ${days} დღე`, late: false, soon: days <= 2 };
 }
 
-/* The deadline itself, for the line under the countdown. */
+/* The deadline itself, spelled out.
+
+   Written by hand rather than through toLocaleDateString: browsers ship little
+   or no Georgian date data, so asking for "ka-GE" quietly returned "October 4"
+   to a student reading a Georgian page. */
+const MONTHS = [
+  "იანვრის", "თებერვლის", "მარტის", "აპრილის", "მაისის", "ივნისის",
+  "ივლისის", "აგვისტოს", "სექტემბრის", "ოქტომბრის", "ნოემბრის", "დეკემბრის",
+];
+
 export function dueDate(due: number) {
-  return new Date(due).toLocaleDateString("ka-GE", {
-    day: "numeric",
-    month: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const d = new Date(due);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}, ${hh}:${mm}`;
 }
