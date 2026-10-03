@@ -54,6 +54,10 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
      exactly what it was reported as. */
   const [pct, setPct] = useState<number | null>(null);
   const [only, setOnly] = useState<"all" | "live" | "hidden">("all");
+  /* The address a new course lives at. Held in state so it can be cleaned as it
+     is typed: the server only accepts latin letters, digits and hyphens, and a
+     title typed in Georgian was refused after the form had been filled in. */
+  const [slug, setSlug] = useState("");
 
   async function save(body: Record<string, unknown>) {
     setBusy(true);
@@ -83,6 +87,7 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
     setAdding(false);
     setPhoto(null);
     setVideo(null);
+    setSlug("");
     router.refresh();
   }
 
@@ -117,7 +122,27 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
         {isNew ? (
           <div className="field">
             <label>მისამართი (ლათინურად, მაგ. french-pro)</label>
-            <input name="id" placeholder="french-pro" required />
+            <input
+              name="id"
+              placeholder="french-pro"
+              required
+              value={slug}
+              onChange={(e) =>
+                setSlug(
+                  e.target.value
+                    .toLowerCase()
+                    .replace(/\s+/g, "-")
+                    .replace(/[^a-z0-9-]/g, "")
+                    .replace(/-+/g, "-")
+                    .slice(0, 40)
+                )
+              }
+            />
+            <p className="hint" style={{ textAlign: "left", marginTop: 4 }}>
+              {slug
+                ? `კურსის მისამართი: tinarobless.com/kurs/${slug}`
+                : "ქართული ასოები აქ არ მუშაობს — დაწერე ლათინურად, მაგ. french-pro"}
+            </p>
           </div>
         ) : null}
 
@@ -269,6 +294,15 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
           </div>
         </div>
 
+        {/* Said here as well as at the top of the tab. The form is taller than the
+            screen, so a refusal printed above it was never seen and the button
+            looked broken. */}
+        {msg && msg.kind === "bad" ? (
+          <p className="auth-msg bad" style={{ marginBottom: 12 }}>
+            {msg.text}
+          </p>
+        ) : null}
+
         <div className="stu-give-btns">
           <button className="btn btn-plum" type="submit" disabled={busy}>
             {isNew ? "დამატება" : "შენახვა"}
@@ -360,9 +394,15 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
                 </span>
                 <span>
                   {c.featured ? "★ მთავარ გვერდზე" : "მთავარზე არ ჩანს"}
-                  {c.video ? " · ვიდეო მიბმულია" : ""}
                   {c.inCode ? "" : " · დამატებულია პანელიდან"}
                 </span>
+                {/* The sales page shows a buyer the locked poster, so this is
+                    where the upload itself can be checked. */}
+                {c.video ? (
+                  <a className="crs-vid" href={c.video} target="_blank" rel="noopener">
+                    ▶ ვიდეოს შემოწმება
+                  </a>
+                ) : null}
                 {/* Said outright rather than left to be inferred from a button. */}
                 <span className={"crs-state " + (c.hidden ? "off" : "on")}>
                   {c.hidden ? "დამალულია — საიტზე არ ჩანს" : "საიტზე ჩანს"}

@@ -1942,3 +1942,10 @@ select.tr-select{
 /* When a task is due, beside the task itself. */
 .due-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 12px}
 .due-when{font-size:.82rem;color:var(--ink-soft)}
+
+/* Checking an uploaded course video, from the list it was uploaded in. */
+.crs-vid{
+  display:inline-block;margin-top:4px;font-size:.84rem;font-weight:600;
+  color:var(--plum);border-bottom:1px solid var(--blush);
+}
+.crs-vid:hover{border-bottom-color:var(--plum)}

@@ -54,8 +54,10 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
   const owned = !!student?.owned.includes(id);
 
   const supabase = await createClient();
-  // Tina browses the site signed in, so moderating is done where the comment is.
-  const { data: isAdmin } = student ? await supabase.rpc("is_admin") : { data: false };
+  /* Tina browses the site signed in, so moderating is done where the comment is.
+     Read from the session rather than asked again - getStudent has already been
+     told, and asking twice is a second round trip on every view. */
+  const isAdmin = student?.isAdmin === true;
   const { data: reviewRows } = await supabase
     .from("course_reviews")
     .select("id,profile_id,author_name,body,photo_url,verified,created_at")
@@ -72,8 +74,11 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
 
      Whether a video exists is not a secret, though - it is a reason to buy. The
      poster says so and stays locked; only the address is withheld. */
-  const canWatch = owned || isAdmin === true;
-  const player = canWatch ? playerFor(c.video) : null;
+  /* Owning the course is the only thing that opens it, Tina included. The sales
+     page is what a buyer is shown, so she has to be able to see what that is;
+     checking her own upload belongs in the admin panel, where the course list
+     now links to it. */
+  const player = owned ? playerFor(c.video) : null;
   const hasVideo = playerFor(c.video) !== null;
 
   return (
@@ -159,7 +164,7 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
 
             <h2 style={{ fontSize: "1.7rem", margin: "40px 0 14px" }}>{t("კომენტარები")}</h2>
             {said.length ? (
-              <ReviewList reviews={said} viewerId={student?.userId ?? null} canModerate={isAdmin === true} />
+              <ReviewList reviews={said} viewerId={student?.userId ?? null} canModerate={isAdmin} />
             ) : (
               <p className="lead">{t("კომენტარები ჯერ არ არის.")}</p>
             )}
