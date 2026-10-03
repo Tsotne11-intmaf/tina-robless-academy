@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { playerFor } from "@/lib/video";
 import CourseReview, { type Review } from "@/components/CourseReview";
 import ReviewList from "@/components/ReviewList";
+import CourseMedia from "@/components/CourseMedia";
 import { Badge, Price } from "@/components/CourseCard";
 import BuyButton from "@/components/BuyButton";
 import { getT } from "@/lib/i18n";
@@ -96,46 +97,19 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
               {t(c.desc)}
             </p>
 
-            {player ? (
-              <div className="video" style={{ marginBottom: 34 }}>
-                {player.kind === "iframe" ? (
-                  <iframe
-                    src={player.src}
-                    title={c.title}
-                    loading="lazy"
-                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
-                    allowFullScreen
-                  />
-                ) : (
-                  <video
-                    src={player.src}
-                    poster={c.photo ?? undefined}
-                    controls
-                    controlsList="nodownload"
-                    playsInline
-                    preload="metadata"
-                  />
-                )}
-              </div>
-            ) : (
-              <div
-                className={"thumb " + (c.photo ? "" : c.img || "")}
-                style={{
-                  aspectRatio: "16/9",
-                  borderRadius: "var(--r-card)",
-                  marginBottom: 34,
-                  ...(c.photo ? { background: `url(${c.photo}) center/cover` } : {}),
-                }}
-              >
-                {hasVideo ? (
-                  <div className="locked">
-                    <span className="locked-play">▶</span>
-                    <b>{t("ამ კურსს ვიდეო აქვს")}</b>
-                    <span className="locked-note">🔒 {t("ნახვა კურსის შეძენის შემდეგ")}</span>
-                  </div>
-                ) : null}
-              </div>
-            )}
+            <CourseMedia
+              photo={c.photo ?? null}
+              img={c.img ?? null}
+              locked={hasVideo && !owned}
+              lockedTitle={t("ამ კურსს ვიდეო აქვს")}
+              lockedNote={t("ნახვა კურსის შეძენის შემდეგ")}
+              player={player}
+              title={c.title}
+              shots={samples.map((r) => ({
+                url: r.photo_url!,
+                name: r.author_name || "სტუდენტი",
+              }))}
+            />
 
             {c.learn?.length ? (
               <>
@@ -154,8 +128,15 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
             {samples.length ? (
               <div className="rev-gallery">
                 {samples.map((r) => (
-                  /* plain img: the file is on UploadThing's CDN, outside next/image config */
-                  <img key={r.id} src={r.photo_url!} alt={r.author_name} loading="lazy" />
+                  <figure key={r.id}>
+                    {/* plain img: the file is on UploadThing's CDN, outside next/image config */}
+                    <img src={r.photo_url!} alt={r.author_name} loading="lazy" />
+                    {/* Whose work it is. A wall of pictures said nothing about that. */}
+                    <figcaption>
+                      {r.author_name || "სტუდენტი"}
+                      {r.verified ? <i>✓</i> : null}
+                    </figcaption>
+                  </figure>
                 ))}
               </div>
             ) : (

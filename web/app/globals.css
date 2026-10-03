@@ -1949,3 +1949,47 @@ select.tr-select{
   color:var(--plum);border-bottom:1px solid var(--blush);
 }
 .crs-vid:hover{border-bottom-color:var(--plum)}
+
+/* ===== The course's media panel =====
+   One frame at the top holding the video, with the work students have shown as
+   thumbnails underneath. Picking one puts it in the frame at full size. */
+.media{margin-bottom:34px}
+.media-main .video{margin-bottom:0}
+.media-shot{
+  position:relative;border-radius:var(--r-card);overflow:hidden;background:var(--ink);
+  display:grid;place-items:center;min-height:220px;
+}
+.media-shot img{width:100%;max-height:68vh;object-fit:contain;display:block}
+.media-close{
+  position:absolute;top:10px;right:10px;width:34px;height:34px;border:0;border-radius:50%;
+  background:rgba(27,20,24,.72);color:#fff;font-size:.95rem;cursor:pointer;line-height:1;
+}
+.media-close:hover{background:var(--plum)}
+.media-by{
+  position:absolute;left:10px;bottom:10px;
+  background:rgba(27,20,24,.72);color:#fff;border-radius:var(--r-pill);
+  padding:6px 14px;font-size:.84rem;font-weight:600;
+}
+.media-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.media-thumb{
+  width:70px;height:70px;flex:none;padding:0;cursor:pointer;
+  border:2px solid transparent;border-radius:12px;
+  background-color:var(--blush-soft);background-size:cover;background-position:center;
+  transition:border-color .2s ease,transform .2s ease;
+}
+.media-thumb:hover{transform:translateY(-2px)}
+.media-thumb.on{border-color:var(--plum)}
+.media-thumb.vid{position:relative;display:grid;place-items:center}
+.media-thumb.vid span{
+  display:grid;place-items:center;width:28px;height:28px;border-radius:50%;
+  background:rgba(27,20,24,.6);color:#fff;font-size:.75rem;padding-left:2px;
+}
+@media (max-width:560px){.media-thumb{width:58px;height:58px}}
+
+/* Each sample says whose it is. */
+.rev-gallery figure{margin:0}
+.rev-gallery figcaption{
+  margin-top:6px;font-size:.84rem;color:var(--ink-soft);
+  display:flex;align-items:center;gap:5px;overflow-wrap:anywhere;
+}
+.rev-gallery figcaption i{font-style:normal;color:#1F8A4C;font-weight:700}
