@@ -93,14 +93,20 @@ export const getCatalog = cache(async (): Promise<Course[]> => build(await rowsO
    one-way door. */
 export const getCatalogAll = cache(async (): Promise<Course[]> => build(await rowsOf(), true));
 
-/* The front-page top row. Courses she has marked, or - until she marks any -
-   the six the site launched with, so the row is never empty. */
+/* The front-page top row: what Tina has marked, then the launch courses to fill
+   the rest of it.
+
+   Marking used to replace the row rather than lead it, so ticking one course
+   took the other six off the front page - which is not what "show on the front
+   page" says, and not what was meant by giving it the first position. The row
+   keeps its length; a marked course simply comes first. */
 const LAUNCH_FEATURED = ["master-1", "master-2", "french", "extreme", "crystals", "money"];
+const ROW = 6;
 
 export function featured(list: Course[]): Course[] {
   const chosen = list.filter((c) => c.featured);
-  if (chosen.length) return chosen;
-  return list.filter((c) => LAUNCH_FEATURED.includes(c.id));
+  const rest = list.filter((c) => !c.featured && LAUNCH_FEATURED.includes(c.id));
+  return [...chosen, ...rest].slice(0, Math.max(ROW, chosen.length));
 }
 
 export async function courseById(id: string): Promise<Course | undefined> {

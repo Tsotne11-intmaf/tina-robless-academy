@@ -291,6 +291,10 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
               <input type="checkbox" name="featured" defaultChecked={!!c?.featured} /> მთავარ
               გვერდზე ჩვენება
             </label>
+            <p className="hint" style={{ textAlign: "left", marginTop: 4 }}>
+              მონიშნული კურსები რიგში პირველები დგება; დანარჩენი ადგილები ავტომატურად ივსება.
+              „რიგითობა“ წყობას განსაზღვრავს — პატარა რიცხვი წინ.
+            </p>
           </div>
         </div>
 
