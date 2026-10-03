@@ -1993,3 +1993,4 @@ select.tr-select{
   display:flex;align-items:center;gap:5px;overflow-wrap:anywhere;
 }
 .rev-gallery figcaption i{font-style:normal;color:#1F8A4C;font-weight:700}
+.rev-done .rev-hint{margin-bottom:14px}

@@ -36,6 +36,10 @@ export default function CourseReview({
   const [body, setBody] = useState(mine?.body ?? "");
   const [photo, setPhoto] = useState<string | null>(mine?.photo_url ?? null);
   const [busy, setBusy] = useState(false);
+  /* Closed once something has been written. The form used to stay open with the
+     comment already in it, which reads as "this did not send" - the comment is
+     sitting in the list above at the same time. */
+  const [editing, setEditing] = useState(false);
   const [msg, setMsg] = useState<{ text: string; kind: "ok" | "bad" } | null>(null);
 
   async function save() {
@@ -62,6 +66,7 @@ export default function CourseReview({
       return;
     }
     setMsg({ text: mine ? "შენახულია." : "გმადლობთ! თქვენი კომენტარი გამოქვეყნდა.", kind: "ok" });
+    setEditing(false);
     router.refresh();
   }
 
@@ -81,9 +86,29 @@ export default function CourseReview({
     router.refresh();
   }
 
+  /* Already written and not being changed: say so and offer the two things that
+     can be done about it. The comment itself is in the list above. */
+  if (mine && !editing) {
+    return (
+      <div className="rev-form rev-done">
+        <h3>თქვენი კომენტარი გამოქვეყნებულია</h3>
+        <p className="rev-hint">ზემოთ, სხვების კომენტარებს შორის ჩანს.</p>
+        {msg ? <p className={"auth-msg " + msg.kind}>{msg.text}</p> : null}
+        <div className="rev-acts">
+          <button className="btn btn-plum" type="button" onClick={() => setEditing(true)}>
+            შეცვლა
+          </button>
+          <button className="btn btn-ghost" type="button" onClick={remove} disabled={busy}>
+            წაშლა
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rev-form">
-      <h3>{mine ? "თქვენი კომენტარი" : "დატოვეთ კომენტარი"}</h3>
+      <h3>{mine ? "კომენტარის შეცვლა" : "დატოვეთ კომენტარი"}</h3>
       <p className="rev-hint">
         დაწერეთ, როგორ წაგადგათ კურსი, და მიამაგრეთ ნამუშევარი — სხვა სტუდენტები ამას ხედავენ.
       </p>
@@ -139,8 +164,18 @@ export default function CourseReview({
           {mine ? "შენახვა" : "გამოქვეყნება"}
         </button>
         {mine ? (
-          <button className="btn btn-ghost" type="button" onClick={remove} disabled={busy}>
-            კომენტარის წაშლა
+          <button
+            className="btn btn-ghost"
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              setBody(mine.body ?? "");
+              setPhoto(mine.photo_url ?? null);
+              setMsg(null);
+              setEditing(false);
+            }}
+          >
+            გაუქმება
           </button>
         ) : null}
       </div>
