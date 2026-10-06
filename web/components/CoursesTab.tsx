@@ -13,6 +13,7 @@ export type AdminCourse = {
   price: string;
   was?: string;
   pricePlus?: string | null;
+  parts?: number | null;
   desc: string;
   photo?: string | null;
   img?: string | null;
@@ -97,6 +98,18 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
      offered for courses added from the panel - the built-in ones cannot go,
      which the route says too rather than relying on this button not to ask. */
   async function destroy(c: AdminCourse) {
+    /* A course from the site's own set cannot leave the code, so for those this
+       is what deleting means: off the site, findable under "hidden". */
+    if (c.inCode) {
+      if (!confirm(`„${c.title}“ მოიხსნება საიტიდან.
+
+კოდში არსებული კურსი სრულად ვერ წაიშლება — დარჩება „დამალული“ ფილტრში და ნებისმიერ დროს დააბრუნებ.
+
+გავაგრძელოთ?`))
+        return;
+      await save({ id: c.id, hidden: true });
+      return;
+    }
     if (
       !confirm(
         `სამუდამოდ წაიშალოს „${c.title}“?
@@ -139,6 +152,7 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
             price: String(f.get("price")),
             was: String(f.get("was") || ""),
             price_plus: String(f.get("price_plus") || ""),
+            parts: f.get("parts") ? Number(f.get("parts")) : 1,
             descr: String(f.get("descr")),
             video: String(f.get("video") || ""),
             badge: String(f.get("badge") || ""),
@@ -242,6 +256,20 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
               ))}
             </select>
           </div>
+        </div>
+
+        <div className="field">
+          <label>რამდენ ნაწილად იყოფა ვიდეო</label>
+          <input
+            name="parts"
+            type="number"
+            min={1}
+            max={60}
+            defaultValue={c?.parts ?? 1}
+          />
+          <p className="hint" style={{ textAlign: "left", marginTop: 4 }}>
+            ამდენი ასატვირთი ველი გამოჩნდება „ვიდეოების“ ჩანართში. 10 რვაწუთიანი ნაწილი = 10.
+          </p>
         </div>
 
         <div className="field">
@@ -373,14 +401,17 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
           </button>
         </div>
 
-        {/* Deleting is kept apart from saving, and only where it can work: a
-            built-in course would come straight back from the code. */}
-        {!isNew && !c!.inCode ? (
+        {/* Deleting is kept apart from saving. What it can do depends on where
+            the course came from: one added from the panel goes entirely, while
+            one of the site's own is taken off the site for good, since its text
+            lives in the code and the row would only come back. */}
+        {!isNew ? (
           <div className="crs-danger">
-            <b>კურსის სამუდამოდ წაშლა</b>
+            <b>კურსის წაშლა</b>
             <p>
-              კურსი, მისი კომენტარები და ვიდეოები წაიშლება. დაბრუნება შეუძლებელია. თუ მხოლოდ
-              საიტიდან მოხსნა გინდა, გამოიყენე „დამალვა“.
+              {c!.inCode
+                ? "ეს კურსი საიტის საწყის ნაკრებშია — მისი ტექსტი კოდშია, ამიტომ სრულად ვერ წაიშლება. წაშლა მას სამუდამოდ მოხსნის საიტიდან; „დამალული“ ფილტრში დარჩება და ნებისმიერ დროს დააბრუნებ."
+                : "კურსი, მისი კომენტარები და ვიდეოები წაიშლება. დაბრუნება შეუძლებელია."}
             </p>
             <button
               className="btn btn-danger"
@@ -391,11 +422,6 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
               წაშლა
             </button>
           </div>
-        ) : null}
-        {!isNew && c!.inCode ? (
-          <p className="hint" style={{ textAlign: "left", marginTop: 16 }}>
-            ეს კურსი საიტის საწყის ნაკრებშია — წაშლა არ შეიძლება. „დამალვა“ საიტიდან მოხსნის.
-          </p>
         ) : null}
       </form>
     );

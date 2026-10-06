@@ -12,6 +12,7 @@ type Body = {
   dur?: string;
   price?: string;
   price_plus?: string;
+  parts?: number | null;
   was?: string;
   descr?: string;
   photo?: string;
@@ -93,6 +94,13 @@ export async function POST(request: Request) {
   if (has("featured")) row.featured = b.featured ?? null;
   if (has("hidden")) row.hidden = b.hidden === true;
   if (has("sort")) row.sort = typeof b.sort === "number" ? b.sort : null;
+  /* One part unless more are asked for, and never more than a course could
+     plausibly have - the field is a number box, and a slip there would draw a
+     thousand upload rows. */
+  if (has("parts")) {
+    const n = typeof b.parts === "number" ? Math.round(b.parts) : 1;
+    row.parts = Math.min(Math.max(n, 1), 60);
+  }
 
   const { error } = await supabase.from("courses").upsert(row, { onConflict: "id" });
 

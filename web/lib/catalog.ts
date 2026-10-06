@@ -6,6 +6,8 @@ export type CourseItem = {
   /* What it costs with Tina marking the homework. Unset means "base price plus
      the standard step", worked out in lib/price. */
   pricePlus?: string | null;
+  /* How many video parts the course is split into. Unset means one. */
+  parts?: number | null;
   desc: string; img?: string; photo?: string | null; was?: string;
   badge?: string | null; home?: boolean; order?: number;
   learn?: string[]; incl?: string[]; thumb?: string;

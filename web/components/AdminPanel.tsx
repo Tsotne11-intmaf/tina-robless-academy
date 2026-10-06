@@ -765,7 +765,7 @@ export default function AdminPanel({
     
       {tab === "courses" ? <CoursesTab courses={catalog} /> : null}
 
-      {tab === "videos" ? <VideosTab /> : null}
+      {tab === "videos" ? <VideosTab courses={catalog} /> : null}
 
       {tab === "mail" ? (
         <>
