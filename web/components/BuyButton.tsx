@@ -59,14 +59,19 @@ export default function BuyButton({
           <>
             <b>აირჩიეთ ვარიანტი</b>
             <div className="plans">
+              {/* Name and price on one line. The sidebar this sits in is narrow,
+                  so each plan is a row rather than a column - two columns were
+                  being asked to fit a 320px rail and ran past its edge. */}
               <button
                 type="button"
                 className={"plan" + (plan === "solo" ? " on" : "")}
                 aria-pressed={plan === "solo"}
                 onClick={() => setPlan("solo")}
               >
-                <span className="plan-name">დამოუკიდებლად</span>
-                <span className="plan-price">{price}</span>
+                <span className="plan-top">
+                  <span className="plan-name">დამოუკიდებლად</span>
+                  <span className="plan-price">{price}</span>
+                </span>
                 <span className="plan-note">
                   ყველა გაკვეთილი და მასალა. დავალებებს თვითონ აკეთებთ.
                 </span>
@@ -77,11 +82,12 @@ export default function BuyButton({
                 aria-pressed={plan === "coached"}
                 onClick={() => setPlan("coached")}
               >
-                <span className="plan-name">თინას გასწორებით</span>
-                <span className="plan-price">{pricePlus}</span>
+                <span className="plan-top">
+                  <span className="plan-name">თინას გასწორებით</span>
+                  <span className="plan-price">{pricePlus}</span>
+                </span>
                 <span className="plan-note">
-                  იგივე, პლუს თინა ამოწმებს თქვენს ნამუშევრებს და წერილობით გიბრუნებთ
-                  შენიშვნებს.
+                  იგივე, პლუს თინა ამოწმებს ნამუშევრებს და წერილობით გიბრუნებთ შენიშვნებს.
                 </span>
               </button>
             </div>
