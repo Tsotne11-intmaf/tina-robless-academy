@@ -63,13 +63,22 @@ export default function HomeworkPanel({
       setMsg({ text: "ავტორიზაცია საჭიროა", kind: "bad" });
       return;
     }
-    const { error } = await supabase.from("submissions").insert({
-      profile_id: user.id,
-      course_id: task.course,
-      task_id: task.id,
+    /* Work sent back is replaced, not sent a second time: the row already
+       exists, and a trigger puts it back in the queue and clears the old mark.
+       A first attempt is still an insert. */
+    const existing = byTask.get(task.id);
+    const work = {
       note: String(f.get("note") || "").trim() || null,
       photo_url: photo,
-    });
+    };
+    const { error } = existing
+      ? await supabase.from("submissions").update(work).eq("id", existing.id)
+      : await supabase.from("submissions").insert({
+          profile_id: user.id,
+          course_id: task.course,
+          task_id: task.id,
+          ...work,
+        });
     setBusy(false);
     if (error) {
       setMsg({ text: "ვერ გაიგზავნა: " + error.message, kind: "bad" });
@@ -119,7 +128,7 @@ export default function HomeworkPanel({
               : null}
             <p className="lead" style={{ marginBottom: 10 }}>{t.task}</p>
 
-            {sub ? (
+            {sub && !(sub.status === "redo" && open) ? (
               <>
                 {/* The whole verdict in one block: the state, the mark, and the
                     reason for it. The mark's colour says how it went before the
@@ -149,12 +158,28 @@ export default function HomeworkPanel({
                     style={{ maxWidth: 220, borderRadius: 12, marginTop: 10 }}
                   />
                 ) : null}
+                {/* Sent back means there is something to do about it. The page
+                    used to show the verdict and nothing else, so work returned
+                    for redoing could never be handed in again. */}
+                {sub.status === "redo" ? (
+                  <button
+                    className="btn btn-plum"
+                    style={{ marginTop: 14 }}
+                    onClick={() => {
+                      setOpenId(t.id);
+                      setPhoto(sub.photo_url ?? null);
+                      setMsg(null);
+                    }}
+                  >
+                    ხელახლა ჩაბარება
+                  </button>
+                ) : null}
               </>
             ) : open ? (
               <form onSubmit={(e) => submit(e, t)}>
                 <div className="field">
                   <label>კომენტარი (სურვილისამებრ)</label>
-                  <textarea name="note" rows={3} />
+                  <textarea name="note" rows={3} defaultValue={sub?.note ?? ""} />
                 </div>
                 <UploadButton
                   endpoint="homework"
@@ -175,7 +200,7 @@ export default function HomeworkPanel({
                 ) : null}
                 <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
                   <button className="btn btn-plum" type="submit" disabled={busy}>
-                    გაგზავნა
+                    {sub ? "ხელახლა გაგზავნა" : "გაგზავნა"}
                   </button>
                   <button
                     className="btn btn-ghost"

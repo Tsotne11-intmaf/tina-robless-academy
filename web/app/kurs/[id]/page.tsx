@@ -150,10 +150,11 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
               <p className="lead">{t("კომენტარები ჯერ არ არის.")}</p>
             )}
 
-            {/* Everyone with an account may leave a comment, on any course. A
-                visitor is asked to sign in rather than shown a form that would
-                refuse them. */}
-            {student ? (
+            {/* Only someone holding the course may write about it. An opinion
+                from a reader who has not taken it is worth less than none, and
+                the row policy refuses the write in any case - this is what the
+                page says rather than what it enforces. */}
+            {owned && student ? (
               <CourseReview
                 courseId={c.id}
                 authorName={student.name || student.email.split("@")[0]}
@@ -162,10 +163,12 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
             ) : (
               <div className="rev-form rev-signin">
                 <h3>{t("დატოვეთ კომენტარი")}</h3>
-                <p className="rev-hint">{t("კომენტარის დასაწერად საჭიროა ანგარიში.")}</p>
-                <Link className="btn btn-plum" href={`/login?next=/kurs/${c.id}`}>
-                  {t("შესვლა")}
-                </Link>
+                <p className="rev-hint">{t("კომენტარს წერენ ისინი, ვისაც ეს კურსი გავლილი აქვს.")}</p>
+                {!student ? (
+                  <Link className="btn btn-plum" href={`/login?next=/kurs/${c.id}`}>
+                    {t("შესვლა")}
+                  </Link>
+                ) : null}
               </div>
             )}
           </div>
