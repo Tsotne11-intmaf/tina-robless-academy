@@ -111,3 +111,59 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ ok: true, id, created: creating });
 }
+
+/* Removing a course for good.
+ *
+ * Only one that was added from the panel can actually go: the thirteen the site
+ * launched with live in the code, so deleting their row would delete the changes
+ * made to them and bring the original straight back - which looks like the
+ * delete silently failed. Those are hidden instead.
+ *
+ * A course somebody has paid for is refused outright. The row would go and the
+ * enrolment would remain, pointing at nothing, and a student who had paid would
+ * open their cabinet to a course that no longer exists. */
+export async function DELETE(request: Request) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "ავტორიზაცია საჭიროა" }, { status: 401 });
+
+  const { data: isAdmin } = await supabase.rpc("is_admin");
+  if (isAdmin !== true) return NextResponse.json({ error: "წვდომა აკრძალულია" }, { status: 403 });
+
+  const id = String(new URL(request.url).searchParams.get("id") ?? "").trim().toLowerCase();
+  if (!ID.test(id)) return NextResponse.json({ error: "bad id" }, { status: 400 });
+
+  if (CATALOG.some((c) => c.id === id)) {
+    return NextResponse.json(
+      { error: "ეს კურსი საიტის საწყის ნაკრებშია და ვერ წაიშლება. დამალე — საიტზე აღარ გამოჩნდება." },
+      { status: 400 }
+    );
+  }
+
+  const { count } = await supabase
+    .from("enrollments")
+    .select("course_id", { count: "exact", head: true })
+    .eq("course_id", id);
+  if (count && count > 0) {
+    return NextResponse.json(
+      {
+        error: `ამ კურსზე ${count} სტუდენტს აქვს წვდომა. ჯერ წაართვი წვდომა, ან დამალე კურსი.`,
+      },
+      { status: 400 }
+    );
+  }
+
+  // What belonged to the course goes with it, so nothing is left pointing at it.
+  await supabase.from("course_reviews").delete().eq("course_id", id);
+  await supabase.from("lesson_videos").delete().eq("course_id", id);
+
+  const { error } = await supabase.from("courses").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateTag("catalog", "max");
+  revalidatePath("/", "layout");
+  return NextResponse.json({ ok: true, id });
+}

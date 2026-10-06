@@ -91,6 +91,36 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
     router.refresh();
   }
 
+  /* Removing a course for good, as opposed to taking it off the site. Only
+     offered for courses added from the panel - the built-in ones cannot go,
+     which the route says too rather than relying on this button not to ask. */
+  async function destroy(c: AdminCourse) {
+    if (
+      !confirm(
+        `სამუდამოდ წაიშალოს „${c.title}“?
+
+კურსი, მისი კომენტარები და ვიდეოები წაიშლება. დაბრუნება შეუძლებელია.
+
+თუ მხოლოდ საიტიდან მოხსნა გინდა, გამოიყენე „დამალვა“.`
+      )
+    )
+      return;
+    setBusy(true);
+    setMsg({ text: "იშლება…" });
+    const r = await fetch(`/api/admin/course?id=${encodeURIComponent(c.id)}`, {
+      method: "DELETE",
+    });
+    const out = await r.json().catch(() => ({}));
+    setBusy(false);
+    if (!r.ok) {
+      setMsg({ text: out.error ?? "ვერ წაიშალა", kind: "bad" });
+      return;
+    }
+    setMsg({ text: "კურსი წაიშალა.", kind: "ok" });
+    setEditing(null);
+    router.refresh();
+  }
+
   function form(c: AdminCourse | null) {
     const isNew = c === null;
     return (
@@ -324,6 +354,31 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
             გაუქმება
           </button>
         </div>
+
+        {/* Deleting is kept apart from saving, and only where it can work: a
+            built-in course would come straight back from the code. */}
+        {!isNew && !c!.inCode ? (
+          <div className="crs-danger">
+            <b>კურსის სამუდამოდ წაშლა</b>
+            <p>
+              კურსი, მისი კომენტარები და ვიდეოები წაიშლება. დაბრუნება შეუძლებელია. თუ მხოლოდ
+              საიტიდან მოხსნა გინდა, გამოიყენე „დამალვა“.
+            </p>
+            <button
+              className="btn btn-danger"
+              type="button"
+              disabled={busy}
+              onClick={() => destroy(c!)}
+            >
+              წაშლა
+            </button>
+          </div>
+        ) : null}
+        {!isNew && c!.inCode ? (
+          <p className="hint" style={{ textAlign: "left", marginTop: 16 }}>
+            ეს კურსი საიტის საწყის ნაკრებშია — წაშლა არ შეიძლება. „დამალვა“ საიტიდან მოხსნის.
+          </p>
+        ) : null}
       </form>
     );
   }
