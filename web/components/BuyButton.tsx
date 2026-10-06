@@ -16,11 +16,23 @@ const REACH = [
   { label: "TikTok", href: "https://www.tiktok.com/@tinarobless" },
 ];
 
-export default function BuyButton({ courseId }: { courseId: string }) {
+/* The course is sold two ways. The site shows the cheaper one everywhere, so the
+   choice belongs here, at the moment it is being made, rather than as a second
+   price on every card. */
+export default function BuyButton({
+  courseId,
+  price,
+  pricePlus,
+}: {
+  courseId: string;
+  price: string;
+  pricePlus: string | null;
+}) {
   const supabase = createClient();
   const router = useRouter();
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [asking, setAsking] = useState(false);
+  const [plan, setPlan] = useState<"solo" | "coached">("solo");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setSignedIn(!!data.user));
@@ -43,9 +55,44 @@ export default function BuyButton({ courseId }: { courseId: string }) {
   if (asking) {
     return (
       <div className="buy-reach">
-        <b>გადახდა ჯერ ეწყობა</b>
+        {pricePlus ? (
+          <>
+            <b>აირჩიეთ ვარიანტი</b>
+            <div className="plans">
+              <button
+                type="button"
+                className={"plan" + (plan === "solo" ? " on" : "")}
+                aria-pressed={plan === "solo"}
+                onClick={() => setPlan("solo")}
+              >
+                <span className="plan-name">დამოუკიდებლად</span>
+                <span className="plan-price">{price}</span>
+                <span className="plan-note">
+                  ყველა გაკვეთილი და მასალა. დავალებებს თვითონ აკეთებთ.
+                </span>
+              </button>
+              <button
+                type="button"
+                className={"plan" + (plan === "coached" ? " on" : "")}
+                aria-pressed={plan === "coached"}
+                onClick={() => setPlan("coached")}
+              >
+                <span className="plan-name">თინას გასწორებით</span>
+                <span className="plan-price">{pricePlus}</span>
+                <span className="plan-note">
+                  იგივე, პლუს თინა ამოწმებს თქვენს ნამუშევრებს და წერილობით გიბრუნებთ
+                  შენიშვნებს.
+                </span>
+              </button>
+            </div>
+          </>
+        ) : (
+          <b>გადახდა ჯერ ეწყობა</b>
+        )}
         <p>
-          ამ კურსის შესაძენად მოგვწერეთ — გიპასუხებთ და წვდომას გაგიხსნით.
+          {pricePlus
+            ? "ბარათით გადახდა ჯერ ეწყობა — მოგვწერეთ არჩეული ვარიანტი და წვდომას გაგიხსნით."
+            : "ამ კურსის შესაძენად მოგვწერეთ — გიპასუხებთ და წვდომას გაგიხსნით."}
         </p>
         <div className="buy-reach-links">
           {REACH.map((r) => (

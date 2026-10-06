@@ -3,6 +3,9 @@
 
 export type CourseItem = {
   id: string; cat: string; title: string; dur: string; price: string;
+  /* What it costs with Tina marking the homework. Unset means "base price plus
+     the standard step", worked out in lib/price. */
+  pricePlus?: string | null;
   desc: string; img?: string; photo?: string | null; was?: string;
   badge?: string | null; home?: boolean; order?: number;
   learn?: string[]; incl?: string[]; thumb?: string;

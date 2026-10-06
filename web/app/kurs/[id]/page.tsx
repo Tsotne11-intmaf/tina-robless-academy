@@ -9,6 +9,7 @@ import { playerFor } from "@/lib/video";
 import CourseReview, { type Review } from "@/components/CourseReview";
 import ReviewList from "@/components/ReviewList";
 import CourseMedia from "@/components/CourseMedia";
+import { coachPrice } from "@/lib/price";
 import { Badge, Price } from "@/components/CourseCard";
 import BuyButton from "@/components/BuyButton";
 import { getT } from "@/lib/i18n";
@@ -199,7 +200,11 @@ export default async function KursPage({ params }: { params: Promise<{ id: strin
               </>
             ) : (
               <>
-                <BuyButton courseId={c.id} />
+                <BuyButton
+                  courseId={c.id}
+                  price={c.price}
+                  pricePlus={coachPrice(c.price, c.pricePlus)}
+                />
                 <Link
                   className="btn btn-ghost"
                   style={{ justifyContent: "center", width: "100%", marginTop: 10 }}

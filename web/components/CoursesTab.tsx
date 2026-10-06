@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UploadButton } from "@/lib/uploadthing";
+import { coachPrice, COACH_STEP } from "@/lib/price";
 
 export type AdminCourse = {
   id: string;
@@ -11,6 +12,7 @@ export type AdminCourse = {
   dur: string;
   price: string;
   was?: string;
+  pricePlus?: string | null;
   desc: string;
   photo?: string | null;
   img?: string | null;
@@ -136,6 +138,7 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
             dur: String(f.get("dur")),
             price: String(f.get("price")),
             was: String(f.get("was") || ""),
+            price_plus: String(f.get("price_plus") || ""),
             descr: String(f.get("descr")),
             video: String(f.get("video") || ""),
             badge: String(f.get("badge") || ""),
@@ -206,6 +209,21 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
           <div className="field">
             <label>ძველი ფასი (ფასდაკლებისთვის)</label>
             <input name="was" defaultValue={c?.was ?? ""} placeholder="750 ₾" />
+          </div>
+        </div>
+
+        <div className="adm-2">
+          <div className="field">
+            <label>ფასი თინას გასწორებით</label>
+            <input
+              name="price_plus"
+              defaultValue={c?.pricePlus ?? ""}
+              placeholder={c ? coachPrice(c.price, null) ?? "" : "+50 ₾"}
+            />
+            <p className="hint" style={{ textAlign: "left", marginTop: 4 }}>
+              ცარიელი = ძირითადი ფასი +{COACH_STEP} ₾. საიტზე ყოველთვის ძირითადი, დაბალი ფასი ჩანს;
+              ორივე ყიდვის მომენტში გამოჩნდება.
+            </p>
           </div>
         </div>
 

@@ -11,6 +11,7 @@ type Row = {
   title: string | null;
   dur: string | null;
   price: string | null;
+  price_plus: string | null;
   was: string | null;
   descr: string | null;
   photo: string | null;
@@ -122,6 +123,7 @@ function merge(base: Course, r: Row): Course {
     title: pick(r.title, base.title),
     dur: pick(r.dur, base.dur),
     price: pick(r.price, base.price),
+    pricePlus: pick(r.price_plus, base.pricePlus ?? null),
     was: pick(r.was, base.was),
     desc: pick(r.descr, base.desc),
     photo: pick(r.photo, base.photo ?? null),

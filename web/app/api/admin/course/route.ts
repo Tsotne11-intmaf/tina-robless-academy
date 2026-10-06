@@ -11,6 +11,7 @@ type Body = {
   title?: string;
   dur?: string;
   price?: string;
+  price_plus?: string;
   was?: string;
   descr?: string;
   photo?: string;
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
     updated_at: new Date().toISOString(),
     updated_by: user.id,
   };
-  const TEXT = ["cat", "title", "dur", "price", "was", "descr", "photo", "video", "badge"] as const;
+  const TEXT = ["cat", "title", "dur", "price", "price_plus", "was", "descr", "photo", "video", "badge"] as const;
   for (const k of TEXT) if (has(k)) row[k] = text(b[k]);
   if (has("featured")) row.featured = b.featured ?? null;
   if (has("hidden")) row.hidden = b.hidden === true;
