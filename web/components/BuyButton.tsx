@@ -73,7 +73,7 @@ export default function BuyButton({
                   <span className="plan-price">{price}</span>
                 </span>
                 <span className="plan-note">
-                  ყველა გაკვეთილი და მასალა. დავალებებს თვითონ აკეთებთ.
+                  ყველა გაკვეთილი და მასალა. დავალებები არ არის — თვითონ ვარჯიშობთ.
                 </span>
               </button>
               <button
@@ -87,7 +87,8 @@ export default function BuyButton({
                   <span className="plan-price">{pricePlus}</span>
                 </span>
                 <span className="plan-note">
-                  იგივე, პლუს თინა ამოწმებს ნამუშევრებს და წერილობით გიბრუნებთ შენიშვნებს.
+                  იგივე, პლუს დავალებები: თინა ამოწმებს თქვენს ნამუშევრებს და წერილობით
+                  გიბრუნებთ შენიშვნებს.
                 </span>
               </button>
             </div>
