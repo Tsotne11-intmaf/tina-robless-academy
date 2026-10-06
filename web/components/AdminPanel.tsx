@@ -80,6 +80,11 @@ export default function AdminPanel({
   /* Which pile of homework is on screen. It opens on the one that needs Tina:
      work that has been handed in and not yet looked at. */
   const [hwPile, setHwPile] = useState<"sent" | "redo" | "done">("sent");
+  /* Writing a letter: who it goes to, and what it says. */
+  const [audience, setAudience] = useState<"all" | "course" | "subscribers">("all");
+  const [mailCourse, setMailCourse] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
 
   const nameOf = (id: string) => {
     const p = profiles.find((x) => x.id === id);
@@ -312,6 +317,46 @@ export default function AdminPanel({
       kind: "ok",
     });
     router.refresh();
+  }
+
+  /* How many people the chosen audience actually is, counted here so the button
+     can say it before it is pressed. */
+  const ownersOf = (courseId: string) =>
+    new Set(enrollments.filter((e) => e.course_id === courseId).map((e) => e.profile_id)).size;
+  const reach =
+    audience === "all"
+      ? profiles.length
+      : audience === "subscribers"
+        ? subscriberCount
+        : mailCourse
+          ? ownersOf(mailCourse)
+          : 0;
+
+  async function sendMessage() {
+    if (!subject.trim() || !message.trim()) {
+      setMsg({ text: "სათაური და ტექსტი შეავსეთ.", kind: "bad" });
+      return;
+    }
+    if (!confirm(`წერილი გაეგზავნება ${reach} ადამიანს. გავაგზავნოთ?`)) return;
+    setBusy(true);
+    setMsg({ text: "იგზავნება…" });
+    const r = await fetch("/api/admin/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ audience, courseId: mailCourse, subject, message }),
+    });
+    const body = await r.json().catch(() => ({}));
+    setBusy(false);
+    if (!r.ok) {
+      setMsg({ text: "ვერ გაიგზავნა: " + (body.error ?? r.status), kind: "bad" });
+      return;
+    }
+    setMsg({
+      text: body.sent ? `გაიგზავნა ${body.sent} მისამართზე.` : (body.note ?? "მიმღები არ იყო."),
+      kind: "ok",
+    });
+    setSubject("");
+    setMessage("");
   }
 
   return (
@@ -724,6 +769,99 @@ export default function AdminPanel({
 
       {tab === "mail" ? (
         <>
+          <div className="adm-form">
+            <h2>წერილის გაგზავნა</h2>
+            <p className="lead" style={{ margin: "0 0 14px" }}>
+              დაწერეთ რისი თქმაც გინდათ და აირჩიეთ ვის მიუვიდეს.
+            </p>
+
+            <div className="field">
+              <label>ვის</label>
+              <div className="filters" style={{ marginBottom: 0 }}>
+                <a
+                  className="chip"
+                  aria-pressed={audience === "all"}
+                  onClick={() => setAudience("all")}
+                >
+                  ყველა ({profiles.length})
+                </a>
+                <a
+                  className="chip"
+                  aria-pressed={audience === "course"}
+                  onClick={() => setAudience("course")}
+                >
+                  კონკრეტული კურსის მფლობელები
+                </a>
+                <a
+                  className="chip"
+                  aria-pressed={audience === "subscribers"}
+                  onClick={() => setAudience("subscribers")}
+                >
+                  სიახლეების გამომწერები ({subscriberCount})
+                </a>
+              </div>
+            </div>
+
+            {audience === "course" ? (
+              <div className="field">
+                <label htmlFor="msg-course">რომელი კურსი</label>
+                <select
+                  id="msg-course"
+                  value={mailCourse}
+                  onChange={(e) => setMailCourse(e.target.value)}
+                >
+                  <option value="">— აირჩიეთ —</option>
+                  {courses.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.title} ({ownersOf(c.id)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+
+            <div className="field">
+              <label htmlFor="msg-subject">სათაური</label>
+              <input
+                id="msg-subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="მაგ. ახალი გაკვეთილი დაემატა"
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="msg-body">ტექსტი</label>
+              <textarea
+                id="msg-body"
+                rows={7}
+                value={message}
+                maxLength={4000}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="დაწერეთ წერილი ისე, როგორც მეილში დაწერდით…"
+              />
+              <p className="hint" style={{ textAlign: "left", marginTop: 4 }}>
+                {message.length}/4000 · ცარიელი ხაზი ახალ აბზაცს ქმნის
+              </p>
+            </div>
+
+            {audience === "all" ? (
+              <p className="hint warn" style={{ textAlign: "left" }}>
+                ⚠ „ყველა“ მოიცავს მათაც, ვინც სიახლეების მიღებაზე არ დათანხმებულა. გამოიყენეთ
+                სამსახურებრივი შეტყობინებისთვის — არა რეკლამისთვის.
+              </p>
+            ) : null}
+
+            <button
+              className="btn btn-plum"
+              style={{ marginTop: 10 }}
+              disabled={busy || reach === 0}
+              onClick={sendMessage}
+            >
+              {reach === 0 ? "მიმღები არ არის" : `გაგზავნა ${reach} ადამიანს`}
+            </button>
+          </div>
+
           <div className="adm-form">
             <h2>ახალი კურსის შეტყობინება</h2>
             <p className="lead" style={{ margin: "0 0 14px" }}>
