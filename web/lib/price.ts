@@ -14,7 +14,9 @@ export const COACH_STEP = 50;
    whatever was written around it is put back, so the currency mark, spacing and
    any wording survive a calculation. */
 export function priceParts(price: string): { n: number; before: string; after: string } | null {
-  const m = price.match(/^(\D*)(\d[\d\s,.]*)(\D*)$/);
+  // The number must end on a digit, or "190 ₾" loses its space to the number
+  // and comes back as "240₾".
+  const m = price.match(/^(\D*)([\d\s,.]*\d)(\D*)$/);
   if (!m) return null;
   const n = parseFloat(m[2].replace(/[\s,]/g, ""));
   return Number.isFinite(n) ? { n, before: m[1], after: m[3] } : null;
