@@ -63,6 +63,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="ka">
       <head>
+        {/* A second icon at an address that never changes.
+
+            Next fingerprints app/favicon.ico, so the link in the head carries a
+            hash that is different after every deploy. Google asks for a stable
+            favicon URL and will not show one it keeps re-discovering, so this
+            one is served from /public, at 48px, which is the size it wants. */}
+        <link rel="icon" href="/icon-48.png" sizes="48x48" type="image/png" />
+        <link rel="icon" href="/icon-96.png" sizes="96x96" type="image/png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
