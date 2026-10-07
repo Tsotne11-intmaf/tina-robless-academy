@@ -13,6 +13,8 @@ type Row = {
   price: string | null;
   price_plus: string | null;
   parts: number | null;
+  learn: string | null;
+  incl: string | null;
   was: string | null;
   descr: string | null;
   photo: string | null;
@@ -126,6 +128,11 @@ function merge(base: Course, r: Row): Course {
     price: pick(r.price, base.price),
     pricePlus: pick(r.price_plus, base.pricePlus ?? null),
     parts: r.parts ?? base.parts ?? null,
+    /* Stored as text, a point per line, because that is how it is written. An
+       empty column leaves the code's own list in place; a filled one replaces
+       it whole, so a course can be repurposed without its old bullets. */
+    learn: lines(r.learn) ?? base.learn,
+    incl: lines(r.incl) ?? base.incl,
     was: pick(r.was, base.was),
     desc: pick(r.descr, base.desc),
     photo: pick(r.photo, base.photo ?? null),
@@ -136,6 +143,14 @@ function merge(base: Course, r: Row): Course {
     featured: r.featured ?? base.featured,
     order: r.sort ?? base.order,
   };
+}
+
+function lines(v: string | null): string[] | undefined {
+  const out = (v ?? "")
+    .split("\n")
+    .map((l) => l.replace(/^[-–—•\s]+/, "").trim())
+    .filter(Boolean);
+  return out.length ? out : undefined;
 }
 
 function blank(id: string): Course {

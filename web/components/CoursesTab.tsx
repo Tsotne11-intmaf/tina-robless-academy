@@ -14,6 +14,8 @@ export type AdminCourse = {
   was?: string;
   pricePlus?: string | null;
   parts?: number | null;
+  learn?: string[];
+  incl?: string[];
   desc: string;
   photo?: string | null;
   img?: string | null;
@@ -153,6 +155,8 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
             was: String(f.get("was") || ""),
             price_plus: String(f.get("price_plus") || ""),
             parts: f.get("parts") ? Number(f.get("parts")) : 1,
+            learn: String(f.get("learn") || ""),
+            incl: String(f.get("incl") || ""),
             descr: String(f.get("descr")),
             video: String(f.get("video") || ""),
             badge: String(f.get("badge") || ""),
@@ -256,6 +260,22 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
               ))}
             </select>
           </div>
+        </div>
+
+        <div className="field">
+          <label>რას ისწავლით</label>
+          <textarea name="learn" rows={5} defaultValue={(c?.learn ?? []).join("\n")} />
+          <p className="hint" style={{ textAlign: "left", marginTop: 4 }}>
+            თითო პუნქტი ცალკე ხაზზე. ცარიელი = საწყისი სია რჩება.
+          </p>
+        </div>
+
+        <div className="field">
+          <label>რა შედის</label>
+          <textarea name="incl" rows={5} defaultValue={(c?.incl ?? []).join("\n")} />
+          <p className="hint" style={{ textAlign: "left", marginTop: 4 }}>
+            თითო პუნქტი ცალკე ხაზზე — ეს ჩანს მარჯვენა პანელში ✓ ნიშნებით.
+          </p>
         </div>
 
         <div className="field">
