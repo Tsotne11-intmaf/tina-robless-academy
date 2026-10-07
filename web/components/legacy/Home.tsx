@@ -15,6 +15,9 @@ export default async function HomePage() {
   const owned = (await getStudent())?.owned ?? [];
   const ed = editable(await getContent(), t);
   const catalog = await getCatalog();
+  /* The package shown in the big block: the course badged as one. Marking a
+     second simply picks the first, so the block never doubles. */
+  const pack = catalog.find((c) => c.badge === "package");
   return (
     <>
       
@@ -111,10 +114,18 @@ export default async function HomePage() {
               </div>
             </article>
           </div>
+          {/* The package block, reading the course it sells rather than a copy of
+              it. Title, prices and link were written into this markup, so
+              changing the package in the panel left the front page advertising
+              the old one. Hidden or deleted, the block goes with it. */}
+          {pack ? (
           <div className="bundle">
-            <div className="thumb ph1"></div>
+            <div
+              className={"thumb " + (pack.photo ? "" : pack.img || "ph1")}
+              style={pack.photo ? { background: `url(${pack.photo}) center/cover` } : undefined}
+            ></div>
             <div className="bundle-body">
-              <h3 data-edit="t.home.38"><a href="/kurs/bundle">{t("მასტერ-პროგრამა — სრული პაკეტი")}</a></h3>
+              <h3><a href={`/kurs/${pack.id}`}>{t(pack.title)}</a></h3>
               <p data-edit="t.home.39">{ed("t.home.39", "ნაწილი 1 და 2 პლუს მათში შემავალი სამი ტექნიკური კურსი, ერთი გადახდით.")}</p>
               <ul>
                 <li data-edit="t.home.40">{ed("t.home.40", "ნაწილი 1 და ნაწილი 2")}</li>
@@ -123,10 +134,14 @@ export default async function HomePage() {
                 <li data-edit="t.home.43">{ed("t.home.43", "ორი ლაივ Q&A ზარი თინასთან")}</li>
                 <li data-edit="t.home.44">{ed("t.home.44", "სერტიფიკატი დასრულებისას")}</li>
               </ul>
-              <div className="bundle-price"><span className="now">990 ₾</span><span className="was">1,430 ₾</span></div>
-              <a className="btn btn-plum" href="/kurs/bundle">{t("სრული პაკეტის ყიდვა")}</a>
+              <div className="bundle-price">
+                <span className="now">{pack.price}</span>
+                {pack.was ? <span className="was">{pack.was}</span> : null}
+              </div>
+              <a className="btn btn-plum" href={`/kurs/${pack.id}`}>{t("სრული პაკეტის ყიდვა")}</a>
             </div>
           </div>
+          ) : null}
         </div>
       </section>
       

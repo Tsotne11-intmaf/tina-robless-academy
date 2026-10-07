@@ -14,6 +14,8 @@ export type AdminCourse = {
   was?: string;
   pricePlus?: string | null;
   parts?: number | null;
+  access?: string;
+  accessDays?: number | null;
   learn?: string[];
   incl?: string[];
   desc: string;
@@ -155,6 +157,8 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
             was: String(f.get("was") || ""),
             price_plus: String(f.get("price_plus") || ""),
             parts: f.get("parts") ? Number(f.get("parts")) : 1,
+            access: String(f.get("access") || ""),
+            access_days: f.get("access_days") ? Number(f.get("access_days")) : null,
             learn: String(f.get("learn") || ""),
             incl: String(f.get("incl") || ""),
             descr: String(f.get("descr")),
@@ -259,6 +263,30 @@ export default function CoursesTab({ courses }: { courses: AdminCourse[] }) {
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+
+        <div className="adm-2">
+          <div className="field">
+            <label>წვდომის ვადა</label>
+            <select name="access" defaultValue={c?.access === "days" ? "days" : ""}>
+              <option value="">უვადო — სამუდამოდ რჩება</option>
+              <option value="days">შეზღუდული — დღეებით</option>
+            </select>
+          </div>
+          <div className="field">
+            <label>რამდენი დღე</label>
+            <input
+              name="access_days"
+              type="number"
+              min={1}
+              max={3650}
+              defaultValue={c?.accessDays ?? ""}
+              placeholder="მაგ. 365"
+            />
+            <p className="hint" style={{ textAlign: "left", marginTop: 4 }}>
+              ივსება მხოლოდ მაშინ, თუ ზემოთ „შეზღუდული“ აირჩიე.
+            </p>
           </div>
         </div>
 

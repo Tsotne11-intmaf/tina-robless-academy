@@ -13,6 +13,8 @@ type Body = {
   price?: string;
   price_plus?: string;
   parts?: number | null;
+  access?: string;
+  access_days?: number | null;
   learn?: string;
   incl?: string;
   was?: string;
@@ -91,7 +93,7 @@ export async function POST(request: Request) {
     updated_at: new Date().toISOString(),
     updated_by: user.id,
   };
-  const TEXT = ["cat", "title", "dur", "price", "price_plus", "was", "descr", "photo", "video", "badge", "learn", "incl"] as const;
+  const TEXT = ["cat", "title", "dur", "price", "price_plus", "was", "descr", "photo", "video", "badge", "learn", "incl", "access"] as const;
   for (const k of TEXT) if (has(k)) row[k] = text(b[k]);
   if (has("featured")) row.featured = b.featured ?? null;
   if (has("hidden")) row.hidden = b.hidden === true;
@@ -99,6 +101,10 @@ export async function POST(request: Request) {
   /* One part unless more are asked for, and never more than a course could
      plausibly have - the field is a number box, and a slip there would draw a
      thousand upload rows. */
+  if (has("access_days")) {
+    const n = typeof b.access_days === "number" ? Math.round(b.access_days) : 0;
+    row.access_days = n > 0 ? Math.min(n, 3650) : null;
+  }
   if (has("parts")) {
     const n = typeof b.parts === "number" ? Math.round(b.parts) : 1;
     row.parts = Math.min(Math.max(n, 1), 60);
